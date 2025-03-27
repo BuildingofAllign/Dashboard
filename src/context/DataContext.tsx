@@ -175,17 +175,37 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   // Create and update functions
   const createProject = async (projectData: any) => {
     try {
-      // Generate a unique project ID with P- prefix
-      const projectId = generateEntityId('P');
+      // Generate a unique project ID with P- prefix if not provided
+      const projectId = projectData.project_id || generateEntityId('P');
       
       // Insert the project first
       const { data: projectRecord, error: projectError } = await supabase
         .from('projects')
-        .insert({ ...projectData, project_id: projectId })
+        .insert({ 
+          ...projectData, 
+          project_id: projectId,
+          is_pinned: projectData.is_pinned || false,
+          progress: projectData.progress || 0
+        })
         .select()
         .single();
       
       if (projectError) throw projectError;
+      
+      // Create related project stats
+      const { error: statsError } = await supabase
+        .from('project_stats')
+        .insert({
+          project_id: projectRecord.id,
+          deviations: 0,
+          additions: 0,
+          quality_assurance: 0
+        });
+      
+      if (statsError) {
+        console.error('Error creating project stats:', statsError);
+        // Continue as this is not critical
+      }
       
       toast.success('Project created successfully');
       await fetchProjects();

@@ -412,10 +412,12 @@ export type Database = {
         Row: {
           category: string
           created_at: string | null
+          description: string | null
           end_date: string | null
           id: string
           is_pinned: boolean | null
           name: string
+          priority: string | null
           progress: number
           project_id: string
           start_date: string | null
@@ -426,10 +428,12 @@ export type Database = {
         Insert: {
           category: string
           created_at?: string | null
+          description?: string | null
           end_date?: string | null
           id?: string
           is_pinned?: boolean | null
           name: string
+          priority?: string | null
           progress?: number
           project_id: string
           start_date?: string | null
@@ -440,10 +444,12 @@ export type Database = {
         Update: {
           category?: string
           created_at?: string | null
+          description?: string | null
           end_date?: string | null
           id?: string
           is_pinned?: boolean | null
           name?: string
+          priority?: string | null
           progress?: number
           project_id?: string
           start_date?: string | null
