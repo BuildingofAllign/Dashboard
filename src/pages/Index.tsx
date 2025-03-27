@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
@@ -13,7 +14,7 @@ const employees = [
     status: "online" as const,
     project: "Skovvej 12",
     phone: "+45 20 23 34 45",
-    communicationTools: ["meet", "teams", "zoom"] as const,
+    communicationTools: ["meet", "teams", "zoom"],
   },
   {
     initials: "BS",
@@ -22,7 +23,7 @@ const employees = [
     status: "online" as const,
     project: "Havnegade 8",
     phone: "+45 31 45 56 67",
-    communicationTools: ["meet", "teams", "zoom"] as const,
+    communicationTools: ["meet", "teams", "zoom"],
   },
   {
     initials: "MN",
@@ -31,7 +32,7 @@ const employees = [
     status: "busy" as const,
     project: "Stationsvej 23",
     phone: "+45 28 34 45 56",
-    communicationTools: ["meet"] as const,
+    communicationTools: ["meet"],
   },
 ];
 
