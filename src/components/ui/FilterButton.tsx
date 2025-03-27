@@ -1,6 +1,8 @@
 
 import React from "react";
 import { Combobox, ComboboxOption } from "./Combobox";
+import { Filters } from "./filters";
+import { cva } from "class-variance-authority";
 
 interface FilterButtonProps {
   children?: React.ReactNode;
@@ -83,3 +85,6 @@ export const FilterButton: React.FC<FilterButtonProps> = ({
     </button>
   );
 };
+
+// Export the new Filters component
+export { Filters };

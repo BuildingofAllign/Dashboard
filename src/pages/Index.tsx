@@ -3,18 +3,20 @@ import React, { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { SearchBar } from "@/components/ui/SearchBar";
-import { FilterSelect } from "@/components/ui/FilterButton";
+import { FilterSelect, Filters } from "@/components/ui/FilterButton";
 import { EmployeeCard } from "@/components/employees/EmployeeCard";
 import { useData } from "@/context/DataContext";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ComboboxOption } from "@/components/ui/Combobox";
+import { Users, Briefcase } from "lucide-react";
 
 const Index = () => {
   const { employees, loadingEmployees, fetchEmployees } = useData();
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [projectFilter, setProjectFilter] = useState("all");
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
   useEffect(() => {
     fetchEmployees();
@@ -35,8 +37,13 @@ const Index = () => {
       // Project filter
       const matchesProject = projectFilter === "all" || 
         employee.project === projectFilter;
+
+      // For our new advanced filters
+      const matchesAdvancedFilters = selectedFilters.length === 0 ||
+        (selectedFilters.includes(employee.role) || 
+         selectedFilters.includes(employee.project));
       
-      return matchesSearch && matchesRole && matchesProject;
+      return matchesSearch && matchesRole && matchesProject && matchesAdvancedFilters;
     }
   );
 
@@ -56,6 +63,30 @@ const Index = () => {
     { value: "all", label: "Alle projekter" },
     ...uniqueProjects.map(project => ({ value: project, label: `Projekt ${project}` }))
   ];
+
+  // Create filter options for the new Filters component
+  const filtersOptions = [
+    {
+      title: "Roller",
+      options: uniqueRoles.map(role => ({ 
+        label: role, 
+        value: role,
+        icon: Users
+      }))
+    },
+    {
+      title: "Projekter",
+      options: uniqueProjects.map(project => ({ 
+        label: `Projekt ${project}`, 
+        value: project,
+        icon: Briefcase
+      }))
+    }
+  ];
+
+  const handleFiltersChange = (filters: string[]) => {
+    setSelectedFilters(filters);
+  };
 
   return (
     <SidebarProvider>
@@ -83,6 +114,13 @@ const Index = () => {
                   value={projectFilter}
                   onValueChange={setProjectFilter}
                   className="min-w-[180px]"
+                />
+                <Filters 
+                  placeholder="Avanceret filter" 
+                  filtersOptions={filtersOptions}
+                  selectedOptions={selectedFilters}
+                  onSelectedOptionsChange={handleFiltersChange}
+                  className="min-w-[150px]"
                 />
               </div>
             </div>
