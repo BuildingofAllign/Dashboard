@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
@@ -7,7 +6,6 @@ import { FilterSelect, FilterButton } from "@/components/ui/FilterButton";
 import { ProjectCard } from "@/components/projects/ProjectCard";
 import { ProjectRowCard } from "@/components/projects/ProjectRowCard";
 import { ProjectListItem } from "@/components/projects/ProjectListItem";
-import { AddProjectCard } from "@/components/projects/AddProjectCard";
 import { ViewToggle, ViewMode } from "@/components/ui/ViewToggle";
 import { Plus, Star, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -139,11 +137,9 @@ const Projects = () => {
 
   const sortProjects = (projectsToSort) => {
     return [...projectsToSort].sort((a, b) => {
-      // First sort by pinned status
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
       
-      // Then sort by priority
       const priorityOrder = {
         "red": 0,
         "yellow": 1,
@@ -155,7 +151,6 @@ const Projects = () => {
         return priorityOrder[a.priority] - priorityOrder[b.priority];
       }
       
-      // Then sort by status
       const statusPriority = {
         "igangværende": 0,
         "planlagt": 1,
@@ -657,17 +652,6 @@ const Projects = () => {
                           ))}
                       </div>
                     )}
-                  </div>
-                )}
-
-                {viewMode === "grid" && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <AddProjectCard />
-                  </div>
-                )}
-                {viewMode === "rows" && (
-                  <div className="mt-4">
-                    <AddProjectCard />
                   </div>
                 )}
               </div>
