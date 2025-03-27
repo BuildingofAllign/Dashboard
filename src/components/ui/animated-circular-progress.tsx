@@ -1,108 +1,125 @@
 
-import { cn } from "@/lib/utils";
+import React, { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface AnimatedCircularProgressProps {
   value: number;
-  size?: "xs" | "sm" | "md" | "lg" | "xl";
-  showValue?: boolean;
-  className?: string;
+  size?: 'sm' | 'md' | 'lg';
   color?: string;
-  strokeWidth?: number;
-  background?: string;
   duration?: number;
-  max?: number;
   label?: string;
-  valuePrefix?: string;
-  valueSuffix?: string;
-  valueClassName?: string;
-  valuePosition?: "inside" | "outside";
+  className?: string;
 }
 
-export function AnimatedCircularProgress({
-  value = 0,
-  size = "md",
-  showValue = true,
-  className,
-  color = "stroke-primary",
-  strokeWidth = 8,
-  background = "stroke-muted",
-  duration = 1.5,
-  max = 100,
+export const AnimatedCircularProgress = ({
+  value,
+  size = 'md',
+  color = 'stroke-primary',
+  duration = 1,
   label,
-  valuePrefix = "",
-  valueSuffix = "%",
-  valueClassName,
-  valuePosition = "inside",
-}: AnimatedCircularProgressProps) {
-  const sizeMap = {
-    xs: { width: "2rem", height: "2rem", textSize: "text-xs", strokeWidth: strokeWidth || 6 },
-    sm: { width: "3rem", height: "3rem", textSize: "text-sm", strokeWidth: strokeWidth || 6 },
-    md: { width: "4rem", height: "4rem", textSize: "text-base", strokeWidth: strokeWidth || 8 },
-    lg: { width: "6rem", height: "6rem", textSize: "text-lg", strokeWidth: strokeWidth || 10 },
-    xl: { width: "8rem", height: "8rem", textSize: "text-xl", strokeWidth: strokeWidth || 12 },
-  };
-
-  const { width, height, textSize, strokeWidth: sizeStrokeWidth } = sizeMap[size];
-  const normalizedValue = Math.min(Math.max(value, 0), max);
-  const progress = (normalizedValue / max) * 100;
-  const actualStrokeWidth = strokeWidth || sizeStrokeWidth;
+  className,
+}: AnimatedCircularProgressProps) => {
+  const [progress, setProgress] = useState(0);
   
-  // Adjust radius based on size
-  const radius = parseInt(width) / 2 - actualStrokeWidth;
+  useEffect(() => {
+    // Animate from current value to new value
+    const startValue = progress;
+    const endValue = Math.min(100, Math.max(0, value)); // Ensure value is between 0-100
+    const startTime = performance.now();
+    
+    const animateProgress = (currentTime: number) => {
+      const elapsedTime = currentTime - startTime;
+      const animationProgress = Math.min(elapsedTime / (duration * 1000), 1);
+      const currentValue = startValue + (endValue - startValue) * animationProgress;
+      
+      setProgress(currentValue);
+      
+      if (animationProgress < 1) {
+        requestAnimationFrame(animateProgress);
+      }
+    };
+    
+    requestAnimationFrame(animateProgress);
+  }, [value, duration]);
+  
+  // Size configurations
+  const sizeConfig = {
+    sm: {
+      containerSize: 'h-14 w-14',
+      circleSize: 'h-12 w-12',
+      fontSize: 'text-xs',
+      strokeWidth: 3,
+      radius: 18,
+    },
+    md: {
+      containerSize: 'h-20 w-20',
+      circleSize: 'h-16 w-16',
+      fontSize: 'text-sm',
+      strokeWidth: 4,
+      radius: 24,
+    },
+    lg: {
+      containerSize: 'h-28 w-28',
+      circleSize: 'h-24 w-24',
+      fontSize: 'text-base',
+      strokeWidth: 5,
+      radius: 36,
+    },
+  };
+  
+  const { containerSize, circleSize, fontSize, strokeWidth, radius } = sizeConfig[size];
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
-
+  
   return (
-    <div className={cn("relative inline-flex flex-col items-center justify-center", className)}>
-      <svg
-        className={cn(
-          "transform -rotate-90 transition-transform",
-          width,
-          height
-        )}
-        viewBox={`0 0 ${parseInt(width)} ${parseInt(height)}`}
-      >
-        <circle
-          className={cn(background, "transition-all")}
-          cx={parseInt(width) / 2}
-          cy={parseInt(height) / 2}
-          r={radius}
-          strokeWidth={actualStrokeWidth}
-          fill="none"
-        />
-        <circle
-          className={cn(color, "transition-all")}
-          cx={parseInt(width) / 2}
-          cy={parseInt(height) / 2}
-          r={radius}
-          strokeWidth={actualStrokeWidth}
-          fill="none"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          style={{
-            transition: `stroke-dashoffset ${duration}s ease-in-out`,
-          }}
-        />
-      </svg>
-      
-      {showValue && valuePosition === "inside" && (
-        <div className="absolute inset-0 flex items-center justify-center flex-col">
-          <span className={cn("font-medium", textSize, valueClassName)}>
-            {valuePrefix}{Math.round(normalizedValue)}{valueSuffix}
+    <div className={cn('flex flex-col items-center justify-center', className)}>
+      <div className={cn('relative flex items-center justify-center', containerSize)}>
+        {/* Background circle */}
+        <svg className="absolute inset-0" width="100%" height="100%" viewBox={`0 0 ${radius * 2 + strokeWidth * 2} ${radius * 2 + strokeWidth * 2}`}>
+          <circle
+            cx={radius + strokeWidth}
+            cy={radius + strokeWidth}
+            r={radius}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={strokeWidth}
+            className="text-gray-200"
+          />
+        </svg>
+        
+        {/* Progress circle */}
+        <svg 
+          className="absolute inset-0 -rotate-90 transform" 
+          width="100%" 
+          height="100%" 
+          viewBox={`0 0 ${radius * 2 + strokeWidth * 2} ${radius * 2 + strokeWidth * 2}`}
+        >
+          <circle
+            cx={radius + strokeWidth}
+            cy={radius + strokeWidth}
+            r={radius}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            className={cn(color, "transition-all duration-500 ease-out")}
+          />
+        </svg>
+        
+        {/* Center text */}
+        <div className={cn('flex flex-col items-center justify-center', circleSize)}>
+          <span className={cn('font-semibold', fontSize)}>
+            {Math.round(progress)}%
           </span>
-          {label && <span className="text-xs text-muted-foreground">{label}</span>}
+          {label && (
+            <span className={cn('text-xs text-gray-500 mt-0.5')}>
+              {label}
+            </span>
+          )}
         </div>
-      )}
-      
-      {showValue && valuePosition === "outside" && (
-        <div className={cn("mt-1 flex flex-col items-center", valueClassName)}>
-          <span className={cn("font-medium", textSize)}>
-            {valuePrefix}{Math.round(normalizedValue)}{valueSuffix}
-          </span>
-          {label && <span className="text-xs text-muted-foreground">{label}</span>}
-        </div>
-      )}
+      </div>
     </div>
   );
-}
+};
