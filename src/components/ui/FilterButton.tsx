@@ -8,14 +8,20 @@ interface FilterButtonProps {
   className?: string;
 }
 
-export const FilterSelect: React.FC<FilterButtonProps> = ({
+interface FilterSelectProps extends FilterButtonProps {
+  value?: string;
+}
+
+export const FilterSelect: React.FC<FilterSelectProps> = ({
   children,
   onClick,
   onChange,
+  value,
   className = "",
 }) => {
   return (
     <select
+      value={value}
       onChange={(e) => {
         onChange?.(e);
         onClick?.();

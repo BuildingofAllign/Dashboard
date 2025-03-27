@@ -244,7 +244,7 @@ export const useProjects = () => {
     setStatusFilter,
     priorityFilter,
     setPriorityFilter,
-    refreshProjects,
+    fetchProjects, // Changed from refreshProjects to fetchProjects
     handleTogglePin,
     handleCreateProject,
     handleUpdateProject

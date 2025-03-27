@@ -29,7 +29,7 @@ const Projects = () => {
     setStatusFilter,
     priorityFilter,
     setPriorityFilter,
-    refreshProjects,
+    fetchProjects,
     handleTogglePin
   } = useProjects();
 
@@ -37,8 +37,8 @@ const Projects = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   useEffect(() => {
-    refreshProjects();
-  }, [refreshProjects]);
+    fetchProjects();
+  }, [fetchProjects]);
 
   const renderProjectsByStatus = (statusProjects, title) => {
     if (statusProjects.length === 0) return null;
