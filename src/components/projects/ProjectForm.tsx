@@ -242,6 +242,7 @@ export const ProjectForm = ({ initialData, onSuccess, onCancel }: ProjectFormPro
                           "w-full pl-3 text-left font-normal",
                           !field.value && "text-muted-foreground"
                         )}
+                        type="button"
                       >
                         {field.value ? (
                           format(field.value, "dd/MM/yyyy")
@@ -284,6 +285,7 @@ export const ProjectForm = ({ initialData, onSuccess, onCancel }: ProjectFormPro
                           "w-full pl-3 text-left font-normal",
                           !field.value && "text-muted-foreground"
                         )}
+                        type="button"
                       >
                         {field.value ? (
                           format(field.value, "dd/MM/yyyy")
