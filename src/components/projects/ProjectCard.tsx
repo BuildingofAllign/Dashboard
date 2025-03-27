@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,7 +44,6 @@ interface ProjectCardProps {
 export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTogglePin }) => {
   const navigate = useNavigate();
 
-  // Helper to determine status badge color
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case "igangværende":
@@ -59,7 +57,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTogglePin }
     }
   };
 
-  // Helper to determine progress bar color
   const getProgressColor = (progress: number) => {
     if (progress >= 75) return "bg-green-600";
     if (progress >= 50) return "bg-blue-600";
@@ -67,7 +64,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTogglePin }
     return "bg-red-500";
   };
 
-  // Helper for Danish status text
   const getStatusText = (status: string) => {
     switch (status) {
       case "igangværende":
@@ -81,12 +77,10 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTogglePin }
     }
   };
 
-  // Navigate to project details
   const goToProjectDetails = () => {
     navigate(`/projekter/${project.id}`);
   };
 
-  // Navigate to filtered views
   const goToDeviations = () => {
     navigate(`/afvigelser?project=${project.id}`);
   };
@@ -99,7 +93,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTogglePin }
     navigate(`/kvalitetssikring?project=${project.id}`);
   };
 
-  // Helper to render the category icon
   const renderCategoryIcon = (category: string) => {
     switch (category) {
       case "bolig":
@@ -115,7 +108,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTogglePin }
     }
   };
 
-  // Handle pin/unpin
   const handlePinToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onTogglePin) {
@@ -198,7 +190,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTogglePin }
             <span className="text-xs font-medium text-gray-700">Fremgang</span>
             <span className="text-xs font-medium text-gray-700">{project.progress}%</span>
           </div>
-          <Progress value={project.progress} className="h-2" indicatorClassName={getProgressColor(project.progress)} />
+          <Progress value={project.progress} className={`h-2 ${getProgressColor(project.progress)}`} />
         </div>
 
         <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">

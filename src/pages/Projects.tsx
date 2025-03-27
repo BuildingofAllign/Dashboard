@@ -6,7 +6,7 @@ import { SearchBar } from "@/components/ui/SearchBar";
 import { FilterSelect, FilterButton } from "@/components/ui/FilterButton";
 import { ProjectCard } from "@/components/projects/ProjectCard";
 import { AddProjectCard } from "@/components/projects/AddProjectCard";
-import { Plus } from "lucide-react";
+import { Plus, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Enhanced project data
