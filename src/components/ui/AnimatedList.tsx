@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Bell, CheckCircle, AlertTriangle, Calendar, MessageSquare, User, FileText, Server, Upload, Shield, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,9 +20,10 @@ interface AnimatedListProps {
   className?: string;
   maxHeight?: string;
   showControls?: boolean;
+  filter?: string;
 }
 
-export function AnimatedList({ className, maxHeight = "400px", showControls = true }: AnimatedListProps) {
+export function AnimatedList({ className, maxHeight = "400px", showControls = true, filter = "all" }: AnimatedListProps) {
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showRead, setShowRead] = useState(true);
@@ -128,9 +128,13 @@ export function AnimatedList({ className, maxHeight = "400px", showControls = tr
     }
   };
   
-  const filteredItems = showRead 
+  const filteredByType = filter === "all" 
     ? items 
-    : items.filter(item => !item.read);
+    : items.filter(item => item.icon_type === filter);
+  
+  const filteredItems = showRead 
+    ? filteredByType 
+    : filteredByType.filter(item => !item.read);
   
   if (loading) {
     return (

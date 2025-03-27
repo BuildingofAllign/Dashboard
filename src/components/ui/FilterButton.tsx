@@ -3,7 +3,7 @@ import React from "react";
 import { Combobox, ComboboxOption } from "./Combobox";
 
 interface FilterButtonProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   onClick?: () => void;
   onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   className?: string;
