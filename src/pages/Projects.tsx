@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
@@ -25,6 +24,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { ProjectProgressIndicator } from "@/components/ui/ProjectProgressIndicator";
 import { toast } from "sonner";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const Projects = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -194,137 +194,139 @@ const Projects = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      <Sidebar />
-      <main className="flex-1 overflow-auto">
-        <Header title="Projekter" userInitials="BL" />
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-background">
+        <Sidebar />
+        <main className="flex-1 overflow-auto">
+          <Header title="Projekter" userInitials="BL" />
 
-        <div className="p-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-            <div className="flex items-center space-x-2">
-              <SearchBar
-                placeholder="Søg efter projekt..."
-                onChange={setSearchQuery}
-                value={searchQuery}
-              />
-              <Button 
-                variant="outline" 
-                size="icon" 
-                onClick={() => setCommandOpen(true)}
-                className="hidden md:flex"
-                id="command-button"
-              >
-                <Command className="h-5 w-5" />
-              </Button>
-              <HoverCard>
-                <HoverCardTrigger asChild>
-                  <Button variant="ghost" size="icon" className="hidden md:flex">
-                    <AlertTriangle className="h-5 w-5 text-yellow-500" />
-                  </Button>
-                </HoverCardTrigger>
-                <HoverCardContent className="w-80">
-                  <div className="space-y-1">
-                    <h4 className="text-sm font-semibold">Projektoversigt</h4>
-                    <div className="text-sm">
-                      <p className="flex items-center justify-between">
-                        <span>Aktive projekter:</span>
-                        <Badge variant="outline" className="bg-green-100">
-                          {filteredAndSortedProjects.filter(p => p.status === "aktiv").length}
-                        </Badge>
-                      </p>
-                      <p className="flex items-center justify-between">
-                        <span>Problem projekter:</span>
-                        <Badge variant="outline" className="bg-red-100">
-                          {filteredAndSortedProjects.filter(p => p.status === "problem").length}
-                        </Badge>
-                      </p>
-                      <p className="flex items-center justify-between">
-                        <span>Udfordrende projekter:</span>
-                        <Badge variant="outline" className="bg-yellow-100">
-                          {filteredAndSortedProjects.filter(p => p.status === "udfordring").length}
-                        </Badge>
-                      </p>
-                      <p className="flex items-center justify-between">
-                        <span>Afsluttede projekter:</span>
-                        <Badge variant="outline" className="bg-gray-100">
-                          {filteredAndSortedProjects.filter(p => p.status === "afsluttet").length}
-                        </Badge>
-                      </p>
+          <div className="p-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+              <div className="flex items-center space-x-2">
+                <SearchBar
+                  placeholder="Søg efter projekt..."
+                  onChange={setSearchQuery}
+                  value={searchQuery}
+                />
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  onClick={() => setCommandOpen(true)}
+                  className="hidden md:flex"
+                  id="command-button"
+                >
+                  <Command className="h-5 w-5" />
+                </Button>
+                <HoverCard>
+                  <HoverCardTrigger asChild>
+                    <Button variant="ghost" size="icon" className="hidden md:flex">
+                      <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                    </Button>
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-80">
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-semibold">Projektoversigt</h4>
+                      <div className="text-sm">
+                        <p className="flex items-center justify-between">
+                          <span>Aktive projekter:</span>
+                          <Badge variant="outline" className="bg-green-100">
+                            {filteredAndSortedProjects.filter(p => p.status === "aktiv").length}
+                          </Badge>
+                        </p>
+                        <p className="flex items-center justify-between">
+                          <span>Problem projekter:</span>
+                          <Badge variant="outline" className="bg-red-100">
+                            {filteredAndSortedProjects.filter(p => p.status === "problem").length}
+                          </Badge>
+                        </p>
+                        <p className="flex items-center justify-between">
+                          <span>Udfordrende projekter:</span>
+                          <Badge variant="outline" className="bg-yellow-100">
+                            {filteredAndSortedProjects.filter(p => p.status === "udfordring").length}
+                          </Badge>
+                        </p>
+                        <p className="flex items-center justify-between">
+                          <span>Afsluttede projekter:</span>
+                          <Badge variant="outline" className="bg-gray-100">
+                            {filteredAndSortedProjects.filter(p => p.status === "afsluttet").length}
+                          </Badge>
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </HoverCardContent>
-              </HoverCard>
+                  </HoverCardContent>
+                </HoverCard>
+              </div>
+              <div className="flex flex-wrap space-x-2 mt-4 md:mt-0 items-center">
+                <FilterSelect 
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  value={typeFilter}
+                  className="min-w-[150px]"
+                >
+                  <option value="all">Alle typer</option>
+                  <option value="nybyggeri">Nybyggeri</option>
+                  <option value="renovering">Renovering</option>
+                  <option value="tilbygning">Tilbygning</option>
+                </FilterSelect>
+                
+                <FilterSelect
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  value={statusFilter}
+                  className="min-w-[150px]"
+                >
+                  <option value="all">Alle status</option>
+                  <option value="aktiv">Aktiv</option>
+                  <option value="problem">Problem</option>
+                  <option value="udfordring">Udfordring</option>
+                  <option value="afsluttet">Afsluttet</option>
+                </FilterSelect>
+                
+                <FilterSelect
+                  onChange={(e) => setPriorityFilter(e.target.value)}
+                  value={priorityFilter}
+                  className="min-w-[180px]"
+                >
+                  <option value="all">Alle prioriteter</option>
+                  <option value="red">Kritiske fejl</option>
+                  <option value="yellow">Midlertidige fejl</option>
+                  <option value="green">Fungerer som planlagt</option>
+                  <option value="grey">Afsluttede</option>
+                </FilterSelect>
+                
+                <ViewToggle 
+                  currentView={viewMode}
+                  onChange={setViewMode}
+                />
+                
+                <Button 
+                  className="flex items-center"
+                  onClick={() => setIsCreateDialogOpen(true)}
+                  id="create-project-button"
+                >
+                  <Plus className="h-5 w-5 mr-1" />
+                  Nyt Projekt
+                </Button>
+              </div>
             </div>
-            <div className="flex flex-wrap space-x-2 mt-4 md:mt-0 items-center">
-              <FilterSelect 
-                onChange={(e) => setTypeFilter(e.target.value)}
-                value={typeFilter}
-                className="min-w-[150px]"
-              >
-                <option value="all">Alle typer</option>
-                <option value="nybyggeri">Nybyggeri</option>
-                <option value="renovering">Renovering</option>
-                <option value="tilbygning">Tilbygning</option>
-              </FilterSelect>
-              
-              <FilterSelect
-                onChange={(e) => setStatusFilter(e.target.value)}
-                value={statusFilter}
-                className="min-w-[150px]"
-              >
-                <option value="all">Alle status</option>
-                <option value="aktiv">Aktiv</option>
-                <option value="problem">Problem</option>
-                <option value="udfordring">Udfordring</option>
-                <option value="afsluttet">Afsluttet</option>
-              </FilterSelect>
-              
-              <FilterSelect
-                onChange={(e) => setPriorityFilter(e.target.value)}
-                value={priorityFilter}
-                className="min-w-[180px]"
-              >
-                <option value="all">Alle prioriteter</option>
-                <option value="red">Kritiske fejl</option>
-                <option value="yellow">Midlertidige fejl</option>
-                <option value="green">Fungerer som planlagt</option>
-                <option value="grey">Afsluttede</option>
-              </FilterSelect>
-              
-              <ViewToggle 
-                currentView={viewMode}
-                onChange={setViewMode}
-              />
-              
-              <Button 
-                className="flex items-center"
-                onClick={() => setIsCreateDialogOpen(true)}
-                id="create-project-button"
-              >
-                <Plus className="h-5 w-5 mr-1" />
-                Nyt Projekt
-              </Button>
-            </div>
+
+            <TooltipProvider>
+              {renderProjectContent()}
+            </TooltipProvider>
           </div>
+        </main>
 
-          <TooltipProvider>
-            {renderProjectContent()}
-          </TooltipProvider>
-        </div>
-      </main>
-
-      <ProjectFormDialog
-        open={isCreateDialogOpen}
-        onOpenChange={handleCloseDialog}
-        mode={editingProject ? "edit" : "create"}
-        initialData={editingProject}
-      />
-      
-      <CommandPalette
-        open={commandOpen}
-        onOpenChange={setCommandOpen}
-      />
-    </div>
+        <ProjectFormDialog
+          open={isCreateDialogOpen}
+          onOpenChange={handleCloseDialog}
+          mode={editingProject ? "edit" : "create"}
+          initialData={editingProject}
+        />
+        
+        <CommandPalette
+          open={commandOpen}
+          onOpenChange={setCommandOpen}
+        />
+      </div>
+    </SidebarProvider>
   );
 };
 

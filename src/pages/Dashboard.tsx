@@ -4,6 +4,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { useTheme } from "@/hooks/use-theme";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const Dashboard: React.FC = () => {
   const { isDarkMode } = useTheme();
@@ -32,16 +33,18 @@ const Dashboard: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header title="Dashboard" userInitials="BL" />
-        
-        <div className="flex-1 overflow-auto">
-          <DashboardContent />
+    <SidebarProvider>
+      <div className="flex h-screen w-full bg-background">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header title="Dashboard" userInitials="BL" />
+          
+          <div className="flex-1 overflow-auto">
+            <DashboardContent />
+          </div>
         </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 
