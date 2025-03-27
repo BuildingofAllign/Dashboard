@@ -8,6 +8,7 @@ import { EmployeeCard } from "@/components/employees/EmployeeCard";
 import { useData } from "@/context/DataContext";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { ComboboxOption } from "@/components/ui/Combobox";
 
 const Index = () => {
   const { employees, loadingEmployees, fetchEmployees } = useData();
@@ -44,6 +45,17 @@ const Index = () => {
   
   // Get unique roles for filter dropdown
   const uniqueRoles = [...new Set(employees.map(emp => emp.role))].filter(Boolean);
+  
+  // Create ComboboxOption arrays for our filters
+  const roleOptions: ComboboxOption[] = [
+    { value: "all", label: "Alle roller" },
+    ...uniqueRoles.map(role => ({ value: role, label: role }))
+  ];
+  
+  const projectOptions: ComboboxOption[] = [
+    { value: "all", label: "Alle projekter" },
+    ...uniqueProjects.map(project => ({ value: project, label: `Projekt ${project}` }))
+  ];
 
   return (
     <SidebarProvider>
@@ -61,23 +73,17 @@ const Index = () => {
               />
               <div className="flex space-x-2 mt-4 md:mt-0">
                 <FilterSelect 
-                  onChange={(e) => setRoleFilter(e.target.value)}
+                  options={roleOptions}
                   value={roleFilter}
-                >
-                  <option value="all">Alle roller</option>
-                  {uniqueRoles.map((role, index) => (
-                    <option key={index} value={role}>{role}</option>
-                  ))}
-                </FilterSelect>
+                  onValueChange={setRoleFilter}
+                  className="min-w-[150px]"
+                />
                 <FilterSelect
-                  onChange={(e) => setProjectFilter(e.target.value)}
+                  options={projectOptions}
                   value={projectFilter}
-                >
-                  <option value="all">Alle projekter</option>
-                  {uniqueProjects.map((project, index) => (
-                    <option key={index} value={project}>Projekt {project}</option>
-                  ))}
-                </FilterSelect>
+                  onValueChange={setProjectFilter}
+                  className="min-w-[180px]"
+                />
               </div>
             </div>
           </div>
