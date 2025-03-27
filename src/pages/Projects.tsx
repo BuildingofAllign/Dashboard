@@ -17,7 +17,7 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useProjects } from "@/hooks/use-projects";
 import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
-import { CommandPalette } from "@/components/ui/CommandPalette";
+import { CommandPalette, useCommandPalette } from "@/components/ui/CommandPalette";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
 import { ProjectDetailsCollapsible } from "@/components/projects/ProjectDetailsCollapsible";
@@ -31,7 +31,7 @@ const Projects = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
-  const [commandOpen, setCommandOpen] = useState(false);
+  const { open: commandOpen, setOpen: setCommandOpen } = useCommandPalette();
   
   const {
     filteredAndSortedProjects,

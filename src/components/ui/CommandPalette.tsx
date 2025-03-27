@@ -26,15 +26,51 @@ interface CommandPaletteProps {
   onOpenChange: (open: boolean) => void;
 }
 
+// Get the command shortcut from localStorage or use default
+const getCommandShortcut = (): { key: string; displayKey: string } => {
+  const savedShortcut = localStorage.getItem('commandShortcut');
+  if (savedShortcut) {
+    try {
+      return JSON.parse(savedShortcut);
+    } catch (e) {
+      console.error('Error parsing command shortcut from localStorage:', e);
+    }
+  }
+  // Default to 'k'
+  return { key: 'k', displayKey: 'K' };
+};
+
+export const useCommandPalette = () => {
+  const [open, setOpen] = useState(false);
+  const shortcut = getCommandShortcut();
+  
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      // Check for both K and G shortcuts
+      if ((e.key.toLowerCase() === shortcut.key || e.key.toLowerCase() === 'g') && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setOpen(true);
+      }
+    };
+    
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, [shortcut.key]);
+  
+  return { open, setOpen };
+};
+
 export const CommandPalette: React.FC<CommandPaletteProps> = ({
   open,
   onOpenChange
 }) => {
   const navigate = useNavigate();
+  const shortcut = getCommandShortcut();
   
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+      // Check for both K and G shortcuts
+      if ((e.key.toLowerCase() === shortcut.key || e.key.toLowerCase() === 'g') && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         onOpenChange(!open);
       }
@@ -42,7 +78,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
     
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, [onOpenChange, open]);
+  }, [onOpenChange, open, shortcut.key]);
   
   const navigateTo = (path: string) => {
     navigate(path);
