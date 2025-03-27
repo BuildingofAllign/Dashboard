@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { KeyboardShortcutsDialog } from "@/components/ui/KeyboardShortcuts";
 import { OfflineIndicator } from "@/components/ui/OfflineIndicator";
+import { DataProvider } from "@/context/DataContext";
 import { useEffect } from "react";
 import Index from "./pages/Index";
 import Projects from "./pages/Projects";
@@ -32,26 +33,28 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <KeyboardShortcutsDialog />
-          <OfflineIndicator />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/projekter" element={<Projects />} />
-            <Route path="/projekter/:id" element={<ProjectDetails />} />
-            <Route path="/tegninger" element={<Tegninger />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/afvigelser" element={<Afvigelser />} />
-            <Route path="/tillagsopgaver" element={<Tillagsopgaver />} />
-            <Route path="/kvalitetssikring" element={<Kvalitetssikring />} />
-            <Route path="/indstillinger" element={<Navigate to="/" replace />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <DataProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <KeyboardShortcutsDialog />
+            <OfflineIndicator />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/projekter" element={<Projects />} />
+              <Route path="/projekter/:id" element={<ProjectDetails />} />
+              <Route path="/tegninger" element={<Tegninger />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/afvigelser" element={<Afvigelser />} />
+              <Route path="/tillagsopgaver" element={<Tillagsopgaver />} />
+              <Route path="/kvalitetssikring" element={<Kvalitetssikring />} />
+              <Route path="/indstillinger" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </DataProvider>
     </QueryClientProvider>
   );
 };

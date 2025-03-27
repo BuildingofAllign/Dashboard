@@ -9,7 +9,474 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      additional_tasks: {
+        Row: {
+          assigned_to: string
+          created_at: string | null
+          description: string
+          drawing: string
+          from_deviation_id: string | null
+          id: string
+          materials: string
+          price: number
+          project_id: string | null
+          status: string
+          task_id: string
+          time_required: string
+          title: string
+        }
+        Insert: {
+          assigned_to: string
+          created_at?: string | null
+          description: string
+          drawing: string
+          from_deviation_id?: string | null
+          id?: string
+          materials: string
+          price: number
+          project_id?: string | null
+          status: string
+          task_id: string
+          time_required: string
+          title: string
+        }
+        Update: {
+          assigned_to?: string
+          created_at?: string | null
+          description?: string
+          drawing?: string
+          from_deviation_id?: string | null
+          id?: string
+          materials?: string
+          price?: number
+          project_id?: string | null
+          status?: string
+          task_id?: string
+          time_required?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "additional_tasks_from_deviation_id_fkey"
+            columns: ["from_deviation_id"]
+            isOneToOne: false
+            referencedRelation: "deviations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "additional_tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deviation_comments: {
+        Row: {
+          author: string
+          created_at: string | null
+          deviation_id: string | null
+          id: string
+          text: string
+        }
+        Insert: {
+          author: string
+          created_at?: string | null
+          deviation_id?: string | null
+          id?: string
+          text: string
+        }
+        Update: {
+          author?: string
+          created_at?: string | null
+          deviation_id?: string | null
+          id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deviation_comments_deviation_id_fkey"
+            columns: ["deviation_id"]
+            isOneToOne: false
+            referencedRelation: "deviations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deviations: {
+        Row: {
+          approver_role: string
+          assigned_to: string
+          created_at: string | null
+          description: string
+          deviation_id: string
+          drawing: string
+          id: string
+          image_url: string | null
+          project_id: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          approver_role: string
+          assigned_to: string
+          created_at?: string | null
+          description: string
+          deviation_id: string
+          drawing: string
+          id?: string
+          image_url?: string | null
+          project_id?: string | null
+          status: string
+          title: string
+        }
+        Update: {
+          approver_role?: string
+          assigned_to?: string
+          created_at?: string | null
+          description?: string
+          deviation_id?: string
+          drawing?: string
+          id?: string
+          image_url?: string | null
+          project_id?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deviations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      drawing_annotation_markers: {
+        Row: {
+          color: string
+          drawing_id: string | null
+          id: string
+          position: string
+        }
+        Insert: {
+          color: string
+          drawing_id?: string | null
+          id?: string
+          position: string
+        }
+        Update: {
+          color?: string
+          drawing_id?: string | null
+          id?: string
+          position?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drawing_annotation_markers_drawing_id_fkey"
+            columns: ["drawing_id"]
+            isOneToOne: false
+            referencedRelation: "drawings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      drawings: {
+        Row: {
+          additional_tasks: number | null
+          deviations: number | null
+          id: string
+          image_url: string
+          project_id: string | null
+          title: string
+          updated_days_ago: number | null
+          version: string
+        }
+        Insert: {
+          additional_tasks?: number | null
+          deviations?: number | null
+          id?: string
+          image_url: string
+          project_id?: string | null
+          title: string
+          updated_days_ago?: number | null
+          version: string
+        }
+        Update: {
+          additional_tasks?: number | null
+          deviations?: number | null
+          id?: string
+          image_url?: string
+          project_id?: string | null
+          title?: string
+          updated_days_ago?: number | null
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drawings_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_communication_tools: {
+        Row: {
+          employee_id: string | null
+          id: string
+          tool: string
+        }
+        Insert: {
+          employee_id?: string | null
+          id?: string
+          tool: string
+        }
+        Update: {
+          employee_id?: string | null
+          id?: string
+          tool?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_communication_tools_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employees: {
+        Row: {
+          created_at: string | null
+          id: string
+          initials: string
+          name: string
+          phone: string | null
+          project: string | null
+          role: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          initials: string
+          name: string
+          phone?: string | null
+          project?: string | null
+          role: string
+          status: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          initials?: string
+          name?: string
+          phone?: string | null
+          project?: string | null
+          role?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      project_communication_tools: {
+        Row: {
+          id: string
+          project_id: string | null
+          tool: string
+        }
+        Insert: {
+          id?: string
+          project_id?: string | null
+          tool: string
+        }
+        Update: {
+          id?: string
+          project_id?: string | null
+          tool?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_communication_tools_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_messages: {
+        Row: {
+          count: number | null
+          id: string
+          priority: string
+          project_id: string | null
+        }
+        Insert: {
+          count?: number | null
+          id?: string
+          priority: string
+          project_id?: string | null
+        }
+        Update: {
+          count?: number | null
+          id?: string
+          priority?: string
+          project_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_messages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_stats: {
+        Row: {
+          additions: number | null
+          deviations: number | null
+          id: string
+          project_id: string | null
+          quality_assurance: number | null
+        }
+        Insert: {
+          additions?: number | null
+          deviations?: number | null
+          id?: string
+          project_id?: string | null
+          quality_assurance?: number | null
+        }
+        Update: {
+          additions?: number | null
+          deviations?: number | null
+          id?: string
+          project_id?: string | null
+          quality_assurance?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_stats_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_team_members: {
+        Row: {
+          color: string
+          id: string
+          initials: string
+          name: string
+          project_id: string | null
+          role: string
+        }
+        Insert: {
+          color: string
+          id?: string
+          initials: string
+          name: string
+          project_id?: string | null
+          role: string
+        }
+        Update: {
+          color?: string
+          id?: string
+          initials?: string
+          name?: string
+          project_id?: string | null
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_team_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          category: string
+          created_at: string | null
+          end_date: string | null
+          id: string
+          is_pinned: boolean | null
+          name: string
+          progress: number
+          project_id: string
+          start_date: string | null
+          status: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          name: string
+          progress?: number
+          project_id: string
+          start_date?: string | null
+          status: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          name?: string
+          progress?: number
+          project_id?: string
+          start_date?: string | null
+          status?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          id: string
+          last_visited: string | null
+          pinned_projects: string[] | null
+          theme: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          last_visited?: string | null
+          pinned_projects?: string[] | null
+          theme?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          last_visited?: string | null
+          pinned_projects?: string[] | null
+          theme?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
