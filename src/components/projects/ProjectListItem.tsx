@@ -13,7 +13,7 @@ import {
   PlusCircle 
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { AnimatedCircularProgress } from "@/components/ui/animated-circular-progress";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { PriorityIndicator, Priority } from "@/components/ui/PriorityIndicator";
@@ -25,6 +25,15 @@ interface ProjectListItemProps {
 }
 
 export const ProjectListItem = ({ project, onTogglePin }: ProjectListItemProps) => {
+  // Get color for progress circle based on status and progress
+  const getProgressColor = () => {
+    if (project.status === "afsluttet") return "stroke-gray-400";
+    if (project.progress >= 75) return "stroke-green-500";
+    if (project.progress >= 50) return "stroke-blue-500";
+    if (project.progress >= 25) return "stroke-yellow-500";
+    return "stroke-red-500";
+  };
+
   return (
     <TableRow className={cn(
       project.isPinned && "border-l-2 border-l-primary"
@@ -58,9 +67,12 @@ export const ProjectListItem = ({ project, onTogglePin }: ProjectListItemProps) 
       </TableCell>
       
       <TableCell>
-        <div className="flex items-center space-x-2 w-32">
-          <Progress value={project.progress} className="h-2 flex-1" />
-          <span className="text-xs">{project.progress}%</span>
+        <div className="flex items-center justify-center">
+          <AnimatedCircularProgress 
+            value={project.progress} 
+            size="xs" 
+            color={getProgressColor()} 
+          />
         </div>
       </TableCell>
       

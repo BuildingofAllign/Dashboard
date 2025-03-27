@@ -18,7 +18,7 @@ import {
   AlertTriangle, 
   PlusCircle 
 } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { AnimatedCircularProgress } from "@/components/ui/animated-circular-progress";
 import { 
   Tooltip, 
   TooltipContent, 
@@ -68,6 +68,15 @@ interface ProjectCardProps {
 }
 
 export const ProjectCard = ({ project, onTogglePin }: ProjectCardProps) => {
+  // Get color for progress circle based on status and progress
+  const getProgressColor = () => {
+    if (project.status === "afsluttet") return "stroke-gray-400";
+    if (project.progress >= 75) return "stroke-green-500";
+    if (project.progress >= 50) return "stroke-blue-500";
+    if (project.progress >= 25) return "stroke-yellow-500";
+    return "stroke-red-500";
+  };
+
   return (
     <Card 
       className={cn(
@@ -118,23 +127,17 @@ export const ProjectCard = ({ project, onTogglePin }: ProjectCardProps) => {
       </CardHeader>
       
       <CardContent className="pb-2">
-        <div className="mb-4">
-          <div className="flex justify-between items-center mb-1">
-            <span className="text-sm font-medium">Fremgang</span>
-            <span className="text-sm">{project.progress}%</span>
-          </div>
-          <Progress value={project.progress} className="h-2" />
+        <div className="flex justify-between items-center mb-4">
+          <StatusBadge status={project.status} />
+          <AnimatedCircularProgress 
+            value={project.progress} 
+            size="sm"
+            color={getProgressColor()}
+            showValue={true}
+          />
         </div>
         
         <div className="grid grid-cols-1 gap-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Building className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Status:</span>
-            </div>
-            <StatusBadge status={project.status} />
-          </div>
-          
           {project.startDate && (
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">

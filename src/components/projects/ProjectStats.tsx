@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { AnimatedCircularProgress } from "@/components/ui/animated-circular-progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -44,10 +44,10 @@ export const ProjectStats: React.FC<ProjectStatsProps> = ({
   className = ""
 }) => {
   const getProgressColor = (progress: number) => {
-    if (progress >= 75) return "bg-green-600";
-    if (progress >= 50) return "bg-blue-600";
-    if (progress >= 25) return "bg-yellow-500";
-    return "bg-red-500";
+    if (progress >= 75) return "stroke-green-600";
+    if (progress >= 50) return "stroke-blue-600";
+    if (progress >= 25) return "stroke-yellow-500";
+    return "stroke-red-500";
   };
   
   // Calculate completion percentage for tasks
@@ -92,12 +92,12 @@ export const ProjectStats: React.FC<ProjectStatsProps> = ({
       
       <CardContent className="space-y-6">
         {/* Overall Progress */}
-        <div>
-          <div className="flex justify-between mb-1">
+        <div className="flex justify-center">
+          <div className="flex flex-col items-center">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="flex items-center cursor-help">
+                  <div className="flex items-center cursor-help mb-2">
                     <CircleDashed className="h-4 w-4 mr-1 text-indigo-600" />
                     <span className="font-medium">Samlet fremgang</span>
                   </div>
@@ -107,13 +107,14 @@ export const ProjectStats: React.FC<ProjectStatsProps> = ({
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            
-            <span className="font-bold">{stats.progress}%</span>
+            <AnimatedCircularProgress 
+              value={stats.progress} 
+              size="lg"
+              color={getProgressColor(stats.progress)}
+              duration={2} 
+              label="Fremgang"
+            />
           </div>
-          <Progress 
-            value={stats.progress} 
-            className={`h-2 ${getProgressColor(stats.progress)}`} 
-          />
         </div>
         
         {/* Time stats */}
@@ -191,15 +192,17 @@ export const ProjectStats: React.FC<ProjectStatsProps> = ({
         </div>
         
         {/* Task completion */}
-        <div>
-          <div className="flex justify-between mb-1">
-            <div className="flex items-center">
-              <CheckCircle2 className="h-4 w-4 mr-1 text-green-600" />
-              <span className="text-sm font-medium">Opgaver gennemført</span>
-            </div>
-            <span className="text-sm font-medium">{taskCompletionPercent}%</span>
+        <div className="flex flex-col items-center">
+          <div className="flex items-center mb-2">
+            <CheckCircle2 className="h-4 w-4 mr-1 text-green-600" />
+            <span className="text-sm font-medium">Opgaver gennemført</span>
           </div>
-          <Progress value={taskCompletionPercent} className="h-2 bg-green-600" />
+          <AnimatedCircularProgress 
+            value={taskCompletionPercent} 
+            size="md" 
+            color="stroke-green-600" 
+            label="Opgaver"
+          />
         </div>
         
         {/* Alerts if needed */}

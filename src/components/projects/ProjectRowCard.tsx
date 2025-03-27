@@ -12,7 +12,7 @@ import {
   Pin,
   PlusCircle
 } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { AnimatedCircularProgress } from "@/components/ui/animated-circular-progress";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { PriorityIndicator, Priority } from "@/components/ui/PriorityIndicator";
@@ -52,6 +52,15 @@ interface ProjectRowCardProps {
 }
 
 export const ProjectRowCard = ({ project, onTogglePin }: ProjectRowCardProps) => {
+  // Get color for progress circle based on status and progress
+  const getProgressColor = () => {
+    if (project.status === "afsluttet") return "stroke-gray-400";
+    if (project.progress >= 75) return "stroke-green-500";
+    if (project.progress >= 50) return "stroke-blue-500";
+    if (project.progress >= 25) return "stroke-yellow-500";
+    return "stroke-red-500";
+  };
+
   return (
     <Card 
       className={cn(
@@ -75,18 +84,19 @@ export const ProjectRowCard = ({ project, onTogglePin }: ProjectRowCardProps) =>
             </div>
           </div>
           
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-6">
             <div className="flex flex-col items-center">
               <div className="text-xs text-muted-foreground mb-1">Status</div>
               <StatusBadge status={project.status} />
             </div>
             
-            <div className="w-32">
+            <div className="flex flex-col items-center">
               <div className="text-xs text-muted-foreground mb-1">Fremgang</div>
-              <div className="flex items-center space-x-2">
-                <Progress value={project.progress} className="h-2 flex-1" />
-                <span className="text-xs">{project.progress}%</span>
-              </div>
+              <AnimatedCircularProgress 
+                value={project.progress} 
+                size="xs"
+                color={getProgressColor()}
+              />
             </div>
             
             {project.team && (
@@ -142,4 +152,4 @@ export const ProjectRowCard = ({ project, onTogglePin }: ProjectRowCardProps) =>
       </CardContent>
     </Card>
   );
-};
+}
