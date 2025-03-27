@@ -9,8 +9,7 @@ import {
   Building2, 
   ChevronRight, 
   Home, 
-  Star, 
-  StarOff, 
+  Pin, 
   ConstructionIcon, 
   Building, 
   Factory, 
@@ -188,8 +187,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTogglePin }
                     className="text-gray-400 hover:text-yellow-500 transition-colors"
                   >
                     {project.isPinned ? 
-                      <Star className="h-5 w-5 fill-yellow-400 text-yellow-500" /> : 
-                      <StarOff className="h-5 w-5" />
+                      <Pin className="h-5 w-5 fill-yellow-400 text-yellow-500" /> : 
+                      <Pin className="h-5 w-5" />
                     }
                   </button>
                 </TooltipTrigger>
