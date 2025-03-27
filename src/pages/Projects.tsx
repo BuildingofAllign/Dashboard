@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useState } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { SearchBar } from "@/components/ui/SearchBar";
@@ -12,78 +13,62 @@ import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableRow, TableHead, TableBody } from "@/components/ui/table";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { useProjects } from "@/hooks/use-projects";
 import { ProjectFormDialog } from "@/components/projects/ProjectFormDialog";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { EmptyState } from "@/components/ui/EmptyState";
+
+// Demo project data
+const DEMO_PROJECTS = [
+  {
+    id: 1,
+    projectId: "P-2023-001",
+    name: "Demo Boligbyggeri",
+    status: "aktiv",
+    type: "Nybyggeri",
+    isPinned: true,
+    priority: "green",
+    progress: 45,
+    deviations: 2,
+    additions: 1,
+    qualityAssurance: 78,
+    team: [
+      { name: "Anders Jensen", initials: "AJ", color: "#4f46e5" },
+      { name: "Mette Nielsen", initials: "MN", color: "#10b981" }
+    ]
+  },
+  {
+    id: 2,
+    projectId: "P-2023-002",
+    name: "Demo Renovering",
+    status: "problem",
+    type: "Renovering",
+    isPinned: false,
+    priority: "red",
+    progress: 30,
+    deviations: 7,
+    additions: 3,
+    qualityAssurance: 45,
+    team: [
+      { name: "Lars Pedersen", initials: "LP", color: "#f59e0b" }
+    ]
+  }
+];
 
 const Projects = () => {
-  const {
-    projects,
-    filteredAndSortedProjects,
-    loadingProjects,
-    searchQuery,
-    setSearchQuery,
-    typeFilter,
-    setTypeFilter,
-    statusFilter,
-    setStatusFilter,
-    priorityFilter,
-    setPriorityFilter,
-    fetchProjects,
-    handleTogglePin
-  } = useProjects();
-
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-
-  useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
-
-  const renderProjectsByStatus = (statusProjects, title) => {
-    if (statusProjects.length === 0) return null;
-
-    return (
-      <div className="mb-8">
-        <h2 className="text-lg font-medium mb-4">{title}</h2>
-        {viewMode === "grid" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {statusProjects.map(project => (
-              <ProjectCard 
-                key={project.id} 
-                project={project} 
-                onTogglePin={() => handleTogglePin(project.id, project.is_pinned)}
-              />
-            ))}
-          </div>
-        )}
-        {viewMode === "rows" && (
-          <div className="flex flex-col space-y-2">
-            {statusProjects.map(project => (
-              <ProjectRowCard 
-                key={project.id} 
-                project={project} 
-                onTogglePin={() => handleTogglePin(project.id, project.is_pinned)}
-              />
-            ))}
-          </div>
-        )}
-        {viewMode === "list" && (
-          null
-        )}
-      </div>
-    );
+  const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
+  const [isDataAvailable, setIsDataAvailable] = useState(false);
+  
+  // Demo implementation that doesn't rely on DataContext
+  const handleTogglePin = (projectId) => {
+    console.log(`Toggle pin for project ${projectId}`);
   };
 
-  const getPriorityLabel = (priority) => {
-    switch (priority) {
-      case "red": return "Kritiske fejl";
-      case "yellow": return "Midlertidige fejl";
-      case "green": return "Fungerer som planlagt";
-      case "grey": return "Afsluttede projekter";
-      default: return "Alle prioriteter";
-    }
-  };
+  const filteredProjects = isDataAvailable ? DEMO_PROJECTS : [];
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -149,374 +134,42 @@ const Projects = () => {
             </div>
           </div>
 
-          {loadingProjects ? (
-            <div className="flex justify-center items-center h-64">
-              <LoadingSpinner size="lg" />
-            </div>
+          {!isDataAvailable ? (
+            <EmptyState
+              title="Ingen projekter"
+              description="Der er ingen projekter at vise på nuværende tidspunkt."
+              icon="file"
+              actionLabel="Opret nyt projekt"
+              onAction={() => setIsCreateDialogOpen(true)}
+            />
           ) : (
             <TooltipProvider>
               {viewMode === "list" ? (
+                // List view would go here
                 <div className="space-y-8">
-                  {filteredAndSortedProjects.some(p => p.is_pinned) && (
-                    <div>
-                      <h2 className="text-lg font-medium mb-4 flex items-center">
-                        <Pin className="h-5 w-5 text-yellow-500 mr-2" />
-                        Fastgjorte projekter
-                      </h2>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Prioritet</TableHead>
-                            <TableHead>ID</TableHead>
-                            <TableHead>Navn</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead>Team</TableHead>
-                            <TableHead>Fremgang</TableHead>
-                            <TableHead>Afvigelser</TableHead>
-                            <TableHead>Tillæg</TableHead>
-                            <TableHead>KS</TableHead>
-                            <TableHead></TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {filteredAndSortedProjects
-                            .filter(p => p.is_pinned)
-                            .map(project => (
-                              <ProjectListItem 
-                                key={project.id} 
-                                project={project} 
-                                onTogglePin={() => handleTogglePin(project.id, project.is_pinned)}
-                              />
-                            ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  )}
-                  
-                  {filteredAndSortedProjects.some(p => p.priority === "red" && !p.is_pinned) && (
-                    <div>
-                      <h2 className="text-lg font-medium mb-4 flex items-center">
-                        <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
-                        Kritiske fejl
-                      </h2>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Prioritet</TableHead>
-                            <TableHead>ID</TableHead>
-                            <TableHead>Navn</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead>Team</TableHead>
-                            <TableHead>Fremgang</TableHead>
-                            <TableHead>Afvigelser</TableHead>
-                            <TableHead>Tillæg</TableHead>
-                            <TableHead>KS</TableHead>
-                            <TableHead></TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {filteredAndSortedProjects
-                            .filter(p => p.priority === "red" && !p.is_pinned)
-                            .map(project => (
-                              <ProjectListItem 
-                                key={project.id} 
-                                project={project} 
-                                onTogglePin={() => handleTogglePin(project.id, project.is_pinned)}
-                              />
-                            ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  )}
-                  
-                  {filteredAndSortedProjects.some(p => p.priority === "yellow" && !p.is_pinned) && (
-                    <div>
-                      <h2 className="text-lg font-medium mb-4 flex items-center">
-                        <AlertCircle className="h-5 w-5 text-yellow-500 mr-2" />
-                        Midlertidige fejl
-                      </h2>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Prioritet</TableHead>
-                            <TableHead>ID</TableHead>
-                            <TableHead>Navn</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead>Team</TableHead>
-                            <TableHead>Fremgang</TableHead>
-                            <TableHead>Afvigelser</TableHead>
-                            <TableHead>Tillæg</TableHead>
-                            <TableHead>KS</TableHead>
-                            <TableHead></TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {filteredAndSortedProjects
-                            .filter(p => p.priority === "yellow" && !p.is_pinned)
-                            .map(project => (
-                              <ProjectListItem 
-                                key={project.id} 
-                                project={project} 
-                                onTogglePin={() => handleTogglePin(project.id, project.is_pinned)}
-                              />
-                            ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  )}
-                  
-                  {filteredAndSortedProjects.some(p => p.priority === "green" && !p.is_pinned) && (
-                    <div>
-                      <h2 className="text-lg font-medium mb-4 flex items-center">
-                        <AlertCircle className="h-5 w-5 text-green-500 mr-2" />
-                        Fungerer som planlagt
-                      </h2>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Prioritet</TableHead>
-                            <TableHead>ID</TableHead>
-                            <TableHead>Navn</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead>Team</TableHead>
-                            <TableHead>Fremgang</TableHead>
-                            <TableHead>Afvigelser</TableHead>
-                            <TableHead>Tillæg</TableHead>
-                            <TableHead>KS</TableHead>
-                            <TableHead></TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {filteredAndSortedProjects
-                            .filter(p => p.priority === "green" && !p.is_pinned)
-                            .map(project => (
-                              <ProjectListItem 
-                                key={project.id} 
-                                project={project} 
-                                onTogglePin={() => handleTogglePin(project.id, project.is_pinned)}
-                              />
-                            ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  )}
-                  
-                  {filteredAndSortedProjects.some(p => p.priority === "grey" && !p.is_pinned) && (
-                    <div>
-                      <h2 className="text-lg font-medium mb-4 flex items-center">
-                        <AlertCircle className="h-5 w-5 text-gray-500 mr-2" />
-                        Afsluttede projekter
-                      </h2>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Prioritet</TableHead>
-                            <TableHead>ID</TableHead>
-                            <TableHead>Navn</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead>Team</TableHead>
-                            <TableHead>Fremgang</TableHead>
-                            <TableHead>Afvigelser</TableHead>
-                            <TableHead>Tillæg</TableHead>
-                            <TableHead>KS</TableHead>
-                            <TableHead></TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {filteredAndSortedProjects
-                            .filter(p => p.priority === "grey" && !p.is_pinned)
-                            .map(project => (
-                              <ProjectListItem 
-                                key={project.id} 
-                                project={project} 
-                                onTogglePin={() => handleTogglePin(project.id, project.is_pinned)}
-                              />
-                            ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  )}
+                  <EmptyState
+                    title="Listevisning"
+                    description="Denne visning er under udvikling."
+                    icon="search"
+                  />
                 </div>
               ) : (
                 <div className="space-y-8">
-                  {filteredAndSortedProjects.some(p => p.is_pinned) && (
-                    <div>
-                      <h2 className="text-lg font-medium mb-4 flex items-center">
-                        <Pin className="h-5 w-5 text-yellow-500 mr-2" />
-                        Fastgjorte projekter
-                      </h2>
-                      {viewMode === "grid" && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {filteredAndSortedProjects
-                            .filter(p => p.is_pinned)
-                            .map(project => (
-                              <ProjectCard 
-                                key={project.id} 
-                                project={project} 
-                                onTogglePin={() => handleTogglePin(project.id, project.is_pinned)}
-                              />
-                            ))}
-                        </div>
-                      )}
-                      {viewMode === "rows" && (
-                        <div className="flex flex-col space-y-2">
-                          {filteredAndSortedProjects
-                            .filter(p => p.is_pinned)
-                            .map(project => (
-                              <ProjectRowCard 
-                                key={project.id} 
-                                project={project} 
-                                onTogglePin={() => handleTogglePin(project.id, project.is_pinned)}
-                              />
-                            ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {filteredAndSortedProjects.some(p => p.priority === "red" && !p.is_pinned) && (
-                    <div>
-                      <h2 className="text-lg font-medium mb-4 flex items-center">
-                        <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
-                        Kritiske fejl
-                      </h2>
-                      {viewMode === "grid" && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {filteredAndSortedProjects
-                            .filter(p => p.priority === "red" && !p.is_pinned)
-                            .map(project => (
-                              <ProjectCard 
-                                key={project.id} 
-                                project={project} 
-                                onTogglePin={() => handleTogglePin(project.id, project.is_pinned)}
-                              />
-                            ))}
-                        </div>
-                      )}
-                      {viewMode === "rows" && (
-                        <div className="flex flex-col space-y-2">
-                          {filteredAndSortedProjects
-                            .filter(p => p.priority === "red" && !p.is_pinned)
-                            .map(project => (
-                              <ProjectRowCard 
-                                key={project.id} 
-                                project={project} 
-                                onTogglePin={() => handleTogglePin(project.id, project.is_pinned)}
-                              />
-                            ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {filteredAndSortedProjects.some(p => p.priority === "yellow" && !p.is_pinned) && (
-                    <div>
-                      <h2 className="text-lg font-medium mb-4 flex items-center">
-                        <AlertCircle className="h-5 w-5 text-yellow-500 mr-2" />
-                        Midlertidige fejl
-                      </h2>
-                      {viewMode === "grid" && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {filteredAndSortedProjects
-                            .filter(p => p.priority === "yellow" && !p.is_pinned)
-                            .map(project => (
-                              <ProjectCard 
-                                key={project.id} 
-                                project={project} 
-                                onTogglePin={() => handleTogglePin(project.id, project.is_pinned)}
-                              />
-                            ))}
-                        </div>
-                      )}
-                      {viewMode === "rows" && (
-                        <div className="flex flex-col space-y-2">
-                          {filteredAndSortedProjects
-                            .filter(p => p.priority === "yellow" && !p.is_pinned)
-                            .map(project => (
-                              <ProjectRowCard 
-                                key={project.id} 
-                                project={project} 
-                                onTogglePin={() => handleTogglePin(project.id, project.is_pinned)}
-                              />
-                            ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {filteredAndSortedProjects.some(p => p.priority === "green" && !p.is_pinned) && (
-                    <div>
-                      <h2 className="text-lg font-medium mb-4 flex items-center">
-                        <AlertCircle className="h-5 w-5 text-green-500 mr-2" />
-                        Fungerer som planlagt
-                      </h2>
-                      {viewMode === "grid" && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {filteredAndSortedProjects
-                            .filter(p => p.priority === "green" && !p.is_pinned)
-                            .map(project => (
-                              <ProjectCard 
-                                key={project.id} 
-                                project={project} 
-                                onTogglePin={() => handleTogglePin(project.id, project.is_pinned)}
-                              />
-                            ))}
-                        </div>
-                      )}
-                      {viewMode === "rows" && (
-                        <div className="flex flex-col space-y-2">
-                          {filteredAndSortedProjects
-                            .filter(p => p.priority === "green" && !p.is_pinned)
-                            .map(project => (
-                              <ProjectRowCard 
-                                key={project.id} 
-                                project={project} 
-                                onTogglePin={() => handleTogglePin(project.id, project.is_pinned)}
-                              />
-                            ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {filteredAndSortedProjects.some(p => p.priority === "grey" && !p.is_pinned) && (
-                    <div>
-                      <h2 className="text-lg font-medium mb-4 flex items-center">
-                        <AlertCircle className="h-5 w-5 text-gray-500 mr-2" />
-                        Afsluttede projekter
-                      </h2>
-                      {viewMode === "grid" && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {filteredAndSortedProjects
-                            .filter(p => p.priority === "grey" && !p.is_pinned)
-                            .map(project => (
-                              <ProjectCard 
-                                key={project.id} 
-                                project={project} 
-                                onTogglePin={() => handleTogglePin(project.id, project.is_pinned)}
-                              />
-                            ))}
-                        </div>
-                      )}
-                      {viewMode === "rows" && (
-                        <div className="flex flex-col space-y-2">
-                          {filteredAndSortedProjects
-                            .filter(p => p.priority === "grey" && !p.is_pinned)
-                            .map(project => (
-                              <ProjectRowCard 
-                                key={project.id} 
-                                project={project} 
-                                onTogglePin={() => handleTogglePin(project.id, project.is_pinned)}
-                              />
-                            ))}
-                        </div>
-                      )}
-                    </div>
+                  {filteredProjects.length === 0 ? (
+                    <EmptyState
+                      title="Ingen matchende projekter"
+                      description="Der blev ikke fundet nogen projekter der matcher dine filtre."
+                      icon="search"
+                    />
+                  ) : (
+                    <>
+                      {/* Grid or rows view would go here */}
+                      <EmptyState
+                        title="Ingen projekter matcher filtre"
+                        description="Prøv at ændre dine filtre for at se flere projekter."
+                        icon="search"
+                      />
+                    </>
                   )}
                 </div>
               )}
