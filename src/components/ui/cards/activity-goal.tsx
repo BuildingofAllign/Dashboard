@@ -1,5 +1,5 @@
 
-import { Bar } from "@/components/ui/progress"
+import { Bar } from "@/components/ui/bar"
 import { Button } from "@/components/ui/button"
 import {
   Card,
