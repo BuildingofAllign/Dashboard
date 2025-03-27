@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './components/ui/ThemeProvider';
 import { Toaster } from './components/ui/toaster';
+import { DataProvider } from './context/DataContext';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -31,20 +32,22 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <Router>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/projects" element={<Projects />} />
-            <Route path="/project/:id" element={<ProjectDetails />} />
-            <Route path="/afvigelser" element={<Afvigelser />} />
-            <Route path="/kvalitetssikring" element={<Kvalitetssikring />} />
-            <Route path="/tegninger" element={<Tegninger />} />
-            <Route path="/tillagsopgaver" element={<Tillagsopgaver />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Router>
-        <Toaster />
+        <DataProvider>
+          <Router>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/projects" element={<Projects />} />
+              <Route path="/project/:id" element={<ProjectDetails />} />
+              <Route path="/afvigelser" element={<Afvigelser />} />
+              <Route path="/kvalitetssikring" element={<Kvalitetssikring />} />
+              <Route path="/tegninger" element={<Tegninger />} />
+              <Route path="/tillagsopgaver" element={<Tillagsopgaver />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Router>
+          <Toaster />
+        </DataProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

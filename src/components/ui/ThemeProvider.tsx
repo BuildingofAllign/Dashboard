@@ -1,77 +1,62 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type Theme = 'light' | 'dark';
 
-interface ThemeContextType {
+type ThemeContextType = {
   theme: Theme;
-  isDarkMode: boolean;
   toggleTheme: () => void;
-  setTheme: (theme: Theme) => void;
-}
+  isDarkMode: boolean;
+};
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useState<Theme>(() => {
-    // Check for system preference or saved preference
-    const savedTheme = localStorage.getItem('theme');
-    return (savedTheme === 'dark' || 
-      (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) 
-      ? 'dark' 
-      : 'light';
-  });
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+  const [theme, setTheme] = useState<Theme>('light');
   
-  const { toast } = useToast();
+  // Get the initial theme from localStorage or system preference
+  useEffect(() => {
+    // Check if a theme is stored in localStorage
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      setTheme('dark');
+      document.documentElement.classList.add('dark');
+    } else if (savedTheme === 'light') {
+      setTheme('light');
+      document.documentElement.classList.remove('dark');
+    } else {
+      // Check system preference if no theme is stored
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (prefersDark) {
+        setTheme('dark');
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+  }, []);
+  
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
   
   const isDarkMode = theme === 'dark';
 
-  useEffect(() => {
-    // Apply theme to document
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDarkMode]);
-
-  // Listen for system preference changes
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e: MediaQueryListEvent) => {
-      const newTheme = e.matches ? 'dark' : 'light';
-      setTheme(newTheme);
-      toast({
-        title: `${newTheme === 'dark' ? 'Mørkt' : 'Lyst'} tema aktiveret`,
-        description: `Systemtema har skiftet til ${newTheme === 'dark' ? 'mørkt' : 'lyst'} tema`,
-      });
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [toast]);
-
-  const toggleTheme = () => {
-    const newTheme = isDarkMode ? 'light' : 'dark';
-    setTheme(newTheme);
-    
-    toast({
-      title: `${newTheme === 'dark' ? 'Mørkt' : 'Lyst'} tema aktiveret`,
-      description: `Du har skiftet til ${newTheme === 'dark' ? 'mørkt' : 'lyst'} tema`,
-    });
-  };
-
   return (
-    <ThemeContext.Provider value={{ theme, isDarkMode, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, isDarkMode }}>
       {children}
     </ThemeContext.Provider>
   );
 };
 
-export const useTheme = (): ThemeContextType => {
+export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider');

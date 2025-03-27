@@ -1,6 +1,6 @@
 
-import { useTheme as useThemeFromProvider } from '@/components/ui/ThemeProvider';
+import { useTheme as useThemeFromContext } from '@/components/ui/ThemeProvider';
 
 export const useTheme = () => {
-  return useThemeFromProvider();
+  return useThemeFromContext();
 };
