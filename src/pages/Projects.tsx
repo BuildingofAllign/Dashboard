@@ -8,7 +8,7 @@ import { ProjectCard } from "@/components/projects/ProjectCard";
 import { ProjectRowCard } from "@/components/projects/ProjectRowCard";
 import { ProjectListItem } from "@/components/projects/ProjectListItem";
 import { ViewToggle, ViewMode } from "@/components/ui/ViewToggle";
-import { Plus } from "lucide-react";
+import { Plus, FileText, AlertTriangle, Check, Search, Command } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableRow, TableHead, TableBody } from "@/components/ui/table";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,11 +17,20 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useProjects } from "@/hooks/use-projects";
 import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
+import { CommandPalette } from "@/components/ui/CommandPalette";
+import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
+import { Badge } from "@/components/ui/badge";
+import { ProjectDetailsCollapsible } from "@/components/projects/ProjectDetailsCollapsible";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/ui/UserAvatar";
+import { ProjectProgressIndicator } from "@/components/ui/ProjectProgressIndicator";
+import { toast } from "sonner";
 
 const Projects = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
+  const [commandOpen, setCommandOpen] = useState(false);
   
   const {
     filteredAndSortedProjects,
@@ -43,6 +52,18 @@ const Projects = () => {
     fetchProjects();
   }, [fetchProjects]);
 
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setCommandOpen(true);
+      }
+    };
+
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
+
   const handleEditProject = (project) => {
     setEditingProject(project);
     setIsCreateDialogOpen(true);
@@ -51,6 +72,16 @@ const Projects = () => {
   const handleCloseDialog = () => {
     setIsCreateDialogOpen(false);
     setEditingProject(null);
+  };
+
+  const handlePinWithToast = (projectId: string, isPinned: boolean) => {
+    handleTogglePin(projectId, isPinned);
+    toast(isPinned ? "Projekt afpinnet" : "Projekt pinnet", {
+      description: isPinned 
+        ? "Projektet er blevet fjernet fra dine pinnede projekter" 
+        : "Projektet er blevet tilføjet til dine pinnede projekter",
+      position: "bottom-right",
+    });
   };
 
   const renderProjectContent = () => {
@@ -81,7 +112,7 @@ const Projects = () => {
             <ProjectCard
               key={project.id}
               project={project}
-              onTogglePin={() => handleTogglePin(project.id, project.is_pinned || project.isPinned)}
+              onTogglePin={() => handlePinWithToast(project.id, project.is_pinned || project.isPinned)}
               onEdit={() => handleEditProject(project)}
               onDelete={
                 <DeleteConfirmationDialog 
@@ -98,21 +129,33 @@ const Projects = () => {
 
     if (viewMode === "rows") {
       return (
-        <div className="space-y-2">
+        <div className="space-y-4">
           {filteredAndSortedProjects.map(project => (
-            <ProjectRowCard
-              key={project.id}
-              project={project}
-              onTogglePin={() => handleTogglePin(project.id, project.is_pinned || project.isPinned)}
-              onEdit={() => handleEditProject(project)}
-              onDelete={
+            <div key={project.id} className="bg-white rounded-lg shadow p-4">
+              <ProjectDetailsCollapsible project={project} />
+              <div className="mt-3">
+                <h4 className="text-sm font-medium text-gray-500 mb-1">Fremgang</h4>
+                <ProjectProgressIndicator progress={project.progress} status={project.status} />
+              </div>
+              <div className="flex justify-between mt-3">
+                <div className="flex space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handlePinWithToast(project.id, project.is_pinned || project.isPinned)}
+                  >
+                    {(project.is_pinned || project.isPinned) ? "Afpin" : "Pin"}
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleEditProject(project)}>Rediger</Button>
+                </div>
                 <DeleteConfirmationDialog 
                   title="Slet projekt"
                   description={`Er du sikker på at du vil slette projektet "${project.name}"?`}
                   onDelete={() => handleDeleteProject(project.id)}
+                  trigger={<Button variant="outline" size="sm">Slet</Button>}
                 />
-              }
-            />
+              </div>
+            </div>
           ))}
         </div>
       );
@@ -140,7 +183,7 @@ const Projects = () => {
             <ProjectListItem
               key={project.id}
               project={project}
-              onTogglePin={() => handleTogglePin(project.id, project.is_pinned || project.isPinned)}
+              onTogglePin={() => handlePinWithToast(project.id, project.is_pinned || project.isPinned)}
               onEdit={() => handleEditProject(project)}
               onDelete={() => handleDeleteProject(project.id)}
             />
@@ -158,11 +201,60 @@ const Projects = () => {
 
         <div className="p-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-            <SearchBar
-              placeholder="Søg efter projekt..."
-              onChange={setSearchQuery}
-              value={searchQuery}
-            />
+            <div className="flex items-center space-x-2">
+              <SearchBar
+                placeholder="Søg efter projekt..."
+                onChange={setSearchQuery}
+                value={searchQuery}
+              />
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => setCommandOpen(true)}
+                className="hidden md:flex"
+                id="command-button"
+              >
+                <Command className="h-5 w-5" />
+              </Button>
+              <HoverCard>
+                <HoverCardTrigger asChild>
+                  <Button variant="ghost" size="icon" className="hidden md:flex">
+                    <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                  </Button>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-80">
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-semibold">Projektoversigt</h4>
+                    <div className="text-sm">
+                      <p className="flex items-center justify-between">
+                        <span>Aktive projekter:</span>
+                        <Badge variant="outline" className="bg-green-100">
+                          {filteredAndSortedProjects.filter(p => p.status === "aktiv").length}
+                        </Badge>
+                      </p>
+                      <p className="flex items-center justify-between">
+                        <span>Problem projekter:</span>
+                        <Badge variant="outline" className="bg-red-100">
+                          {filteredAndSortedProjects.filter(p => p.status === "problem").length}
+                        </Badge>
+                      </p>
+                      <p className="flex items-center justify-between">
+                        <span>Udfordrende projekter:</span>
+                        <Badge variant="outline" className="bg-yellow-100">
+                          {filteredAndSortedProjects.filter(p => p.status === "udfordring").length}
+                        </Badge>
+                      </p>
+                      <p className="flex items-center justify-between">
+                        <span>Afsluttede projekter:</span>
+                        <Badge variant="outline" className="bg-gray-100">
+                          {filteredAndSortedProjects.filter(p => p.status === "afsluttet").length}
+                        </Badge>
+                      </p>
+                    </div>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
+            </div>
             <div className="flex flex-wrap space-x-2 mt-4 md:mt-0 items-center">
               <FilterSelect 
                 onChange={(e) => setTypeFilter(e.target.value)}
@@ -207,6 +299,7 @@ const Projects = () => {
               <Button 
                 className="flex items-center"
                 onClick={() => setIsCreateDialogOpen(true)}
+                id="create-project-button"
               >
                 <Plus className="h-5 w-5 mr-1" />
                 Nyt Projekt
@@ -225,6 +318,11 @@ const Projects = () => {
         onOpenChange={handleCloseDialog}
         mode={editingProject ? "edit" : "create"}
         initialData={editingProject}
+      />
+      
+      <CommandPalette
+        open={commandOpen}
+        onOpenChange={setCommandOpen}
       />
     </div>
   );
