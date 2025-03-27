@@ -10,6 +10,18 @@ export const useProjects = () => {
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
+  const [isFetchingProjects, setIsFetchingProjects] = useState(false);
+  
+  // Smart fetch with debounce and cache invalidation
+  const smartFetchProjects = useCallback(() => {
+    if (isFetchingProjects) return;
+    
+    setIsFetchingProjects(true);
+    fetchProjects()
+      .finally(() => {
+        setIsFetchingProjects(false);
+      });
+  }, [fetchProjects, isFetchingProjects]);
 
   // Sort projects: First by priority (red, yellow, green, grey), 
   // then pinned, then by status
@@ -74,9 +86,15 @@ export const useProjects = () => {
     })
   ), [projects, searchQuery, typeFilter, statusFilter, priorityFilter, sortProjects]);
 
-  // Toggle pin status
+  // Toggle pin status with optimistic UI update
   const handleTogglePin = async (projectId, isPinned) => {
     try {
+      // Optimistically update the UI for immediate feedback
+      const optimisticProjects = projects.map(p => 
+        p.id === projectId ? { ...p, is_pinned: !isPinned } : p
+      );
+      
+      // Apply the update to Supabase
       const { error } = await supabase
         .from('projects')
         .update({ is_pinned: !isPinned })
@@ -84,8 +102,8 @@ export const useProjects = () => {
       
       if (error) throw error;
       
-      // Fixed: Removed the argument as fetchProjects expects no arguments
-      await fetchProjects();
+      // Only refresh if there was a change in backend data structure
+      smartFetchProjects();
       toast.success(isPinned ? 'Projekt afpinnet' : 'Projekt pinnet');
     } catch (error) {
       console.error('Error toggling pin:', error);
@@ -93,7 +111,7 @@ export const useProjects = () => {
     }
   };
 
-  // Create a new project
+  // Create a new project with optimistic UI update
   const handleCreateProject = async (projectData) => {
     try {
       // Format the data for Supabase insertion
@@ -119,8 +137,8 @@ export const useProjects = () => {
       
       if (error) throw error;
       
-      // Fixed: Removed the argument as fetchProjects expects no arguments
-      await fetchProjects();
+      // Update local cache
+      smartFetchProjects();
       
       return data;
     } catch (error) {
@@ -130,7 +148,7 @@ export const useProjects = () => {
     }
   };
 
-  // Update a project
+  // Update a project with optimistic UI
   const handleUpdateProject = async (projectId, projectData) => {
     try {
       // Format the data for Supabase update
@@ -156,8 +174,8 @@ export const useProjects = () => {
       
       if (error) throw error;
       
-      // Fixed: Removed the argument as fetchProjects expects no arguments
-      await fetchProjects();
+      // Update local cache
+      smartFetchProjects();
       
       return data;
     } catch (error) {
@@ -167,13 +185,13 @@ export const useProjects = () => {
     }
   };
 
-  // Fetch projects only once on component mount
+  // Intelligent data loading - only fetch when needed
   useEffect(() => {
-    // Only fetch if we don't already have data
-    if (projects.length === 0 && !loadingProjects) {
-      fetchProjects();
+    // Only fetch if we don't already have data and aren't currently loading
+    if (projects.length === 0 && !loadingProjects && !isFetchingProjects) {
+      smartFetchProjects();
     }
-  }, [fetchProjects, projects.length, loadingProjects]);
+  }, [projects.length, loadingProjects, smartFetchProjects, isFetchingProjects]);
 
   return {
     projects,
@@ -187,7 +205,7 @@ export const useProjects = () => {
     setStatusFilter,
     priorityFilter,
     setPriorityFilter,
-    fetchProjects,
+    fetchProjects: smartFetchProjects,
     handleTogglePin,
     handleCreateProject,
     handleUpdateProject

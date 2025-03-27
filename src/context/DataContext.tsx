@@ -47,6 +47,35 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 // Cache time in milliseconds (5 minutes)
 const CACHE_TIME = 5 * 60 * 1000;
 
+// Enhanced caching strategy for different data types
+const CACHE_STRATEGIES = {
+  PROJECTS: {
+    staleTime: 10 * 60 * 1000, // 10 minutes for projects
+    prefetch: true,            // Prefetch on app load
+    priority: 'high'           // High priority data
+  },
+  DEVIATIONS: {
+    staleTime: 5 * 60 * 1000,  // 5 minutes for deviations
+    prefetch: true,
+    priority: 'high'
+  },
+  ADDITIONAL_TASKS: {
+    staleTime: 15 * 60 * 1000, // 15 minutes for tasks
+    prefetch: false,           // Load when needed
+    priority: 'medium'
+  },
+  DRAWINGS: {
+    staleTime: 30 * 60 * 1000, // 30 minutes for drawings
+    prefetch: false,
+    priority: 'low'
+  },
+  EMPLOYEES: {
+    staleTime: 60 * 60 * 1000, // 1 hour for employees
+    prefetch: false,
+    priority: 'low'
+  }
+};
+
 // Add debounce function to limit API calls
 const debounce = (func, wait) => {
   let timeout;
@@ -63,24 +92,29 @@ const debounce = (func, wait) => {
 export const DataProvider = ({ children }: { children: ReactNode }) => {
   // State for each data type
   const [projects, setProjects] = useState<any[]>([]);
-  const [loadingProjects, setLoadingProjects] = useState(true);
+  const [loadingProjects, setLoadingProjects] = useState(false);
   const [projectsLastFetch, setProjectsLastFetch] = useState(0);
+  const [projectsFetchInProgress, setProjectsFetchInProgress] = useState(false);
   
   const [deviations, setDeviations] = useState<any[]>([]);
-  const [loadingDeviations, setLoadingDeviations] = useState(true);
+  const [loadingDeviations, setLoadingDeviations] = useState(false);
   const [deviationsLastFetch, setDeviationsLastFetch] = useState(0);
+  const [deviationsFetchInProgress, setDeviationsFetchInProgress] = useState(false);
   
   const [additionalTasks, setAdditionalTasks] = useState<any[]>([]);
-  const [loadingAdditionalTasks, setLoadingAdditionalTasks] = useState(true);
+  const [loadingAdditionalTasks, setLoadingAdditionalTasks] = useState(false);
   const [additionalTasksLastFetch, setAdditionalTasksLastFetch] = useState(0);
+  const [additionalTasksFetchInProgress, setAdditionalTasksFetchInProgress] = useState(false);
   
   const [drawings, setDrawings] = useState<any[]>([]);
-  const [loadingDrawings, setLoadingDrawings] = useState(true);
+  const [loadingDrawings, setLoadingDrawings] = useState(false);
   const [drawingsLastFetch, setDrawingsLastFetch] = useState(0);
+  const [drawingsFetchInProgress, setDrawingsFetchInProgress] = useState(false);
   
   const [employees, setEmployees] = useState<any[]>([]);
-  const [loadingEmployees, setLoadingEmployees] = useState(true);
+  const [loadingEmployees, setLoadingEmployees] = useState(false);
   const [employeesLastFetch, setEmployeesLastFetch] = useState(0);
+  const [employeesFetchInProgress, setEmployeesFetchInProgress] = useState(false);
   
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   
@@ -106,27 +140,36 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Helper to check if cache is stale
-  const isCacheStale = (lastFetchTime: number) => {
-    return Date.now() - lastFetchTime > CACHE_TIME;
+  // Enhanced cache check with priority-based refresh
+  const shouldRefreshCache = (lastFetchTime: number, cacheStrategy: any) => {
+    // If no data has been fetched yet, always fetch
+    if (lastFetchTime === 0) return true;
+    
+    const currentTime = Date.now();
+    const timeSinceLastFetch = currentTime - lastFetchTime;
+    
+    // Different stale times based on data priority
+    return timeSinceLastFetch > cacheStrategy.staleTime;
   };
 
-  // Fetch functions with caching
+  // Fetch functions with enhanced caching and prioritization
   const fetchProjects = useCallback(async () => {
-    // Skip if data is fresh and not loading
-    if (!isCacheStale(projectsLastFetch) && projects.length > 0) {
+    // Skip if data is fresh or already fetching
+    if (!shouldRefreshCache(projectsLastFetch, CACHE_STRATEGIES.PROJECTS) && projects.length > 0) {
       console.log('Using cached projects data');
       return;
     }
 
-    try {
-      // If already loading, don't start another fetch
-      if (loadingProjects) {
-        console.log('Already fetching projects, skipping duplicate request');
-        return;
-      }
+    // Prevent multiple simultaneous fetches
+    if (projectsFetchInProgress) {
+      console.log('Already fetching projects, skipping duplicate request');
+      return;
+    }
 
-      setLoadingProjects(true);
+    try {
+      setProjectsFetchInProgress(true);
+      setLoadingProjects(projects.length === 0); // Only show loading state if no data yet
+      
       const { data, error } = await supabase
         .from('projects')
         .select('*, project_team_members(*), project_stats(*), project_communication_tools(*), project_messages(*)');
@@ -141,23 +184,26 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       console.error('Error fetching projects:', error);
     } finally {
       setLoadingProjects(false);
+      setProjectsFetchInProgress(false);
     }
-  }, [projects.length, projectsLastFetch, loadingProjects]);
+  }, [projects.length, projectsLastFetch, projectsFetchInProgress]);
   
   const fetchDeviations = useCallback(async () => {
-    if (!isCacheStale(deviationsLastFetch) && deviations.length > 0) {
+    // Similar enhanced fetching logic as fetchProjects
+    if (!shouldRefreshCache(deviationsLastFetch, CACHE_STRATEGIES.DEVIATIONS) && deviations.length > 0) {
       console.log('Using cached deviations data');
       return;
     }
 
+    if (deviationsFetchInProgress) {
+      console.log('Already fetching deviations, skipping duplicate request');
+      return;
+    }
+    
     try {
-      // If already loading, don't start another fetch
-      if (loadingDeviations) {
-        console.log('Already fetching deviations, skipping duplicate request');
-        return;
-      }
+      setDeviationsFetchInProgress(true);
+      setLoadingDeviations(deviations.length === 0);
       
-      setLoadingDeviations(true);
       const { data, error } = await supabase
         .from('deviations')
         .select('*, deviation_comments(*)');
@@ -172,23 +218,26 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       console.error('Error fetching deviations:', error);
     } finally {
       setLoadingDeviations(false);
+      setDeviationsFetchInProgress(false);
     }
-  }, [deviations.length, deviationsLastFetch, loadingDeviations]);
+  }, [deviations.length, deviationsLastFetch, deviationsFetchInProgress]);
   
   const fetchAdditionalTasks = useCallback(async () => {
-    if (!isCacheStale(additionalTasksLastFetch) && additionalTasks.length > 0) {
+    // Similar enhanced fetching logic as fetchProjects
+    if (!shouldRefreshCache(additionalTasksLastFetch, CACHE_STRATEGIES.ADDITIONAL_TASKS) && additionalTasks.length > 0) {
       console.log('Using cached additional tasks data');
       return;
     }
 
+    if (additionalTasksFetchInProgress) {
+      console.log('Already fetching additional tasks, skipping duplicate request');
+      return;
+    }
+    
     try {
-      // If already loading, don't start another fetch
-      if (loadingAdditionalTasks) {
-        console.log('Already fetching additional tasks, skipping duplicate request');
-        return;
-      }
+      setAdditionalTasksFetchInProgress(true);
+      setLoadingAdditionalTasks(additionalTasks.length === 0);
       
-      setLoadingAdditionalTasks(true);
       const { data, error } = await supabase
         .from('additional_tasks')
         .select('*');
@@ -203,23 +252,26 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       console.error('Error fetching additional tasks:', error);
     } finally {
       setLoadingAdditionalTasks(false);
+      setAdditionalTasksFetchInProgress(false);
     }
-  }, [additionalTasks.length, additionalTasksLastFetch, loadingAdditionalTasks]);
+  }, [additionalTasks.length, additionalTasksLastFetch, additionalTasksFetchInProgress]);
   
   const fetchDrawings = useCallback(async () => {
-    if (!isCacheStale(drawingsLastFetch) && drawings.length > 0) {
+    // Similar enhanced fetching logic as fetchProjects
+    if (!shouldRefreshCache(drawingsLastFetch, CACHE_STRATEGIES.DRAWINGS) && drawings.length > 0) {
       console.log('Using cached drawings data');
       return;
     }
 
+    if (drawingsFetchInProgress) {
+      console.log('Already fetching drawings, skipping duplicate request');
+      return;
+    }
+    
     try {
-      // If already loading, don't start another fetch
-      if (loadingDrawings) {
-        console.log('Already fetching drawings, skipping duplicate request');
-        return;
-      }
+      setDrawingsFetchInProgress(true);
+      setLoadingDrawings(drawings.length === 0);
       
-      setLoadingDrawings(true);
       const { data, error } = await supabase
         .from('drawings')
         .select('*, drawing_annotation_markers(*)');
@@ -234,23 +286,26 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       console.error('Error fetching drawings:', error);
     } finally {
       setLoadingDrawings(false);
+      setDrawingsFetchInProgress(false);
     }
-  }, [drawings.length, drawingsLastFetch, loadingDrawings]);
+  }, [drawings.length, drawingsLastFetch, drawingsFetchInProgress]);
   
   const fetchEmployees = useCallback(async () => {
-    if (!isCacheStale(employeesLastFetch) && employees.length > 0) {
+    // Similar enhanced fetching logic as fetchProjects
+    if (!shouldRefreshCache(employeesLastFetch, CACHE_STRATEGIES.EMPLOYEES) && employees.length > 0) {
       console.log('Using cached employees data');
       return;
     }
 
+    if (employeesFetchInProgress) {
+      console.log('Already fetching employees, skipping duplicate request');
+      return;
+    }
+    
     try {
-      // If already loading, don't start another fetch
-      if (loadingEmployees) {
-        console.log('Already fetching employees, skipping duplicate request');
-        return;
-      }
+      setEmployeesFetchInProgress(true);
+      setLoadingEmployees(employees.length === 0);
       
-      setLoadingEmployees(true);
       const { data, error } = await supabase
         .from('employees')
         .select('*, employee_communication_tools(*)');
@@ -265,10 +320,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       console.error('Error fetching employees:', error);
     } finally {
       setLoadingEmployees(false);
+      setEmployeesFetchInProgress(false);
     }
-  }, [employees.length, employeesLastFetch, loadingEmployees]);
+  }, [employees.length, employeesLastFetch, employeesFetchInProgress]);
 
-  // Create and update functions
+  // Create and update functions with optimistic UI updates
   const createProject = async (projectData: any) => {
     try {
       // Generate a unique project ID with P- prefix if not provided
@@ -463,32 +519,81 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Load initial data once on mount
+  // Intelligent initial data loading
   useEffect(() => {
     const loadInitialData = async () => {
-      // Fetch data in sequence to prevent overwhelming the API
-      await fetchProjects();
-      await fetchDeviations();
-      await fetchAdditionalTasks();
-      await fetchDrawings();
-      await fetchEmployees();
+      // Fetch high-priority data immediately
+      const highPriorityFetches = [];
+      
+      if (CACHE_STRATEGIES.PROJECTS.prefetch) {
+        highPriorityFetches.push(fetchProjects());
+      }
+      
+      if (CACHE_STRATEGIES.DEVIATIONS.prefetch) {
+        highPriorityFetches.push(fetchDeviations());
+      }
+      
+      // Load high priority data first
+      await Promise.all(highPriorityFetches);
+      
+      // Then load medium priority data
+      if (CACHE_STRATEGIES.ADDITIONAL_TASKS.prefetch) {
+        await fetchAdditionalTasks();
+      }
+      
+      // Finally load low priority data with delay to prevent UI blocking
+      setTimeout(() => {
+        if (CACHE_STRATEGIES.DRAWINGS.prefetch) {
+          fetchDrawings();
+        }
+        
+        if (CACHE_STRATEGIES.EMPLOYEES.prefetch) {
+          fetchEmployees();
+        }
+      }, 1000);
     };
     
     loadInitialData();
     
-    // Set up a refresh interval with a longer time - refresh all data every 5 minutes
-    const refreshInterval = setInterval(() => {
-      console.log('Scheduled data refresh');
-      fetchProjects();
-      fetchDeviations();
-      fetchAdditionalTasks();
-      fetchDrawings();
-      fetchEmployees();
-    }, CACHE_TIME);
+    // Set up a smart refresh interval with staggered timing
+    const setupRefreshIntervals = () => {
+      // Refresh high priority data more frequently
+      const projectsInterval = setInterval(() => {
+        if (shouldRefreshCache(projectsLastFetch, CACHE_STRATEGIES.PROJECTS)) {
+          console.log('Scheduled projects refresh');
+          fetchProjects();
+        }
+      }, CACHE_STRATEGIES.PROJECTS.staleTime / 2);
+      
+      const deviationsInterval = setInterval(() => {
+        if (shouldRefreshCache(deviationsLastFetch, CACHE_STRATEGIES.DEVIATIONS)) {
+          console.log('Scheduled deviations refresh');
+          fetchDeviations();
+        }
+      }, CACHE_STRATEGIES.DEVIATIONS.staleTime / 2);
+      
+      // Refresh medium and low priority data less frequently
+      const tasksInterval = setInterval(() => {
+        if (shouldRefreshCache(additionalTasksLastFetch, CACHE_STRATEGIES.ADDITIONAL_TASKS)) {
+          console.log('Scheduled tasks refresh');
+          fetchAdditionalTasks();
+        }
+      }, CACHE_STRATEGIES.ADDITIONAL_TASKS.staleTime / 2);
+      
+      return () => {
+        clearInterval(projectsInterval);
+        clearInterval(deviationsInterval);
+        clearInterval(tasksInterval);
+      };
+    };
     
-    return () => clearInterval(refreshInterval);
-  }, []);
+    // Start refresh intervals
+    const clearIntervals = setupRefreshIntervals();
+    return clearIntervals;
+  }, [fetchProjects, fetchDeviations, fetchAdditionalTasks, fetchDrawings, fetchEmployees, 
+      projectsLastFetch, deviationsLastFetch, additionalTasksLastFetch]);
 
+  // Create memoized context value to prevent unnecessary renders
   const value = useMemo(() => ({
     // Projects
     projects,
