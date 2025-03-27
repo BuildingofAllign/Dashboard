@@ -1,62 +1,53 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { KeyboardShortcutsDialog } from "@/components/ui/KeyboardShortcuts";
-import { OfflineIndicator } from "@/components/ui/OfflineIndicator";
-import { DataProvider } from "@/context/DataContext";
-import { useEffect } from "react";
-import Index from "./pages/Index";
-import Projects from "./pages/Projects";
-import ProjectDetails from "./pages/ProjectDetails";
-import Tegninger from "./pages/Tegninger";
-import Dashboard from "./pages/Dashboard";
-import Afvigelser from "./pages/Afvigelser";
-import Tillagsopgaver from "./pages/Tillagsopgaver";
-import Kvalitetssikring from "./pages/Kvalitetssikring";
-import NotFound from "./pages/NotFound";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from './components/ui/ThemeProvider';
+import { Toaster } from './components/ui/toaster';
 
-const queryClient = new QueryClient();
+// Pages
+import Dashboard from './pages/Dashboard';
+import Projects from './pages/Projects';
+import ProjectDetails from './pages/ProjectDetails';
+import Afvigelser from './pages/Afvigelser';
+import Kvalitetssikring from './pages/Kvalitetssikring';
+import Tegninger from './pages/Tegninger';
+import Tillagsopgaver from './pages/Tillagsopgaver';
+import NotFound from './pages/NotFound';
+import Index from './pages/Index';
 
-const App = () => {
-  // Check for dark mode preference on load
-  useEffect(() => {
-    const isDarkMode = localStorage.getItem('theme') === 'dark' || 
-      (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
+// Configure the query client with better error handling and caching
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000,
+      retry: 1,
+    },
+  },
+});
 
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <DataProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <KeyboardShortcutsDialog />
-            <OfflineIndicator />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/projekter" element={<Projects />} />
-              <Route path="/projekter/:id" element={<ProjectDetails />} />
-              <Route path="/tegninger" element={<Tegninger />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/afvigelser" element={<Afvigelser />} />
-              <Route path="/tillagsopgaver" element={<Tillagsopgaver />} />
-              <Route path="/kvalitetssikring" element={<Kvalitetssikring />} />
-              <Route path="/indstillinger" element={<Navigate to="/" replace />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </DataProvider>
+      <ThemeProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/project/:id" element={<ProjectDetails />} />
+            <Route path="/afvigelser" element={<Afvigelser />} />
+            <Route path="/kvalitetssikring" element={<Kvalitetssikring />} />
+            <Route path="/tegninger" element={<Tegninger />} />
+            <Route path="/tillagsopgaver" element={<Tillagsopgaver />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Router>
+        <Toaster />
+      </ThemeProvider>
     </QueryClientProvider>
   );
-};
+}
 
 export default App;

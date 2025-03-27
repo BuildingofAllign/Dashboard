@@ -1,12 +1,6 @@
 
-import { useData } from '@/context/DataContext';
+import { useTheme as useThemeFromProvider } from '@/components/ui/ThemeProvider';
 
 export const useTheme = () => {
-  const { theme, toggleTheme } = useData();
-  
-  return {
-    theme,
-    toggleTheme,
-    isDarkMode: theme === 'dark'
-  };
+  return useThemeFromProvider();
 };
