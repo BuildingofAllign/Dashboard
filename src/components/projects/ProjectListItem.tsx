@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   TableRow, 
@@ -49,6 +48,22 @@ export const ProjectListItem = ({ project, onTogglePin }: ProjectListItemProps) 
     }
   };
 
+  // Map status to capitalized display text
+  const getStatusDisplayText = () => {
+    switch(project.status) {
+      case "aktiv":
+        return "Aktiv";
+      case "problem":
+        return "Problem";
+      case "udfordring":
+        return "Udfordring";
+      case "afsluttet":
+        return "Afsluttet";
+      default:
+        return project.status;
+    }
+  };
+
   return (
     <TableRow className={cn(
       project.isPinned && "border-l-2 border-l-primary"
@@ -63,7 +78,7 @@ export const ProjectListItem = ({ project, onTogglePin }: ProjectListItemProps) 
       
       <TableCell>
         <div className={cn("flex items-center px-2 py-1 rounded-full text-xs", getStatusStyles())}>
-          <span className="font-medium">{project.status}</span>
+          <span className="font-medium">{getStatusDisplayText()}</span>
         </div>
       </TableCell>
       

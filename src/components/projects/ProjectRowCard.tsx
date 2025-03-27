@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,8 +10,7 @@ import {
   ChevronRight, 
   MessageSquare,
   Pin,
-  PlusCircle,
-  Play
+  PlusCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -32,7 +30,7 @@ interface Project {
   name: string;
   type: string;
   category: "bolig" | "erhverv" | "institution" | "renovering";
-  status: "igangværende" | "planlagt" | "afsluttet";
+  status: "aktiv" | "problem" | "udfordring" | "afsluttet";
   progress: number;
   team?: TeamMember[];
   additionalTeamMembers?: number;
@@ -62,6 +60,37 @@ export const ProjectRowCard = ({ project, onTogglePin }: ProjectRowCardProps) =>
     return "bg-red-500";
   };
 
+  // Map status to capitalized display text
+  const getStatusDisplayText = () => {
+    switch(project.status) {
+      case "aktiv":
+        return "Aktiv";
+      case "problem":
+        return "Problem";
+      case "udfordring":
+        return "Udfordring";
+      case "afsluttet":
+        return "Afsluttet";
+      default:
+        return project.status;
+    }
+  };
+
+  const getStatusStyles = () => {
+    switch(project.status) {
+      case "aktiv":
+        return "bg-green-500 text-white";
+      case "problem":
+        return "bg-red-500 text-white";
+      case "udfordring":
+        return "bg-yellow-500 text-white";
+      case "afsluttet":
+        return "bg-gray-400 bg-opacity-70 text-white";
+      default:
+        return "bg-indigo-700 text-white";
+    }
+  };
+
   return (
     <Card 
       className={cn(
@@ -88,9 +117,8 @@ export const ProjectRowCard = ({ project, onTogglePin }: ProjectRowCardProps) =>
           <div className="hidden md:flex items-center space-x-6">
             <div className="flex flex-col items-center">
               <div className="text-xs text-muted-foreground mb-1">Status</div>
-              <div className="flex items-center bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
-                <Play className="h-3 w-3 mr-1 fill-blue-700" />
-                <span className="text-xs font-medium">{project.status}</span>
+              <div className={cn("flex items-center px-3 py-1 rounded-full", getStatusStyles())}>
+                <span className="text-xs font-medium">{getStatusDisplayText()}</span>
               </div>
             </div>
             

@@ -68,6 +68,7 @@ interface ProjectCardProps {
 }
 
 export const ProjectCard = ({ project, onTogglePin }: ProjectCardProps) => {
+  // Get color for progress based on status and progress
   const getProgressColor = () => {
     if (project.status === "afsluttet") return "bg-gray-400";
     if (project.progress >= 75) return "bg-green-500";
@@ -88,6 +89,22 @@ export const ProjectCard = ({ project, onTogglePin }: ProjectCardProps) => {
         return "bg-gray-400 bg-opacity-70 text-white";
       default:
         return "bg-indigo-700 text-white";
+    }
+  };
+
+  // Map status to capitalized display text
+  const getStatusDisplayText = () => {
+    switch(project.status) {
+      case "aktiv":
+        return "Aktiv";
+      case "problem":
+        return "Problem";
+      case "udfordring":
+        return "Udfordring";
+      case "afsluttet":
+        return "Afsluttet";
+      default:
+        return project.status;
     }
   };
 
@@ -143,7 +160,7 @@ export const ProjectCard = ({ project, onTogglePin }: ProjectCardProps) => {
       <CardContent className="pb-2">
         <div className="flex justify-between items-center mb-1">
           <div className={cn("flex items-center px-3 py-1 rounded-full", getStatusStyles())}>
-            <span className="text-sm font-medium">{project.status}</span>
+            <span className="text-sm font-medium">{getStatusDisplayText()}</span>
           </div>
           <div className="text-sm font-medium">{project.progress}%</div>
         </div>
