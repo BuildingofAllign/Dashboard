@@ -11,6 +11,7 @@ export interface AvatarCirclesProps
     src?: string
     status?: "online" | "away" | "busy" | "offline"
     role?: string
+    color?: string
   }[]
   limit?: number
   size?: "xs" | "sm" | "md" | "lg" | "xl"

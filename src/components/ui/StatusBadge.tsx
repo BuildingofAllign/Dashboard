@@ -14,7 +14,7 @@ import {
   HelpCircle
 } from 'lucide-react';
 
-type StatusType = 
+export type StatusType = 
   'success' | 
   'error' | 
   'warning' | 
@@ -28,7 +28,10 @@ type StatusType =
   'reviewing' | 
   'paused' | 
   'running' | 
-  'custom';
+  'custom' |
+  'igangværende' | 
+  'planlagt' | 
+  'afsluttet';
 
 interface StatusConfig {
   bgColor: string;
@@ -55,80 +58,121 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   customTextColor,
   customIcon,
 }) => {
-  const statusConfig: Record<StatusType, StatusConfig> = {
-    success: {
-      bgColor: 'bg-green-100 dark:bg-green-900/30',
-      textColor: 'text-green-800 dark:text-green-400',
-      icon: <CheckCircle className="h-4 w-4" />
-    },
-    error: {
-      bgColor: 'bg-red-100 dark:bg-red-900/30',
-      textColor: 'text-red-800 dark:text-red-400',
-      icon: <XCircle className="h-4 w-4" />
-    },
-    warning: {
-      bgColor: 'bg-yellow-100 dark:bg-yellow-900/30',
-      textColor: 'text-yellow-800 dark:text-yellow-400',
-      icon: <AlertCircle className="h-4 w-4" />
-    },
-    info: {
-      bgColor: 'bg-blue-100 dark:bg-blue-900/30',
-      textColor: 'text-blue-800 dark:text-blue-400',
-      icon: <Eye className="h-4 w-4" />
-    },
-    pending: {
-      bgColor: 'bg-purple-100 dark:bg-purple-900/30',
-      textColor: 'text-purple-800 dark:text-purple-400',
-      icon: <Clock className="h-4 w-4" />
-    },
-    active: {
-      bgColor: 'bg-green-100 dark:bg-green-900/30',
-      textColor: 'text-green-800 dark:text-green-400',
-      icon: <Activity className="h-4 w-4" />
-    },
-    inactive: {
-      bgColor: 'bg-gray-100 dark:bg-gray-800/50',
-      textColor: 'text-gray-800 dark:text-gray-400',
-      icon: <PauseCircle className="h-4 w-4" />
-    },
-    approved: {
-      bgColor: 'bg-green-100 dark:bg-green-900/30',
-      textColor: 'text-green-800 dark:text-green-400',
-      icon: <ThumbsUp className="h-4 w-4" />
-    },
-    rejected: {
-      bgColor: 'bg-red-100 dark:bg-red-900/30',
-      textColor: 'text-red-800 dark:text-red-400',
-      icon: <XCircle className="h-4 w-4" />
-    },
-    waiting: {
-      bgColor: 'bg-yellow-100 dark:bg-yellow-900/30',
-      textColor: 'text-yellow-800 dark:text-yellow-400',
-      icon: <Clock className="h-4 w-4" />
-    },
-    reviewing: {
-      bgColor: 'bg-blue-100 dark:bg-blue-900/30',
-      textColor: 'text-blue-800 dark:text-blue-400',
-      icon: <Eye className="h-4 w-4" />
-    },
-    paused: {
-      bgColor: 'bg-orange-100 dark:bg-orange-900/30',
-      textColor: 'text-orange-800 dark:text-orange-400',
-      icon: <PauseCircle className="h-4 w-4" />
-    },
-    running: {
-      bgColor: 'bg-green-100 dark:bg-green-900/30',
-      textColor: 'text-green-800 dark:text-green-400',
-      icon: <PlayCircle className="h-4 w-4" />
-    },
-    custom: {
-      bgColor: customColor || 'bg-gray-100 dark:bg-gray-800/50',
-      textColor: customTextColor || 'text-gray-800 dark:text-gray-400',
-      icon: customIcon || <HelpCircle className="h-4 w-4" />
+  const getStatusConfig = (statusType: StatusType): StatusConfig => {
+    switch(statusType) {
+      case 'success':
+        return {
+          bgColor: 'bg-green-100 dark:bg-green-900/30',
+          textColor: 'text-green-800 dark:text-green-400',
+          icon: <CheckCircle className="h-4 w-4" />
+        };
+      case 'error':
+        return {
+          bgColor: 'bg-red-100 dark:bg-red-900/30',
+          textColor: 'text-red-800 dark:text-red-400',
+          icon: <XCircle className="h-4 w-4" />
+        };
+      case 'warning':
+        return {
+          bgColor: 'bg-yellow-100 dark:bg-yellow-900/30',
+          textColor: 'text-yellow-800 dark:text-yellow-400',
+          icon: <AlertCircle className="h-4 w-4" />
+        };
+      case 'info':
+        return {
+          bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+          textColor: 'text-blue-800 dark:text-blue-400',
+          icon: <Eye className="h-4 w-4" />
+        };
+      case 'pending':
+        return {
+          bgColor: 'bg-purple-100 dark:bg-purple-900/30',
+          textColor: 'text-purple-800 dark:text-purple-400',
+          icon: <Clock className="h-4 w-4" />
+        };
+      case 'active':
+        return {
+          bgColor: 'bg-green-100 dark:bg-green-900/30',
+          textColor: 'text-green-800 dark:text-green-400',
+          icon: <Activity className="h-4 w-4" />
+        };
+      case 'inactive':
+        return {
+          bgColor: 'bg-gray-100 dark:bg-gray-800/50',
+          textColor: 'text-gray-800 dark:text-gray-400',
+          icon: <PauseCircle className="h-4 w-4" />
+        };
+      case 'approved':
+        return {
+          bgColor: 'bg-green-100 dark:bg-green-900/30',
+          textColor: 'text-green-800 dark:text-green-400',
+          icon: <ThumbsUp className="h-4 w-4" />
+        };
+      case 'rejected':
+        return {
+          bgColor: 'bg-red-100 dark:bg-red-900/30',
+          textColor: 'text-red-800 dark:text-red-400',
+          icon: <XCircle className="h-4 w-4" />
+        };
+      case 'waiting':
+        return {
+          bgColor: 'bg-yellow-100 dark:bg-yellow-900/30',
+          textColor: 'text-yellow-800 dark:text-yellow-400',
+          icon: <Clock className="h-4 w-4" />
+        };
+      case 'reviewing':
+        return {
+          bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+          textColor: 'text-blue-800 dark:text-blue-400',
+          icon: <Eye className="h-4 w-4" />
+        };
+      case 'paused':
+        return {
+          bgColor: 'bg-orange-100 dark:bg-orange-900/30',
+          textColor: 'text-orange-800 dark:text-orange-400',
+          icon: <PauseCircle className="h-4 w-4" />
+        };
+      case 'running':
+        return {
+          bgColor: 'bg-green-100 dark:bg-green-900/30',
+          textColor: 'text-green-800 dark:text-green-400',
+          icon: <PlayCircle className="h-4 w-4" />
+        };
+      case 'igangværende':
+        return {
+          bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+          textColor: 'text-blue-800 dark:text-blue-400',
+          icon: <PlayCircle className="h-4 w-4" />
+        };
+      case 'planlagt':
+        return {
+          bgColor: 'bg-yellow-100 dark:bg-yellow-900/30',
+          textColor: 'text-yellow-800 dark:text-yellow-400',
+          icon: <Clock className="h-4 w-4" />
+        };
+      case 'afsluttet':
+        return {
+          bgColor: 'bg-green-100 dark:bg-green-900/30',
+          textColor: 'text-green-800 dark:text-green-400',
+          icon: <CheckCircle className="h-4 w-4" />
+        };
+      case 'custom':
+        return {
+          bgColor: customColor || 'bg-gray-100 dark:bg-gray-800/50',
+          textColor: customTextColor || 'text-gray-800 dark:text-gray-400',
+          icon: customIcon || <HelpCircle className="h-4 w-4" />
+        };
+      default:
+        return {
+          bgColor: 'bg-gray-100 dark:bg-gray-800/50',
+          textColor: 'text-gray-800 dark:text-gray-400',
+          icon: <HelpCircle className="h-4 w-4" />
+        };
     }
   };
 
-  const { bgColor, textColor, icon } = statusConfig[status];
+  const config = getStatusConfig(status);
+  const { bgColor, textColor, icon } = config;
   
   const sizeClasses = {
     sm: 'text-xs px-2 py-0.5',
@@ -145,7 +189,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       className
     )}>
       {icon}
-      {label}
+      {label || status}
     </span>
   );
 };

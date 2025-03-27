@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   TableRow, 
@@ -15,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { PriorityIndicator } from "@/components/ui/PriorityIndicator";
+import { PriorityIndicator, Priority } from "@/components/ui/PriorityIndicator";
 import { AvatarCircles } from "../ui/avatar-circles";
 
 interface ProjectListItemProps {
@@ -29,7 +30,7 @@ export const ProjectListItem = ({ project, onTogglePin }: ProjectListItemProps) 
       project.isPinned && "border-l-2 border-l-primary"
     )}>
       <TableCell>
-        <PriorityIndicator priority={project.priority} size="sm" />
+        <PriorityIndicator priority={project.priority as Priority} />
       </TableCell>
       
       <TableCell className="font-medium">{project.projectId}</TableCell>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +15,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { PriorityIndicator } from "@/components/ui/PriorityIndicator";
+import { PriorityIndicator, Priority } from "@/components/ui/PriorityIndicator";
 import { AvatarCircles } from "../ui/avatar-circles";
 
 interface TeamMember {
@@ -42,7 +43,7 @@ interface Project {
   endDate?: string;
   messages: { high: number; medium: number; low: number };
   isPinned: boolean;
-  priority: "red" | "yellow" | "green" | "grey";
+  priority: Priority;
 }
 
 interface ProjectRowCardProps {

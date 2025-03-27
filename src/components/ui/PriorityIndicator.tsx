@@ -1,84 +1,64 @@
 
 import React from 'react';
-import { ArrowUp, ArrowDown, Minus } from "lucide-react";
+import { cn } from '@/lib/utils';
 import { 
-  Tooltip, 
-  TooltipContent, 
-  TooltipProvider, 
-  TooltipTrigger 
-} from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
+  AlertCircle, 
+  AlertTriangle, 
+  CheckCircle, 
+  Circle 
+} from 'lucide-react';
 
-export type Priority = 'high' | 'medium' | 'low' | 'none';
+export type Priority = 'red' | 'yellow' | 'green' | 'grey';
 
-interface PriorityIndicatorProps {
+export interface PriorityIndicatorProps {
   priority: Priority;
-  showText?: boolean;
-  showIcon?: boolean;
+  size?: 'xs' | 'sm' | 'md' | 'lg';
+  showLabel?: boolean;
   className?: string;
 }
 
 export const PriorityIndicator: React.FC<PriorityIndicatorProps> = ({
   priority,
-  showText = true,
-  showIcon = true,
-  className = ""
+  size = 'md',
+  showLabel = false,
+  className,
 }) => {
-  const getColor = () => {
-    switch (priority) {
-      case 'high':
-        return 'text-red-600 bg-red-50';
-      case 'medium':
-        return 'text-yellow-600 bg-yellow-50';
-      case 'low':
-        return 'text-green-600 bg-green-50';
-      default:
-        return 'text-gray-600 bg-gray-50';
-    }
+  const sizeClasses = {
+    xs: 'h-3 w-3',
+    sm: 'h-4 w-4',
+    md: 'h-5 w-5',
+    lg: 'h-6 w-6',
   };
   
-  const getText = () => {
-    switch (priority) {
-      case 'high':
-        return 'Høj prioritet';
-      case 'medium':
-        return 'Medium prioritet';
-      case 'low':
-        return 'Lav prioritet';
-      default:
-        return 'Ingen prioritet';
-    }
-  };
-  
-  const getIcon = () => {
-    switch (priority) {
-      case 'high':
-        return <ArrowUp className="h-3 w-3" />;
-      case 'medium':
-        return <ArrowUp className="h-3 w-3" />;
-      case 'low':
-        return <ArrowDown className="h-3 w-3" />;
-      default:
-        return <Minus className="h-3 w-3" />;
+  const priorityConfig = {
+    red: {
+      icon: AlertCircle,
+      color: 'text-red-500',
+      label: 'Høj prioritet'
+    },
+    yellow: {
+      icon: AlertTriangle,
+      color: 'text-yellow-500',
+      label: 'Medium prioritet'
+    },
+    green: {
+      icon: CheckCircle,
+      color: 'text-green-500',
+      label: 'Lav prioritet'
+    },
+    grey: {
+      icon: Circle,
+      color: 'text-gray-400',
+      label: 'Ingen prioritet'
     }
   };
 
+  const { icon: Icon, color, label } = priorityConfig[priority];
+
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Badge 
-            variant="outline" 
-            className={`${getColor()} ${className} inline-flex items-center gap-1`}
-          >
-            {showIcon && getIcon()}
-            {showText && getText()}
-          </Badge>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Projekt prioritet: {getText()}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <div className={cn('flex items-center gap-1.5', className)}>
+      <Icon className={cn(sizeClasses[size], color)} />
+      {showLabel && <span className="text-sm">{label}</span>}
+    </div>
   );
 };

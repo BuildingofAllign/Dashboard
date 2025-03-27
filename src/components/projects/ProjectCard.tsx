@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Card, 
@@ -26,7 +27,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { PriorityIndicator } from "@/components/ui/PriorityIndicator";
+import { PriorityIndicator, Priority } from "@/components/ui/PriorityIndicator";
 import { AvatarCircles } from "../ui/avatar-circles";
 
 export interface Project {
@@ -58,7 +59,7 @@ export interface Project {
     low: number;
   };
   isPinned: boolean;
-  priority: "red" | "yellow" | "green" | "grey";
+  priority: Priority;
 }
 
 interface ProjectCardProps {
