@@ -15,6 +15,7 @@ import Afvigelser from './pages/Afvigelser';
 import Kvalitetssikring from './pages/Kvalitetssikring';
 import Tegninger from './pages/Tegninger';
 import Tillagsopgaver from './pages/Tillagsopgaver';
+import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 import Index from './pages/Index';
 
@@ -45,6 +46,7 @@ function App() {
                 <Route path="/kvalitetssikring" element={<Kvalitetssikring />} />
                 <Route path="/tegninger" element={<Tegninger />} />
                 <Route path="/tillagsopgaver" element={<Tillagsopgaver />} />
+                <Route path="/settings" element={<Settings />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Router>
