@@ -286,6 +286,36 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          description: string
+          icon_type: string
+          id: string
+          read: boolean
+          time: string
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          description: string
+          icon_type: string
+          id?: string
+          read?: boolean
+          time?: string
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          description?: string
+          icon_type?: string
+          id?: string
+          read?: boolean
+          time?: string
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       project_communication_tools: {
         Row: {
           id: string
