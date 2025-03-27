@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
@@ -8,8 +7,8 @@ import { ProjectCard } from "@/components/projects/ProjectCard";
 import { AddProjectCard } from "@/components/projects/AddProjectCard";
 import { Plus, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
-// Enhanced project data
 const initialProjects = [
   {
     id: 1,
@@ -125,14 +124,11 @@ const Projects = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [projects, setProjects] = useState(initialProjects);
 
-  // Sort projects: Pinned first, then by status (active, planned, completed)
   const sortProjects = (projectsToSort) => {
     return [...projectsToSort].sort((a, b) => {
-      // First sort by pinned status
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
       
-      // Then sort by status priority
       const statusPriority = {
         "igangværende": 0,
         "planlagt": 1,
@@ -143,20 +139,16 @@ const Projects = () => {
     });
   };
 
-  // Filter and sort projects
   const filteredAndSortedProjects = sortProjects(
     projects.filter(project => {
-      // Search filter
       const matchesSearch = 
         project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.projectId.toLowerCase().includes(searchQuery.toLowerCase());
       
-      // Type filter
       const matchesType = typeFilter === "all" || 
         project.type.toLowerCase().includes(typeFilter.toLowerCase());
       
-      // Status filter
       const matchesStatus = statusFilter === "all" || 
         project.status.toLowerCase() === statusFilter.toLowerCase();
       
@@ -164,7 +156,6 @@ const Projects = () => {
     })
   );
 
-  // Toggle pin status
   const handleTogglePin = (projectId) => {
     setProjects(projects.map(project => 
       project.id === projectId 
@@ -209,88 +200,84 @@ const Projects = () => {
             </div>
           </div>
 
-          {/* Status groups */}
-          <div className="space-y-8">
-            {/* Pinned projects section (only shown if there are pinned projects) */}
-            {filteredAndSortedProjects.some(p => p.isPinned) && (
-              <div>
-                <h2 className="text-lg font-medium mb-4 flex items-center">
-                  <Star className="h-5 w-5 text-yellow-500 mr-2" />
-                  Fastgjorte projekter
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredAndSortedProjects
-                    .filter(p => p.isPinned)
-                    .map(project => (
-                      <ProjectCard 
-                        key={project.id} 
-                        project={project} 
-                        onTogglePin={handleTogglePin}
-                      />
-                    ))}
+          <TooltipProvider>
+            <div className="space-y-8">
+              {filteredAndSortedProjects.some(p => p.isPinned) && (
+                <div>
+                  <h2 className="text-lg font-medium mb-4 flex items-center">
+                    <Star className="h-5 w-5 text-yellow-500 mr-2" />
+                    Fastgjorte projekter
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredAndSortedProjects
+                      .filter(p => p.isPinned)
+                      .map(project => (
+                        <ProjectCard 
+                          key={project.id} 
+                          project={project} 
+                          onTogglePin={handleTogglePin}
+                        />
+                      ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Active projects */}
-            {filteredAndSortedProjects.some(p => p.status === "igangværende" && !p.isPinned) && (
-              <div>
-                <h2 className="text-lg font-medium mb-4">Igangværende projekter</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredAndSortedProjects
-                    .filter(p => p.status === "igangværende" && !p.isPinned)
-                    .map(project => (
-                      <ProjectCard 
-                        key={project.id} 
-                        project={project} 
-                        onTogglePin={handleTogglePin}
-                      />
-                    ))}
+              {filteredAndSortedProjects.some(p => p.status === "igangværende" && !p.isPinned) && (
+                <div>
+                  <h2 className="text-lg font-medium mb-4">Igangværende projekter</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredAndSortedProjects
+                      .filter(p => p.status === "igangværende" && !p.isPinned)
+                      .map(project => (
+                        <ProjectCard 
+                          key={project.id} 
+                          project={project} 
+                          onTogglePin={handleTogglePin}
+                        />
+                      ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Planned projects */}
-            {filteredAndSortedProjects.some(p => p.status === "planlagt" && !p.isPinned) && (
-              <div>
-                <h2 className="text-lg font-medium mb-4">Planlagte projekter</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredAndSortedProjects
-                    .filter(p => p.status === "planlagt" && !p.isPinned)
-                    .map(project => (
-                      <ProjectCard 
-                        key={project.id} 
-                        project={project} 
-                        onTogglePin={handleTogglePin}
-                      />
-                    ))}
+              {filteredAndSortedProjects.some(p => p.status === "planlagt" && !p.isPinned) && (
+                <div>
+                  <h2 className="text-lg font-medium mb-4">Planlagte projekter</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredAndSortedProjects
+                      .filter(p => p.status === "planlagt" && !p.isPinned)
+                      .map(project => (
+                        <ProjectCard 
+                          key={project.id} 
+                          project={project} 
+                          onTogglePin={handleTogglePin}
+                        />
+                      ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Completed projects */}
-            {filteredAndSortedProjects.some(p => p.status === "afsluttet" && !p.isPinned) && (
-              <div>
-                <h2 className="text-lg font-medium mb-4">Afsluttede projekter</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredAndSortedProjects
-                    .filter(p => p.status === "afsluttet" && !p.isPinned)
-                    .map(project => (
-                      <ProjectCard 
-                        key={project.id} 
-                        project={project} 
-                        onTogglePin={handleTogglePin}
-                      />
-                    ))}
+              {filteredAndSortedProjects.some(p => p.status === "afsluttet" && !p.isPinned) && (
+                <div>
+                  <h2 className="text-lg font-medium mb-4">Afsluttede projekter</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredAndSortedProjects
+                      .filter(p => p.status === "afsluttet" && !p.isPinned)
+                      .map(project => (
+                        <ProjectCard 
+                          key={project.id} 
+                          project={project} 
+                          onTogglePin={handleTogglePin}
+                        />
+                      ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Add new project card */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <AddProjectCard />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <AddProjectCard />
+              </div>
             </div>
-          </div>
+          </TooltipProvider>
         </div>
       </main>
     </div>

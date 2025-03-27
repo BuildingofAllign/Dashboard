@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './components/ui/ThemeProvider';
 import { Toaster } from './components/ui/toaster';
 import { DataProvider } from './context/DataContext';
+import { GlobalTooltipProvider } from './components/ui/TooltipProvider';
+import { TooltipProvider } from './components/ui/tooltip';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -33,20 +35,22 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <DataProvider>
-          <Router>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/projekter" element={<Projects />} />
-              <Route path="/project/:id" element={<ProjectDetails />} />
-              <Route path="/afvigelser" element={<Afvigelser />} />
-              <Route path="/kvalitetssikring" element={<Kvalitetssikring />} />
-              <Route path="/tegninger" element={<Tegninger />} />
-              <Route path="/tillagsopgaver" element={<Tillagsopgaver />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Router>
-          <Toaster />
+          <TooltipProvider>
+            <Router>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/projekter" element={<Projects />} />
+                <Route path="/project/:id" element={<ProjectDetails />} />
+                <Route path="/afvigelser" element={<Afvigelser />} />
+                <Route path="/kvalitetssikring" element={<Kvalitetssikring />} />
+                <Route path="/tegninger" element={<Tegninger />} />
+                <Route path="/tillagsopgaver" element={<Tillagsopgaver />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Router>
+            <Toaster />
+          </TooltipProvider>
         </DataProvider>
       </ThemeProvider>
     </QueryClientProvider>

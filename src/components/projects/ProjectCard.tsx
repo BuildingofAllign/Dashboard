@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -317,42 +316,44 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTogglePin }
 
         {project.messages && (
           <div className="flex items-center justify-center mt-4 space-x-2 border-t pt-3">
-            {project.messages.high > 0 && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="rounded-full bg-red-100 w-6 h-6 flex items-center justify-center text-xs text-red-700 cursor-pointer hover:bg-red-200 transition-colors">
-                    {project.messages.high}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{project.messages.high} højprioritets beskeder</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-            {project.messages.medium > 0 && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="rounded-full bg-yellow-100 w-6 h-6 flex items-center justify-center text-xs text-yellow-700 cursor-pointer hover:bg-yellow-200 transition-colors">
-                    {project.messages.medium}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{project.messages.medium} medium prioritets beskeder</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-            {project.messages.low > 0 && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="rounded-full bg-green-100 w-6 h-6 flex items-center justify-center text-xs text-green-700 cursor-pointer hover:bg-green-200 transition-colors">
-                    {project.messages.low}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{project.messages.low} lavprioritet beskeder</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
+            <TooltipProvider>
+              {project.messages.high > 0 && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="rounded-full bg-red-100 w-6 h-6 flex items-center justify-center text-xs text-red-700 cursor-pointer hover:bg-red-200 transition-colors">
+                      {project.messages.high}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{project.messages.high} højprioritets beskeder</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+              {project.messages.medium > 0 && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="rounded-full bg-yellow-100 w-6 h-6 flex items-center justify-center text-xs text-yellow-700 cursor-pointer hover:bg-yellow-200 transition-colors">
+                      {project.messages.medium}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{project.messages.medium} medium prioritets beskeder</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+              {project.messages.low > 0 && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="rounded-full bg-green-100 w-6 h-6 flex items-center justify-center text-xs text-green-700 cursor-pointer hover:bg-green-200 transition-colors">
+                      {project.messages.low}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{project.messages.low} lavprioritet beskeder</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </TooltipProvider>
           </div>
         )}
       </CardContent>
