@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Dialog,
@@ -30,7 +29,7 @@ export const ProjectFormDialog = ({
     onOpenChange(false);
   };
 
-  // Format the initial data for the form
+  // Format the initial data for the form, ensuring dates are proper Date objects
   const formattedInitialData = initialData ? {
     ...initialData,
     project_id: initialData.project_id || '',
@@ -40,8 +39,17 @@ export const ProjectFormDialog = ({
     status: initialData.status || 'aktiv',
     priority: initialData.priority || 'green',
     description: initialData.description || '',
-    start_date: initialData.start_date || '',
-    end_date: initialData.end_date || '',
+    // Convert string dates to Date objects or keep as undefined
+    start_date: initialData.start_date 
+      ? (initialData.start_date instanceof Date 
+          ? initialData.start_date 
+          : new Date(initialData.start_date)) 
+      : undefined,
+    end_date: initialData.end_date 
+      ? (initialData.end_date instanceof Date 
+          ? initialData.end_date 
+          : new Date(initialData.end_date)) 
+      : undefined,
   } : undefined;
 
   return (
