@@ -15,13 +15,30 @@ export const useProjects = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
 
-  // Sort projects: Pinned first, then by status (active, planned, completed)
+  // Sort projects: First by priority (red, yellow, green, grey), 
+  // then pinned, then by status (active, planned, completed)
   const sortProjects = (projectsToSort: any[]) => {
     return [...projectsToSort].sort((a, b) => {
       // First sort by pinned status
       if (a.is_pinned && !b.is_pinned) return -1;
       if (!a.is_pinned && b.is_pinned) return 1;
+      
+      // Then by priority
+      const priorityOrder = {
+        "red": 0,
+        "yellow": 1,
+        "green": 2,
+        "grey": 3
+      };
+      
+      const aPriority = a.priority || 'green';
+      const bPriority = b.priority || 'green';
+      
+      if (priorityOrder[aPriority] !== priorityOrder[bPriority]) {
+        return priorityOrder[aPriority] - priorityOrder[bPriority];
+      }
       
       // Then sort by status priority
       const statusPriority = {
@@ -54,7 +71,11 @@ export const useProjects = () => {
       const matchesStatus = statusFilter === "all" || 
         project.status?.toLowerCase() === statusFilter.toLowerCase();
       
-      return matchesSearch && matchesType && matchesStatus;
+      // Priority filter
+      const matchesPriority = priorityFilter === "all" || 
+        project.priority === priorityFilter;
+      
+      return matchesSearch && matchesType && matchesStatus && matchesPriority;
     })
   );
 
@@ -100,6 +121,8 @@ export const useProjects = () => {
     setTypeFilter,
     statusFilter,
     setStatusFilter,
+    priorityFilter,
+    setPriorityFilter,
     refreshProjects: fetchProjects,
     handleTogglePin,
     handleCreateProject,

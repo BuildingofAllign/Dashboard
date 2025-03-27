@@ -20,9 +20,11 @@ import {
   Building, 
   Building2, 
   ConstructionIcon, 
-  Factory
+  Factory,
+  AlertCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 type TeamMember = {
   initials: string;
@@ -50,7 +52,7 @@ type Project = {
   duration?: string;
   messages?: { high: number; medium: number; low: number };
   isPinned?: boolean;
-  priority?: "high" | "medium" | "low";
+  priority?: "red" | "yellow" | "green" | "grey";
 };
 
 interface ProjectListItemProps {
@@ -110,6 +112,41 @@ export const ProjectListItem: React.FC<ProjectListItemProps> = ({ project, onTog
     }
   };
 
+  const getPriorityBadge = (priority: string) => {
+    switch (priority) {
+      case "red":
+        return (
+          <div className="flex items-center">
+            <AlertCircle className="h-4 w-4 text-red-600 mr-1" />
+            <span className="text-red-600 font-medium">Kritisk fejl</span>
+          </div>
+        );
+      case "yellow":
+        return (
+          <div className="flex items-center">
+            <AlertCircle className="h-4 w-4 text-yellow-600 mr-1" />
+            <span className="text-yellow-600 font-medium">Midlertidig fejl</span>
+          </div>
+        );
+      case "green":
+        return (
+          <div className="flex items-center">
+            <CheckSquare className="h-4 w-4 text-green-600 mr-1" />
+            <span className="text-green-600 font-medium">OK</span>
+          </div>
+        );
+      case "grey":
+        return (
+          <div className="flex items-center">
+            <CheckSquare className="h-4 w-4 text-gray-600 mr-1" />
+            <span className="text-gray-600 font-medium">Afsluttet</span>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   const goToProjectDetails = () => {
     navigate(`/projekter/${project.id}`);
   };
@@ -127,14 +164,35 @@ export const ProjectListItem: React.FC<ProjectListItemProps> = ({ project, onTog
     }
   };
 
+  // Add priority-based border styling
+  const getPriorityBorderClass = (priority: string) => {
+    switch (priority) {
+      case "red":
+        return "border-l-4 border-l-red-500";
+      case "yellow":
+        return "border-l-4 border-l-yellow-500";
+      case "green":
+        return "border-l-4 border-l-green-500";
+      case "grey":
+        return "border-l-4 border-l-gray-300";
+      default:
+        return "";
+    }
+  };
+
   return (
     <TableRow 
       className={`cursor-pointer hover:bg-gray-50 transition-colors ${
         project.status === 'afsluttet' ? 'opacity-75' : ''
-      } ${project.isPinned ? 'border-l-4 border-l-yellow-400 pl-0' : 'pl-4'}`}
+      } ${project.isPinned ? 'border-l-4 border-l-yellow-400 pl-0' : ''} 
+      ${!project.isPinned ? getPriorityBorderClass(project.priority) : ''}`}
       onClick={goToProjectDetails}
     >
-      <TableCell className="py-3 w-32">
+      <TableCell className="py-3 w-40">
+        {getPriorityBadge(project.priority)}
+      </TableCell>
+      
+      <TableCell className="py-3 w-24">
         <div className="flex items-center">
           <span className="text-sm text-gray-500">{project.projectId}</span>
         </div>
