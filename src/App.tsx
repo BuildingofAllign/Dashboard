@@ -37,7 +37,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/projects" element={<Projects />} />
+              <Route path="/projekter" element={<Projects />} />
               <Route path="/project/:id" element={<ProjectDetails />} />
               <Route path="/afvigelser" element={<Afvigelser />} />
               <Route path="/kvalitetssikring" element={<Kvalitetssikring />} />
