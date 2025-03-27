@@ -1,392 +1,201 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useNavigate } from "react-router-dom";
+import React from 'react';
 import { 
-  Building2, 
-  ChevronRight, 
-  Home, 
-  Pin, 
-  PinOff, 
-  ConstructionIcon, 
+  Card, 
+  CardContent, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { 
   Building, 
-  Factory, 
-  AlertTriangle,
-  ClipboardList,
-  CheckSquare,
-  Calendar,
-  Clock
+  CalendarDays, 
+  Clock, 
+  MessageSquare, 
+  Pin, 
+  ClipboardCheck, 
+  AlertTriangle, 
+  PlusCircle 
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Progress } from "@/components/ui/progress";
+import { 
+  Tooltip, 
+  TooltipContent, 
+  TooltipProvider, 
+  TooltipTrigger 
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { PriorityIndicator } from "@/components/ui/PriorityIndicator";
+import { AvatarCircles } from "../ui/avatar-circles";
 
-type TeamMember = {
-  initials: string;
-  name: string;
-  color: string;
-  role?: string;
-};
-
-type Project = {
+export interface Project {
   id: number;
   projectId: string;
   name: string;
   type: string;
-  category: "bolig" | "erhverv" | "institution" | "renovering" | "andet";
+  category: "bolig" | "erhverv" | "institution" | "renovering";
   status: "igangværende" | "planlagt" | "afsluttet";
   progress: number;
-  team?: TeamMember[];
+  team?: {
+    initials: string;
+    name: string;
+    color: string;
+    role: string;
+  }[];
   additionalTeamMembers?: number;
-  deviations?: number;
-  additions?: number;
-  qualityAssurance?: number;
-  communicationTools?: string[];
-  startDate?: string;
-  endDate?: string;
+  deviations: number;
+  additions: number;
+  qualityAssurance: number;
+  communicationTools: string[];
+  startDate: string;
+  endDate: string;
   completionDate?: string;
   duration?: string;
-  messages?: { high: number; medium: number; low: number };
-  isPinned?: boolean;
-  priority?: "high" | "medium" | "low";
-};
+  messages: {
+    high: number;
+    medium: number;
+    low: number;
+  };
+  isPinned: boolean;
+  priority: "red" | "yellow" | "green" | "grey";
+}
 
 interface ProjectCardProps {
   project: Project;
-  onTogglePin?: (projectId: number) => void;
+  onTogglePin: (projectId: number) => void;
 }
 
-export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTogglePin }) => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case "igangværende":
-        return "bg-green-100 text-green-800";
-      case "planlagt":
-        return "bg-yellow-100 text-yellow-800";
-      case "afsluttet":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-blue-100 text-blue-800";
-    }
-  };
-
-  const getProgressColor = (progress: number) => {
-    if (progress >= 75) return "bg-green-600";
-    if (progress >= 50) return "bg-blue-600";
-    if (progress >= 25) return "bg-yellow-500";
-    return "bg-red-500";
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "igangværende":
-        return "Igangværende";
-      case "planlagt":
-        return "Planlagt";
-      case "afsluttet":
-        return "Afsluttet";
-      default:
-        return status;
-    }
-  };
-
-  const getPriorityBadge = (priority?: "high" | "medium" | "low") => {
-    if (!priority) return null;
-    
-    switch (priority) {
-      case "high":
-        return <Badge className="bg-red-100 text-red-800">Høj prioritet</Badge>;
-      case "medium":
-        return <Badge className="bg-yellow-100 text-yellow-800">Medium prioritet</Badge>;
-      case "low":
-        return <Badge className="bg-green-100 text-green-800">Lav prioritet</Badge>;
-      default:
-        return null;
-    }
-  };
-
-  const goToProjectDetails = () => {
-    navigate(`/projekter/${project.id}`);
-  };
-
-  const goToDeviations = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigate(`/afvigelser?project=${project.id}`);
-    toast({
-      title: "Navigerer til afvigelser",
-      description: `Viser afvigelser for ${project.name}`,
-    });
-  };
-
-  const goToAdditions = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigate(`/tillagsopgaver?project=${project.id}`);
-    toast({
-      title: "Navigerer til tillægsopgaver",
-      description: `Viser tillægsopgaver for ${project.name}`,
-    });
-  };
-
-  const goToQualityAssurance = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigate(`/kvalitetssikring?project=${project.id}`);
-    toast({
-      title: "Navigerer til kvalitetssikring",
-      description: `Viser kvalitetssikring for ${project.name}`,
-    });
-  };
-
-  const renderCategoryIcon = (category: string) => {
-    switch (category) {
-      case "bolig":
-        return <Home className="h-4 w-4 mr-1" />;
-      case "erhverv":
-        return <Building className="h-4 w-4 mr-1" />;
-      case "institution":
-        return <Building2 className="h-4 w-4 mr-1" />;
-      case "renovering":
-        return <ConstructionIcon className="h-4 w-4 mr-1" />;
-      default:
-        return <Factory className="h-4 w-4 mr-1" />;
-    }
-  };
-
-  const handlePinToggle = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onTogglePin) {
-      onTogglePin(project.id);
-      toast({
-        title: project.isPinned ? "Projekt fjernet fra favoritter" : "Projekt tilføjet til favoritter",
-        description: project.isPinned 
-          ? `${project.name} er ikke længere fastgjort` 
-          : `${project.name} er nu fastgjort øverst`,
-      });
-    }
-  };
-
+export const ProjectCard = ({ project, onTogglePin }: ProjectCardProps) => {
   return (
     <Card 
-      className={`overflow-hidden transition-all duration-200 hover:shadow-md cursor-pointer ${
-        project.status === 'afsluttet' ? 'opacity-75' : ''
-      } ${project.isPinned ? 'border-2 border-blue-600' : ''} ${
-        project.priority === 'high' ? 'ring-2 ring-red-400' : ''
-      }`}
-      onClick={goToProjectDetails}
+      className={cn(
+        "transition-all duration-200 hover:shadow-md relative overflow-hidden",
+        project.isPinned && "border-primary shadow-sm",
+      )}
     >
-      <CardHeader className="p-5 pb-3 relative">
-        <div className="absolute top-3 right-3 flex space-x-2">
-          {onTogglePin && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button 
-                    onClick={handlePinToggle}
-                    className="text-gray-400 hover:text-blue-600 transition-colors"
-                  >
-                    {project.isPinned ? 
-                      <Pin className="h-5 w-5 fill-blue-600 text-blue-600" /> : 
-                      <PinOff className="h-5 w-5" />
-                    }
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="left">
-                  {project.isPinned ? 'Fjern fra favoritter' : 'Tilføj til favoritter'}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-          <ChevronRight className="h-5 w-5 text-gray-400" />
+      {project.isPinned && (
+        <div className="absolute top-0 right-0">
+          <div className="w-12 h-12 bg-primary transform rotate-45 translate-x-6 -translate-y-6" />
+          <Pin 
+            className="absolute top-1 right-1 h-4 w-4 text-white cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              onTogglePin(project.id);
+            }}
+          />
         </div>
-        <div className="flex flex-col">
-          <div className="flex items-center mb-1">
-            <span className="text-xs text-gray-500 mr-2">{project.projectId}</span>
-            <Badge 
-              className={`${getStatusBadgeClass(project.status)} text-xs`}
-            >
-              {getStatusText(project.status)}
-            </Badge>
-            {project.priority && (
-              <div className="ml-2">
-                {getPriorityBadge(project.priority)}
-              </div>
-            )}
+      )}
+      
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          <div>
+            <div className="text-sm text-muted-foreground mb-1">
+              {project.projectId}
+            </div>
+            <CardTitle className="text-lg font-bold">
+              {project.name}
+            </CardTitle>
           </div>
-          <h3 className="text-lg font-semibold text-gray-800">{project.name}</h3>
-          <div className="flex items-center mt-1">
-            {renderCategoryIcon(project.category)}
-            <p className="text-sm text-gray-600">{project.type}</p>
+          {!project.isPinned && (
+            <Pin 
+              onClick={(e) => {
+                e.stopPropagation();
+                onTogglePin(project.id);
+              }}
+              className="h-4 w-4 text-muted-foreground hover:text-primary cursor-pointer"
+            />
+          )}
+        </div>
+        
+        <div className="flex items-center space-x-1 mt-1">
+          <PriorityIndicator priority={project.priority} size="sm" />
+          <div className="text-sm text-muted-foreground">
+            {project.type}
           </div>
         </div>
       </CardHeader>
-
-      <CardContent className="p-5 pt-2">
-        <div className="flex items-center mb-4">
-          <TooltipProvider>
-            {project.team?.map((member, index) => (
-              <Tooltip key={index}>
-                <TooltipTrigger asChild>
-                  <div className={`w-8 h-8 rounded-full ${member.color} flex items-center justify-center text-white text-xs -ml-1 first:ml-0 border-2 border-white cursor-pointer`}>
-                    {member.initials}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <div className="space-y-1">
-                    <p className="font-semibold">{member.name}</p>
-                    {member.role && <p className="text-xs text-gray-500">{member.role}</p>}
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            ))}
-            {project.additionalTeamMembers && project.additionalTeamMembers > 0 && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-xs -ml-1 border-2 border-white cursor-pointer">
-                    +{project.additionalTeamMembers}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{project.additionalTeamMembers} flere medarbejdere</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </TooltipProvider>
-        </div>
-
+      
+      <CardContent className="pb-2">
         <div className="mb-4">
-          <div className="flex justify-between mb-1">
-            <span className="text-xs font-medium text-gray-700">Fremgang</span>
-            <span className="text-xs font-medium text-gray-700">{project.progress}%</span>
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-sm font-medium">Fremgang</span>
+            <span className="text-sm">{project.progress}%</span>
           </div>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="w-full cursor-pointer">
-                  <Progress 
-                    value={project.progress} 
-                    className={`h-2 ${getProgressColor(project.progress)}`}
-                  />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <div className="space-y-1">
-                  <p className="font-semibold">Projekt fremgang: {project.progress}%</p>
-                  <p className="text-xs">Klik for at se detaljeret fremdrift</p>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Progress value={project.progress} className="h-2" />
         </div>
-
-        <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
-          <button
-            onClick={goToDeviations}
-            className="flex flex-col items-center p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors group"
-          >
-            <span className="font-medium text-gray-800 group-hover:text-indigo-700 flex items-center">
-              <AlertTriangle className="h-3 w-3 mr-1 text-red-500 group-hover:text-red-600" />
-              {project.deviations || 0}
-            </span>
-            <span className="group-hover:text-indigo-700">Afvigelser</span>
-          </button>
-          <button
-            onClick={goToAdditions}
-            className="flex flex-col items-center p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors group"
-          >
-            <span className="font-medium text-gray-800 group-hover:text-indigo-700 flex items-center">
-              <ClipboardList className="h-3 w-3 mr-1 text-blue-500 group-hover:text-blue-600" />
-              {project.additions || 0}
-            </span>
-            <span className="group-hover:text-indigo-700">Tillæg</span>
-          </button>
-          <button
-            onClick={goToQualityAssurance}
-            className="flex flex-col items-center p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors group"
-          >
-            <span className="font-medium text-gray-800 group-hover:text-indigo-700 flex items-center">
-              <CheckSquare className="h-3 w-3 mr-1 text-green-500 group-hover:text-green-600" />
-              {project.qualityAssurance || 0}%
-            </span>
-            <span className="group-hover:text-indigo-700">KS</span>
-          </button>
-        </div>
-
-        {project.messages && (
-          <div className="flex items-center justify-center mt-4 space-x-2 border-t pt-3">
-            <TooltipProvider>
-              {project.messages.high > 0 && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="rounded-full bg-red-100 w-6 h-6 flex items-center justify-center text-xs text-red-700 cursor-pointer hover:bg-red-200 transition-colors">
-                      {project.messages.high}
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{project.messages.high} højprioritets beskeder</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-              {project.messages.medium > 0 && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="rounded-full bg-yellow-100 w-6 h-6 flex items-center justify-center text-xs text-yellow-700 cursor-pointer hover:bg-yellow-200 transition-colors">
-                      {project.messages.medium}
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{project.messages.medium} medium prioritets beskeder</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-              {project.messages.low > 0 && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="rounded-full bg-green-100 w-6 h-6 flex items-center justify-center text-xs text-green-700 cursor-pointer hover:bg-green-200 transition-colors">
-                      {project.messages.low}
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{project.messages.low} lavprioritet beskeder</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </TooltipProvider>
+        
+        <div className="grid grid-cols-1 gap-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Building className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">Status:</span>
+            </div>
+            <StatusBadge status={project.status} />
           </div>
-        )}
-      </CardContent>
-
-      <CardFooter className="px-5 py-3 bg-gray-50 border-t flex justify-between">
-        <div className="text-xs text-gray-500 flex items-center">
-          {(project.startDate || project.endDate || project.completionDate) && (
-            <Calendar className="h-3 w-3 mr-1" />
+          
+          {project.startDate && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">Start:</span>
+              </div>
+              <span className="text-sm">{project.startDate}</span>
+            </div>
           )}
-          {project.startDate && <span>Start: {project.startDate}</span>}
-          {project.startDate && project.endDate && <span className="mx-1">•</span>}
-          {project.endDate && <span>Slut: {project.endDate}</span>}
-          {project.completionDate && (
-            <>
-              {(project.startDate || project.endDate) && <span className="mx-1">•</span>}
-              <span>Afsluttet: {project.completionDate}</span>
-            </>
+          
+          {project.endDate && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">Slut:</span>
+              </div>
+              <span className="text-sm">{project.endDate}</span>
+            </div>
           )}
-          {project.duration && (
-            <div className="ml-2 flex items-center text-xs text-gray-500">
-              <Clock className="h-3 w-3 mr-1" />
-              <span>{project.duration}</span>
+          
+          {project.team && (
+            <div>
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="text-sm">Team:</span>
+              </div>
+              <AvatarCircles 
+                items={project.team} 
+                limit={3} 
+                size="sm"
+                className="ml-1"
+              />
             </div>
           )}
         </div>
-        <Button
-          variant="ghost" 
-          size="sm" 
-          className="text-xs text-gray-700 hover:bg-gray-200 hover:text-indigo-700"
-          onClick={goToProjectDetails}
-        >
-          Se detaljer
-        </Button>
+      </CardContent>
+      
+      <CardFooter className="text-xs text-muted-foreground">
+        <div className="w-full">
+          <div className="flex justify-between items-center space-x-2">
+            <Badge variant="outline" className="flex items-center gap-1">
+              <AlertTriangle className="h-3 w-3" />
+              {project.deviations || 0}
+            </Badge>
+            
+            <Badge variant="outline" className="flex items-center gap-1">
+              <PlusCircle className="h-3 w-3" />
+              {project.additions || 0}
+            </Badge>
+            
+            <Badge variant="outline" className="flex items-center gap-1">
+              <ClipboardCheck className="h-3 w-3" />
+              {project.qualityAssurance || 0}%
+            </Badge>
+            
+            {project.messages && (
+              <Badge variant="outline" className="flex items-center gap-1">
+                <MessageSquare className="h-3 w-3" />
+                {project.messages.high + project.messages.medium + project.messages.low}
+              </Badge>
+            )}
+          </div>
+        </div>
       </CardFooter>
     </Card>
   );
