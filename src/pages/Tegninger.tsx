@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -10,6 +11,7 @@ import { DrawingCard } from "@/components/drawings/DrawingCard";
 import { AddDrawingCard } from "@/components/drawings/AddDrawingCard";
 import { useData } from "@/context/DataContext";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { ComboboxOption } from "@/components/ui/Combobox";
 
 const Tegninger: React.FC = () => {
   const { drawings, loadingDrawings, fetchDrawings, projects } = useData();
@@ -39,8 +41,24 @@ const Tegninger: React.FC = () => {
   // Get unique projects for filter dropdown
   const uniqueProjects = [...new Set(projects.map(p => ({ id: p.id, name: p.name })))];
 
+  // Convert to Combobox options
+  const projectOptions: ComboboxOption[] = [
+    { value: "all", label: "Alle projekter" },
+    ...uniqueProjects.map(project => ({
+      value: project.id,
+      label: `Projekt ${project.name}`
+    }))
+  ];
+
   // Common drawing types for filter dropdown
-  const drawingTypes = ["Plantegning", "Snittegning", "Detailtegning", "El", "VVS"];
+  const drawingTypeOptions: ComboboxOption[] = [
+    { value: "all", label: "Alle typer" },
+    { value: "plantegning", label: "Plantegning" },
+    { value: "snittegning", label: "Snittegning" },
+    { value: "detailtegning", label: "Detailtegning" },
+    { value: "el", label: "El" },
+    { value: "vvs", label: "VVS" }
+  ];
 
   return (
     <SidebarProvider>
@@ -58,23 +76,17 @@ const Tegninger: React.FC = () => {
               />
               <div className="flex gap-2 mt-4 md:mt-0">
                 <FilterSelect 
-                  value={projectFilter} 
-                  onChange={(e) => setProjectFilter(e.target.value)}
-                >
-                  <option value="all">Alle projekter</option>
-                  {uniqueProjects.map((project) => (
-                    <option key={project.id} value={project.id}>Projekt {project.name}</option>
-                  ))}
-                </FilterSelect>
+                  options={projectOptions}
+                  value={projectFilter}
+                  onValueChange={setProjectFilter}
+                  className="min-w-[180px]"
+                />
                 <FilterSelect 
-                  value={typeFilter} 
-                  onChange={(e) => setTypeFilter(e.target.value)}
-                >
-                  <option value="all">Alle typer</option>
-                  {drawingTypes.map((type, index) => (
-                    <option key={index} value={type.toLowerCase()}>{type}</option>
-                  ))}
-                </FilterSelect>
+                  options={drawingTypeOptions}
+                  value={typeFilter}
+                  onValueChange={setTypeFilter}
+                  className="min-w-[150px]"
+                />
                 <Button className="bg-indigo-600 hover:bg-indigo-700">
                   <Upload className="h-5 w-5 mr-1" />
                   Upload tegning

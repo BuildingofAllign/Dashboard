@@ -25,6 +25,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { ProjectProgressIndicator } from "@/components/ui/ProjectProgressIndicator";
 import { toast } from "sonner";
+import { ComboboxOption } from "@/components/ui/Combobox";
 
 const Projects = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -193,6 +194,29 @@ const Projects = () => {
     );
   };
 
+  const projectTypeOptions: ComboboxOption[] = [
+    { value: "all", label: "Alle typer" },
+    { value: "nybyggeri", label: "Nybyggeri" },
+    { value: "renovering", label: "Renovering" },
+    { value: "tilbygning", label: "Tilbygning" }
+  ];
+
+  const statusOptions: ComboboxOption[] = [
+    { value: "all", label: "Alle status" },
+    { value: "aktiv", label: "Aktiv" },
+    { value: "problem", label: "Problem" },
+    { value: "udfordring", label: "Udfordring" },
+    { value: "afsluttet", label: "Afsluttet" }
+  ];
+
+  const priorityOptions: ComboboxOption[] = [
+    { value: "all", label: "Alle prioriteter" },
+    { value: "red", label: "Kritiske fejl" },
+    { value: "yellow", label: "Midlertidige fejl" },
+    { value: "green", label: "Fungerer som planlagt" },
+    { value: "grey", label: "Afsluttede" }
+  ];
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
@@ -258,39 +282,28 @@ const Projects = () => {
               </div>
               <div className="flex flex-wrap space-x-2 mt-4 md:mt-0 items-center">
                 <FilterSelect 
-                  onChange={(e) => setTypeFilter(e.target.value)}
+                  options={projectTypeOptions}
                   value={typeFilter}
+                  onValueChange={setTypeFilter}
                   className="min-w-[150px]"
-                >
-                  <option value="all">Alle typer</option>
-                  <option value="nybyggeri">Nybyggeri</option>
-                  <option value="renovering">Renovering</option>
-                  <option value="tilbygning">Tilbygning</option>
-                </FilterSelect>
+                  placeholder="Alle typer"
+                />
                 
                 <FilterSelect
-                  onChange={(e) => setStatusFilter(e.target.value)}
+                  options={statusOptions}
                   value={statusFilter}
+                  onValueChange={setStatusFilter}
                   className="min-w-[150px]"
-                >
-                  <option value="all">Alle status</option>
-                  <option value="aktiv">Aktiv</option>
-                  <option value="problem">Problem</option>
-                  <option value="udfordring">Udfordring</option>
-                  <option value="afsluttet">Afsluttet</option>
-                </FilterSelect>
+                  placeholder="Alle status"
+                />
                 
                 <FilterSelect
-                  onChange={(e) => setPriorityFilter(e.target.value)}
+                  options={priorityOptions}
                   value={priorityFilter}
+                  onValueChange={setPriorityFilter}
                   className="min-w-[180px]"
-                >
-                  <option value="all">Alle prioriteter</option>
-                  <option value="red">Kritiske fejl</option>
-                  <option value="yellow">Midlertidige fejl</option>
-                  <option value="green">Fungerer som planlagt</option>
-                  <option value="grey">Afsluttede</option>
-                </FilterSelect>
+                  placeholder="Alle prioriteter"
+                />
                 
                 <ViewToggle 
                   currentView={viewMode}
