@@ -10,7 +10,8 @@ import {
   ChevronRight, 
   MessageSquare, 
   Pin, 
-  PlusCircle 
+  PlusCircle,
+  Play
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AnimatedCircularProgress } from "@/components/ui/animated-circular-progress";
@@ -47,7 +48,10 @@ export const ProjectListItem = ({ project, onTogglePin }: ProjectListItemProps) 
       <TableCell>{project.name}</TableCell>
       
       <TableCell>
-        <StatusBadge status={project.status} />
+        <div className="flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">
+          <Play className="h-3 w-3 mr-1 fill-blue-700" />
+          <span className="font-medium">{project.status}</span>
+        </div>
       </TableCell>
       
       <TableCell className="max-w-[200px] truncate">
@@ -68,11 +72,7 @@ export const ProjectListItem = ({ project, onTogglePin }: ProjectListItemProps) 
       
       <TableCell>
         <div className="flex items-center justify-center">
-          <AnimatedCircularProgress 
-            value={project.progress} 
-            size="xs" 
-            color={getProgressColor()} 
-          />
+          <div className="text-base font-bold">{project.progress}%</div>
         </div>
       </TableCell>
       

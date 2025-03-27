@@ -10,7 +10,8 @@ import {
   ChevronRight, 
   MessageSquare,
   Pin,
-  PlusCircle
+  PlusCircle,
+  Play
 } from "lucide-react";
 import { AnimatedCircularProgress } from "@/components/ui/animated-circular-progress";
 import { cn } from "@/lib/utils";
@@ -87,16 +88,15 @@ export const ProjectRowCard = ({ project, onTogglePin }: ProjectRowCardProps) =>
           <div className="hidden md:flex items-center space-x-6">
             <div className="flex flex-col items-center">
               <div className="text-xs text-muted-foreground mb-1">Status</div>
-              <StatusBadge status={project.status} />
+              <div className="flex items-center bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                <Play className="h-3 w-3 mr-1 fill-blue-700" />
+                <span className="text-xs font-medium">{project.status}</span>
+              </div>
             </div>
             
             <div className="flex flex-col items-center">
               <div className="text-xs text-muted-foreground mb-1">Fremgang</div>
-              <AnimatedCircularProgress 
-                value={project.progress} 
-                size="xs"
-                color={getProgressColor()}
-              />
+              <div className="text-base font-bold">{project.progress}%</div>
             </div>
             
             {project.team && (

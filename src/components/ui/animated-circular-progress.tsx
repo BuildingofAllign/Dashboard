@@ -14,6 +14,8 @@ interface AnimatedCircularProgressProps {
   label?: string;
   valuePrefix?: string;
   valueSuffix?: string;
+  valueClassName?: string;
+  valuePosition?: "inside" | "outside";
 }
 
 export function AnimatedCircularProgress({
@@ -29,6 +31,8 @@ export function AnimatedCircularProgress({
   label,
   valuePrefix = "",
   valueSuffix = "%",
+  valueClassName,
+  valuePosition = "inside",
 }: AnimatedCircularProgressProps) {
   const sizeMap = {
     xs: { width: "2rem", height: "2rem", textSize: "text-xs", strokeWidth: strokeWidth || 6 },
@@ -82,8 +86,17 @@ export function AnimatedCircularProgress({
         />
       </svg>
       
-      {showValue && (
+      {showValue && valuePosition === "inside" && (
         <div className="absolute inset-0 flex items-center justify-center flex-col">
+          <span className={cn("font-medium", textSize, valueClassName)}>
+            {valuePrefix}{Math.round(normalizedValue)}{valueSuffix}
+          </span>
+          {label && <span className="text-xs text-muted-foreground">{label}</span>}
+        </div>
+      )}
+      
+      {showValue && valuePosition === "outside" && (
+        <div className={cn("mt-1 flex flex-col items-center", valueClassName)}>
           <span className={cn("font-medium", textSize)}>
             {valuePrefix}{Math.round(normalizedValue)}{valueSuffix}
           </span>
