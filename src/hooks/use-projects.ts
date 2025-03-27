@@ -84,7 +84,8 @@ export const useProjects = () => {
       
       if (error) throw error;
       
-      await fetchProjects(true); // Force refresh after update
+      // Fixed: Removed the argument as fetchProjects expects no arguments
+      await fetchProjects();
       toast.success(isPinned ? 'Projekt afpinnet' : 'Projekt pinnet');
     } catch (error) {
       console.error('Error toggling pin:', error);
@@ -118,8 +119,8 @@ export const useProjects = () => {
       
       if (error) throw error;
       
-      // Refresh projects to get the updated list
-      await fetchProjects(true); // Force refresh
+      // Fixed: Removed the argument as fetchProjects expects no arguments
+      await fetchProjects();
       
       return data;
     } catch (error) {
@@ -155,8 +156,8 @@ export const useProjects = () => {
       
       if (error) throw error;
       
-      // Refresh projects to get the updated list
-      await fetchProjects(true); // Force refresh
+      // Fixed: Removed the argument as fetchProjects expects no arguments
+      await fetchProjects();
       
       return data;
     } catch (error) {
@@ -165,6 +166,14 @@ export const useProjects = () => {
       throw error;
     }
   };
+
+  // Fetch projects only once on component mount
+  useEffect(() => {
+    // Only fetch if we don't already have data
+    if (projects.length === 0 && !loadingProjects) {
+      fetchProjects();
+    }
+  }, [fetchProjects, projects.length, loadingProjects]);
 
   return {
     projects,

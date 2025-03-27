@@ -47,6 +47,19 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 // Cache time in milliseconds (5 minutes)
 const CACHE_TIME = 5 * 60 * 1000;
 
+// Add debounce function to limit API calls
+const debounce = (func, wait) => {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};
+
 export const DataProvider = ({ children }: { children: ReactNode }) => {
   // State for each data type
   const [projects, setProjects] = useState<any[]>([]);
@@ -99,116 +112,161 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Fetch functions with caching
-  const fetchProjects = useCallback(async (forceRefresh = false) => {
-    // Skip if data is fresh and not forced
-    if (!forceRefresh && !isCacheStale(projectsLastFetch) && projects.length > 0) {
+  const fetchProjects = useCallback(async () => {
+    // Skip if data is fresh and not loading
+    if (!isCacheStale(projectsLastFetch) && projects.length > 0) {
+      console.log('Using cached projects data');
       return;
     }
 
     try {
+      // If already loading, don't start another fetch
+      if (loadingProjects) {
+        console.log('Already fetching projects, skipping duplicate request');
+        return;
+      }
+
       setLoadingProjects(true);
       const { data, error } = await supabase
         .from('projects')
         .select('*, project_team_members(*), project_stats(*), project_communication_tools(*), project_messages(*)');
       
       if (error) throw error;
+      
       setProjects(data || []);
       setProjectsLastFetch(Date.now());
+      console.log('Projects data refreshed');
     } catch (error: any) {
       toast.error('Error loading projects', { description: error.message });
       console.error('Error fetching projects:', error);
     } finally {
       setLoadingProjects(false);
     }
-  }, [projects.length, projectsLastFetch]);
+  }, [projects.length, projectsLastFetch, loadingProjects]);
   
-  const fetchDeviations = useCallback(async (forceRefresh = false) => {
-    if (!forceRefresh && !isCacheStale(deviationsLastFetch) && deviations.length > 0) {
+  const fetchDeviations = useCallback(async () => {
+    if (!isCacheStale(deviationsLastFetch) && deviations.length > 0) {
+      console.log('Using cached deviations data');
       return;
     }
 
     try {
+      // If already loading, don't start another fetch
+      if (loadingDeviations) {
+        console.log('Already fetching deviations, skipping duplicate request');
+        return;
+      }
+      
       setLoadingDeviations(true);
       const { data, error } = await supabase
         .from('deviations')
         .select('*, deviation_comments(*)');
       
       if (error) throw error;
+      
       setDeviations(data || []);
       setDeviationsLastFetch(Date.now());
+      console.log('Deviations data refreshed');
     } catch (error: any) {
       toast.error('Error loading deviations', { description: error.message });
       console.error('Error fetching deviations:', error);
     } finally {
       setLoadingDeviations(false);
     }
-  }, [deviations.length, deviationsLastFetch]);
+  }, [deviations.length, deviationsLastFetch, loadingDeviations]);
   
-  const fetchAdditionalTasks = useCallback(async (forceRefresh = false) => {
-    if (!forceRefresh && !isCacheStale(additionalTasksLastFetch) && additionalTasks.length > 0) {
+  const fetchAdditionalTasks = useCallback(async () => {
+    if (!isCacheStale(additionalTasksLastFetch) && additionalTasks.length > 0) {
+      console.log('Using cached additional tasks data');
       return;
     }
 
     try {
+      // If already loading, don't start another fetch
+      if (loadingAdditionalTasks) {
+        console.log('Already fetching additional tasks, skipping duplicate request');
+        return;
+      }
+      
       setLoadingAdditionalTasks(true);
       const { data, error } = await supabase
         .from('additional_tasks')
         .select('*');
       
       if (error) throw error;
+      
       setAdditionalTasks(data || []);
       setAdditionalTasksLastFetch(Date.now());
+      console.log('Additional tasks data refreshed');
     } catch (error: any) {
       toast.error('Error loading additional tasks', { description: error.message });
       console.error('Error fetching additional tasks:', error);
     } finally {
       setLoadingAdditionalTasks(false);
     }
-  }, [additionalTasks.length, additionalTasksLastFetch]);
+  }, [additionalTasks.length, additionalTasksLastFetch, loadingAdditionalTasks]);
   
-  const fetchDrawings = useCallback(async (forceRefresh = false) => {
-    if (!forceRefresh && !isCacheStale(drawingsLastFetch) && drawings.length > 0) {
+  const fetchDrawings = useCallback(async () => {
+    if (!isCacheStale(drawingsLastFetch) && drawings.length > 0) {
+      console.log('Using cached drawings data');
       return;
     }
 
     try {
+      // If already loading, don't start another fetch
+      if (loadingDrawings) {
+        console.log('Already fetching drawings, skipping duplicate request');
+        return;
+      }
+      
       setLoadingDrawings(true);
       const { data, error } = await supabase
         .from('drawings')
         .select('*, drawing_annotation_markers(*)');
       
       if (error) throw error;
+      
       setDrawings(data || []);
       setDrawingsLastFetch(Date.now());
+      console.log('Drawings data refreshed');
     } catch (error: any) {
       toast.error('Error loading drawings', { description: error.message });
       console.error('Error fetching drawings:', error);
     } finally {
       setLoadingDrawings(false);
     }
-  }, [drawings.length, drawingsLastFetch]);
+  }, [drawings.length, drawingsLastFetch, loadingDrawings]);
   
-  const fetchEmployees = useCallback(async (forceRefresh = false) => {
-    if (!forceRefresh && !isCacheStale(employeesLastFetch) && employees.length > 0) {
+  const fetchEmployees = useCallback(async () => {
+    if (!isCacheStale(employeesLastFetch) && employees.length > 0) {
+      console.log('Using cached employees data');
       return;
     }
 
     try {
+      // If already loading, don't start another fetch
+      if (loadingEmployees) {
+        console.log('Already fetching employees, skipping duplicate request');
+        return;
+      }
+      
       setLoadingEmployees(true);
       const { data, error } = await supabase
         .from('employees')
         .select('*, employee_communication_tools(*)');
       
       if (error) throw error;
+      
       setEmployees(data || []);
       setEmployeesLastFetch(Date.now());
+      console.log('Employees data refreshed');
     } catch (error: any) {
       toast.error('Error loading employees', { description: error.message });
       console.error('Error fetching employees:', error);
     } finally {
       setLoadingEmployees(false);
     }
-  }, [employees.length, employeesLastFetch]);
+  }, [employees.length, employeesLastFetch, loadingEmployees]);
 
   // Create and update functions
   const createProject = async (projectData: any) => {
@@ -405,25 +463,31 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Load initial data
+  // Load initial data once on mount
   useEffect(() => {
-    fetchProjects();
-    fetchDeviations();
-    fetchAdditionalTasks();
-    fetchDrawings();
-    fetchEmployees();
+    const loadInitialData = async () => {
+      // Fetch data in sequence to prevent overwhelming the API
+      await fetchProjects();
+      await fetchDeviations();
+      await fetchAdditionalTasks();
+      await fetchDrawings();
+      await fetchEmployees();
+    };
     
-    // Set up a refresh interval - refresh all data every 5 minutes
+    loadInitialData();
+    
+    // Set up a refresh interval with a longer time - refresh all data every 5 minutes
     const refreshInterval = setInterval(() => {
-      fetchProjects(true);
-      fetchDeviations(true);
-      fetchAdditionalTasks(true);
-      fetchDrawings(true);
-      fetchEmployees(true);
+      console.log('Scheduled data refresh');
+      fetchProjects();
+      fetchDeviations();
+      fetchAdditionalTasks();
+      fetchDrawings();
+      fetchEmployees();
     }, CACHE_TIME);
     
     return () => clearInterval(refreshInterval);
-  }, [fetchProjects, fetchDeviations, fetchAdditionalTasks, fetchDrawings, fetchEmployees]);
+  }, []);
 
   const value = useMemo(() => ({
     // Projects
