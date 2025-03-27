@@ -10,8 +10,7 @@ import {
   ChevronRight, 
   MessageSquare, 
   Pin, 
-  PlusCircle,
-  Play
+  PlusCircle
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -35,6 +34,21 @@ export const ProjectListItem = ({ project, onTogglePin }: ProjectListItemProps) 
     return "bg-red-500";
   };
 
+  const getStatusStyles = () => {
+    switch(project.status) {
+      case "aktiv":
+        return "bg-green-500 text-white";
+      case "problem":
+        return "bg-red-500 text-white";
+      case "udfordring":
+        return "bg-yellow-500 text-white";
+      case "afsluttet":
+        return "bg-gray-400 bg-opacity-70 text-white";
+      default:
+        return "bg-indigo-700 text-white";
+    }
+  };
+
   return (
     <TableRow className={cn(
       project.isPinned && "border-l-2 border-l-primary"
@@ -48,8 +62,7 @@ export const ProjectListItem = ({ project, onTogglePin }: ProjectListItemProps) 
       <TableCell>{project.name}</TableCell>
       
       <TableCell>
-        <div className="flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">
-          <Play className="h-3 w-3 mr-1 fill-blue-700" />
+        <div className={cn("flex items-center px-2 py-1 rounded-full text-xs", getStatusStyles())}>
           <span className="font-medium">{project.status}</span>
         </div>
       </TableCell>

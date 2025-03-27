@@ -36,7 +36,7 @@ export interface Project {
   name: string;
   type: string;
   category: "bolig" | "erhverv" | "institution" | "renovering";
-  status: "igangværende" | "planlagt" | "afsluttet";
+  status: "aktiv" | "problem" | "udfordring" | "afsluttet";
   progress: number;
   team?: {
     initials: string;
@@ -74,6 +74,21 @@ export const ProjectCard = ({ project, onTogglePin }: ProjectCardProps) => {
     if (project.progress >= 50) return "bg-blue-500";
     if (project.progress >= 25) return "bg-yellow-500";
     return "bg-red-500";
+  };
+
+  const getStatusStyles = () => {
+    switch(project.status) {
+      case "aktiv":
+        return "bg-green-500 text-white";
+      case "problem":
+        return "bg-red-500 text-white";
+      case "udfordring":
+        return "bg-yellow-500 text-white";
+      case "afsluttet":
+        return "bg-gray-400 bg-opacity-70 text-white";
+      default:
+        return "bg-indigo-700 text-white";
+    }
   };
 
   return (
@@ -127,7 +142,7 @@ export const ProjectCard = ({ project, onTogglePin }: ProjectCardProps) => {
       
       <CardContent className="pb-2">
         <div className="flex justify-between items-center mb-1">
-          <div className="flex items-center bg-indigo-700 text-white px-3 py-1 rounded-full">
+          <div className={cn("flex items-center px-3 py-1 rounded-full", getStatusStyles())}>
             <span className="text-sm font-medium">{project.status}</span>
           </div>
           <div className="text-sm font-medium">{project.progress}%</div>
