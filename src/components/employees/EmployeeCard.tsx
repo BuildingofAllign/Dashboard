@@ -1,3 +1,4 @@
+
 import React from "react";
 
 interface EmployeeCardProps {
@@ -7,7 +8,7 @@ interface EmployeeCardProps {
   status: "online" | "busy" | "offline";
   project: string;
   phone: string;
-  communicationTools: Array<"meet" | "teams" | "zoom">;
+  communicationTools: Array<string>;
 }
 
 const StatusBadge: React.FC<{ status: EmployeeCardProps["status"] }> = ({
