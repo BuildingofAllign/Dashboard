@@ -1,11 +1,11 @@
 
 import React from "react";
 import { SearchBar } from "@/components/ui/SearchBar";
-import { Command } from "lucide-react";
+import { Command, CircleInfo } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FilterSelect } from "@/components/ui/FilterButton";
 import { ViewToggle, ViewMode } from "@/components/ui/ViewToggle";
-import { Plus, AlertTriangle } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Project } from "@/hooks/use-projects";
 import { ComboboxOption } from "@/components/ui/Combobox";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
@@ -85,7 +85,7 @@ export const ProjectsHeader: React.FC<ProjectsHeaderProps> = ({
         <HoverCard>
           <HoverCardTrigger asChild>
             <Button variant="ghost" size="icon" className="hidden md:flex">
-              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              <CircleInfo className="h-5 w-5 text-blue-500" />
             </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-80">
