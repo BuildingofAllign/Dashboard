@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -21,8 +20,13 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
 import { toast } from "sonner";
 import { useProjects } from "@/hooks/use-projects";
+import { cn } from "@/lib/utils";
 
 // Define the form schema with zod
 const formSchema = z.object({
@@ -34,14 +38,14 @@ const formSchema = z.object({
   progress: z.coerce.number().min(0).max(100),
   priority: z.string().min(1, "Prioritet er påkrævet"),
   description: z.string().optional(),
-  start_date: z.string().optional(),
-  end_date: z.string().optional(),
+  start_date: z.date().optional(),
+  end_date: z.date().optional(),
 });
 
 export type ProjectFormValues = z.infer<typeof formSchema>;
 
 interface ProjectFormProps {
-  initialData?: ProjectFormValues;
+  initialData?: Partial<ProjectFormValues>;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -50,9 +54,16 @@ export const ProjectForm = ({ initialData, onSuccess, onCancel }: ProjectFormPro
   const { handleCreateProject, handleUpdateProject } = useProjects();
   const isEditing = !!initialData;
 
+  // Convert string dates to Date objects for the form
+  const parsedInitialData = initialData ? {
+    ...initialData,
+    start_date: initialData.start_date ? new Date(initialData.start_date) : undefined,
+    end_date: initialData.end_date ? new Date(initialData.end_date) : undefined,
+  } : undefined;
+
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData || {
+    defaultValues: parsedInitialData || {
       name: "",
       project_id: "",
       type: "",
@@ -61,17 +72,17 @@ export const ProjectForm = ({ initialData, onSuccess, onCancel }: ProjectFormPro
       progress: 0,
       priority: "green",
       description: "",
-      start_date: "",
-      end_date: "",
     }
   });
 
   const onSubmit = async (data: ProjectFormValues) => {
     try {
-      // Use for casting if the API needs different types
+      // Format dates to ISO strings for API submission
       const formattedData = {
         ...data,
         progress: Number(data.progress),
+        start_date: data.start_date ? data.start_date.toISOString().split('T')[0] : undefined,
+        end_date: data.end_date ? data.end_date.toISOString().split('T')[0] : undefined,
       };
 
       if (isEditing && initialData?.project_id) {
@@ -235,11 +246,39 @@ export const ProjectForm = ({ initialData, onSuccess, onCancel }: ProjectFormPro
             control={form.control}
             name="start_date"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex flex-col">
                 <FormLabel>Startdato</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "dd/MM/yyyy")
+                        ) : (
+                          <span>Vælg dato</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) =>
+                        date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
                 <FormMessage />
               </FormItem>
             )}
@@ -249,11 +288,40 @@ export const ProjectForm = ({ initialData, onSuccess, onCancel }: ProjectFormPro
             control={form.control}
             name="end_date"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex flex-col">
                 <FormLabel>Slutdato</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "dd/MM/yyyy")
+                        ) : (
+                          <span>Vælg dato</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) =>
+                        date < new Date("1900-01-01") || 
+                        (form.getValues("start_date") && date < form.getValues("start_date"))
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
                 <FormMessage />
               </FormItem>
             )}

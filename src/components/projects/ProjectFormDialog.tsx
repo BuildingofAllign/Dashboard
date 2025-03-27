@@ -12,7 +12,7 @@ import { ProjectForm, ProjectFormValues } from "./ProjectForm";
 interface ProjectFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialData?: ProjectFormValues;
+  initialData?: Partial<ProjectFormValues>;
   mode: "create" | "edit";
 }
 
@@ -30,7 +30,7 @@ export const ProjectFormDialog = ({
     onOpenChange(false);
   };
 
-  // Map database field names to form field names if needed
+  // Format the initial data for the form
   const formattedInitialData = initialData ? {
     ...initialData,
     project_id: initialData.project_id || '',
