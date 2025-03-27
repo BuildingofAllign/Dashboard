@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Download, FileJson, FileSpreadsheet, FilePdf } from "lucide-react";
+import { Download, FileJson, FileSpreadsheet, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
@@ -135,7 +135,7 @@ export const ExportDataButton: React.FC<ExportDataButtonProps> = ({
         )}
         {formats.includes('pdf') && (
           <DropdownMenuItem onClick={() => handleExport('pdf')}>
-            <FilePdf className="h-4 w-4 mr-2" />
+            <FileText className="h-4 w-4 mr-2" />
             <span>PDF</span>
           </DropdownMenuItem>
         )}

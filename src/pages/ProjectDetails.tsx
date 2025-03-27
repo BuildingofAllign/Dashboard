@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -22,7 +21,6 @@ import {
   PlusCircle
 } from "lucide-react";
 
-// This is a placeholder. In a real app, we would fetch the project data
 const getProjectById = (id) => {
   const projects = [
     {
@@ -59,7 +57,6 @@ const getProjectById = (id) => {
         { date: "01-08-2024", event: "Aflevering", type: "end" },
       ]
     },
-    // More projects would be added here
   ];
 
   return projects.find(project => project.id === parseInt(id));
@@ -126,7 +123,6 @@ const ProjectDetails = () => {
     );
   }
 
-  // Helper to determine progress bar color
   const getProgressColor = (progress) => {
     if (progress >= 75) return "bg-green-600";
     if (progress >= 50) return "bg-blue-600";
@@ -134,7 +130,6 @@ const ProjectDetails = () => {
     return "bg-red-500";
   };
 
-  // Helper to render the category icon
   const getCategoryIcon = (category) => {
     switch (category) {
       case "bolig":
@@ -252,8 +247,7 @@ const ProjectDetails = () => {
                 </div>
                 <Progress 
                   value={project.progress} 
-                  className="h-4"
-                  indicatorClassName={getProgressColor(project.progress)}
+                  className={`h-4 ${getProgressColor(project.progress)}`}
                 />
                 <p className="mt-4 text-gray-600">{project.description}</p>
               </CardContent>
@@ -276,10 +270,8 @@ const ProjectDetails = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="relative">
-                    {/* Timeline line */}
                     <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
                     
-                    {/* Timeline events */}
                     <div className="space-y-6 relative">
                       {project.timeline.map((event, index) => {
                         let dotColor = "bg-gray-400";
