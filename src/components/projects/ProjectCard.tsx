@@ -1,16 +1,26 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useNavigate } from "react-router-dom";
+import { Building2, ChevronRight, Home, Star, StarOff, ConstructionIcon, Building, Factory } from "lucide-react";
 
 type TeamMember = {
   initials: string;
+  name: string;
   color: string;
+  role?: string;
 };
 
 type Project = {
   id: number;
+  projectId: string;
   name: string;
   type: string;
+  category: "bolig" | "erhverv" | "institution" | "renovering" | "andet";
   status: "igangværende" | "planlagt" | "afsluttet";
   progress: number;
   team?: TeamMember[];
@@ -23,13 +33,18 @@ type Project = {
   endDate?: string;
   completionDate?: string;
   duration?: string;
+  messages?: { high: number; medium: number; low: number };
+  isPinned?: boolean;
 };
 
 interface ProjectCardProps {
   project: Project;
+  onTogglePin?: (projectId: number) => void;
 }
 
-export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
+export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTogglePin }) => {
+  const navigate = useNavigate();
+
   // Helper to determine status badge color
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
@@ -45,17 +60,11 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
   };
 
   // Helper to determine progress bar color
-  const getProgressBarClass = (status: string) => {
-    switch (status) {
-      case "igangværende":
-        return "bg-green-600";
-      case "planlagt":
-        return "bg-yellow-500";
-      case "afsluttet":
-        return "bg-gray-600";
-      default:
-        return "bg-blue-600";
-    }
+  const getProgressColor = (progress: number) => {
+    if (progress >= 75) return "bg-green-600";
+    if (progress >= 50) return "bg-blue-600";
+    if (progress >= 25) return "bg-yellow-500";
+    return "bg-red-500";
   };
 
   // Helper for Danish status text
@@ -72,158 +81,208 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
     }
   };
 
-  // Different card content based on status
-  const renderCardContent = () => {
-    if (project.status === "planlagt") {
-      return (
-        <>
-          <div className="flex items-center mb-4">
-            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-xs">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-            </div>
-            <span className="text-xs text-gray-500 ml-2">Tildel medarbejdere</span>
-          </div>
-          <div className="mb-4">
-            <div className="flex justify-between mb-1">
-              <span className="text-xs font-medium text-gray-700">Fremgang</span>
-              <span className="text-xs font-medium text-gray-700">{project.progress}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className={`${getProgressBarClass(project.status)} h-2 rounded-full`} style={{ width: `${project.progress}%` }}></div>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 gap-2 mt-2">
-            <p className="text-sm text-gray-600">Planlagt start: {project.startDate}</p>
-            <p className="text-sm text-gray-600">Forventet afslutning: {project.endDate}</p>
-            <Button variant="outline" className="mt-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              </svg>
-              Redigér projektdetaljer
-            </Button>
-          </div>
-        </>
-      );
-    } else if (project.status === "afsluttet") {
-      return (
-        <>
-          <div className="flex items-center mb-4">
-            {project.team?.map((member, index) => (
-              <div key={index} className={`w-8 h-8 rounded-full ${member.color} flex items-center justify-center text-white text-xs mr-2`}>
-                {member.initials}
-              </div>
-            ))}
-          </div>
-          <div className="mb-4">
-            <div className="flex justify-between mb-1">
-              <span className="text-xs font-medium text-gray-700">Fremgang</span>
-              <span className="text-xs font-medium text-gray-700">{project.progress}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className={`${getProgressBarClass(project.status)} h-2 rounded-full`} style={{ width: `${project.progress}%` }}></div>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 gap-2 mt-2">
-            <p className="text-sm text-gray-600">Afsluttet: {project.completionDate}</p>
-            <p className="text-sm text-gray-600">Varighed: {project.duration}</p>
-            <Button variant="outline" className="mt-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Se slutrapport
-            </Button>
-          </div>
-        </>
-      );
-    } else {
-      // Default for active projects
-      return (
-        <>
-          <div className="flex items-center mb-4">
-            {project.team?.map((member, index) => (
-              <div key={index} className={`w-8 h-8 rounded-full ${member.color} flex items-center justify-center text-white text-xs mr-2`}>
-                {member.initials}
-              </div>
-            ))}
-            {project.additionalTeamMembers && project.additionalTeamMembers > 0 && (
-              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-xs">
-                +{project.additionalTeamMembers}
-              </div>
-            )}
-          </div>
-          <div className="mb-4">
-            <div className="flex justify-between mb-1">
-              <span className="text-xs font-medium text-gray-700">Fremgang</span>
-              <span className="text-xs font-medium text-gray-700">{project.progress}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className={`${getProgressBarClass(project.status)} h-2 rounded-full`} style={{ width: `${project.progress}%` }}></div>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
-            <div className="flex flex-col items-center p-2 rounded-lg bg-gray-50">
-              <span className="font-medium text-gray-800">{project.deviations}</span>
-              <span>Afvigelser</span>
-            </div>
-            <div className="flex flex-col items-center p-2 rounded-lg bg-gray-50">
-              <span className="font-medium text-gray-800">{project.additions}</span>
-              <span>Tillæg</span>
-            </div>
-            <div className="flex flex-col items-center p-2 rounded-lg bg-gray-50">
-              <span className="font-medium text-gray-800">{project.qualityAssurance}%</span>
-              <span>KS</span>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-2 mt-4">
-            {project.communicationTools?.includes("meet") && (
-              <button className="flex items-center justify-center py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="text-red-500 mr-2">
-                  <path fill="currentColor" d="M19.7,11h-1.5v-1c0-0.6-0.4-1-1-1h-7.5c-0.6,0-1,0.4-1,1v4c0,0.6,0.4,1,1,1h7.5c0.6,0,1-0.4,1-1v-1h1.5c0.6,0,1-0.4,1-1v-1C20.7,11.4,20.3,11,19.7,11z" />
-                  <path fill="currentColor" d="M4.3,13v-2c0-0.6,0.4-1,1-1h1.5v4H5.3C4.7,14,4.3,13.6,4.3,13z" />
-                </svg>
-                <span className="text-xs font-medium">Meet</span>
-              </button>
-            )}
-            {project.communicationTools?.includes("teams") && (
-              <button className="flex items-center justify-center py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="text-blue-600 mr-2">
-                  <path fill="currentColor" d="M19.2,6.4C19.2,5.1,18.1,4,16.8,4h-4c-1.3,0-2.4,1.1-2.4,2.4v3.2c0,1.3,1.1,2.4,2.4,2.4h4c1.3,0,2.4-1.1,2.4-2.4V6.4z" />
-                  <path fill="currentColor" d="M12,11.8V20c0,0,0,0-0.1,0c-2.3-0.9-4.3-2.4-5.9-4.4V9.4C7,9.2,8.2,9,9.4,9h0.3C9.5,10,10.7,11.5,12,11.8z" />
-                </svg>
-                <span className="text-xs font-medium">Teams</span>
-              </button>
-            )}
-            {project.communicationTools?.includes("zoom") && (
-              <button className="flex items-center justify-center py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="text-blue-500 mr-2">
-                  <path fill="currentColor" d="M16.6,9.4L16.6,9.4L16.6,9.4c0.2-0.1,0.4-0.1,0.6-0.1c0.7,0,1.3,0.6,1.3,1.3v4.4c0,0.7-0.6,1.3-1.3,1.3c-0.2,0-0.4,0-0.6-0.1l0,0l0,0L14,15V9L16.6,9.4z" />
-                  <path fill="currentColor" d="M12,8H6.7C5.7,8,5,8.7,5,9.7v4.7c0,0.9,0.7,1.7,1.7,1.7H12c0.9,0,1.7-0.7,1.7-1.7V9.7C13.7,8.7,12.9,8,12,8z" />
-                </svg>
-                <span className="text-xs font-medium">Zoom</span>
-              </button>
-            )}
-          </div>
-        </>
-      );
+  // Navigate to project details
+  const goToProjectDetails = () => {
+    navigate(`/projekter/${project.id}`);
+  };
+
+  // Navigate to filtered views
+  const goToDeviations = () => {
+    navigate(`/afvigelser?project=${project.id}`);
+  };
+
+  const goToAdditions = () => {
+    navigate(`/tillagsopgaver?project=${project.id}`);
+  };
+
+  const goToQualityAssurance = () => {
+    navigate(`/kvalitetssikring?project=${project.id}`);
+  };
+
+  // Helper to render the category icon
+  const renderCategoryIcon = (category: string) => {
+    switch (category) {
+      case "bolig":
+        return <Home className="h-4 w-4 mr-1" />;
+      case "erhverv":
+        return <Building className="h-4 w-4 mr-1" />;
+      case "institution":
+        return <Building2 className="h-4 w-4 mr-1" />;
+      case "renovering":
+        return <ConstructionIcon className="h-4 w-4 mr-1" />;
+      default:
+        return <Factory className="h-4 w-4 mr-1" />;
+    }
+  };
+
+  // Handle pin/unpin
+  const handlePinToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onTogglePin) {
+      onTogglePin(project.id);
     }
   };
 
   return (
-    <div className={`bg-white rounded-lg shadow-sm overflow-hidden ${project.status === 'afsluttet' ? 'opacity-75' : ''}`}>
-      <div className="p-5 border-b border-gray-200">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-gray-800">{project.name}</h3>
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(project.status)}`}>
-            {getStatusText(project.status)}
-          </span>
+    <Card 
+      className={`overflow-hidden transition-all duration-200 hover:shadow-md cursor-pointer ${
+        project.status === 'afsluttet' ? 'opacity-75' : ''
+      } ${project.isPinned ? 'border-2 border-yellow-400' : ''}`}
+      onClick={goToProjectDetails}
+    >
+      <CardHeader className="p-5 pb-3 relative">
+        <div className="absolute top-3 right-3 flex space-x-2">
+          {onTogglePin && (
+            <button 
+              onClick={handlePinToggle}
+              className="text-gray-400 hover:text-yellow-500"
+            >
+              {project.isPinned ? 
+                <Star className="h-5 w-5 fill-yellow-400 text-yellow-500" /> : 
+                <StarOff className="h-5 w-5" />
+              }
+            </button>
+          )}
+          <ChevronRight className="h-5 w-5 text-gray-400" />
         </div>
-        <p className="text-sm text-gray-600 mt-1">{project.type}</p>
-      </div>
-      <div className="p-5">
-        {renderCardContent()}
-      </div>
-    </div>
+        <div className="flex flex-col">
+          <div className="flex items-center mb-1">
+            <span className="text-xs text-gray-500 mr-2">{project.projectId}</span>
+            <Badge 
+              className={`${getStatusBadgeClass(project.status)} text-xs`}
+            >
+              {getStatusText(project.status)}
+            </Badge>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-800">{project.name}</h3>
+          <div className="flex items-center mt-1">
+            {renderCategoryIcon(project.category)}
+            <p className="text-sm text-gray-600">{project.type}</p>
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="p-5 pt-2">
+        <div className="flex items-center mb-4">
+          <TooltipProvider>
+            {project.team?.map((member, index) => (
+              <Tooltip key={index}>
+                <TooltipTrigger asChild>
+                  <div className={`w-8 h-8 rounded-full ${member.color} flex items-center justify-center text-white text-xs -ml-1 first:ml-0 border-2 border-white`}>
+                    {member.initials}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{member.name}</p>
+                  {member.role && <p className="text-xs text-gray-500">{member.role}</p>}
+                </TooltipContent>
+              </Tooltip>
+            ))}
+            {project.additionalTeamMembers && project.additionalTeamMembers > 0 && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-xs -ml-1 border-2 border-white">
+                    +{project.additionalTeamMembers}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{project.additionalTeamMembers} flere medarbejdere</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </TooltipProvider>
+        </div>
+
+        <div className="mb-4">
+          <div className="flex justify-between mb-1">
+            <span className="text-xs font-medium text-gray-700">Fremgang</span>
+            <span className="text-xs font-medium text-gray-700">{project.progress}%</span>
+          </div>
+          <Progress value={project.progress} className="h-2" indicatorClassName={getProgressColor(project.progress)} />
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
+          <button
+            onClick={(e) => { e.stopPropagation(); goToDeviations(); }}
+            className="flex flex-col items-center p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+          >
+            <span className="font-medium text-gray-800">{project.deviations || 0}</span>
+            <span>Afvigelser</span>
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); goToAdditions(); }}
+            className="flex flex-col items-center p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+          >
+            <span className="font-medium text-gray-800">{project.additions || 0}</span>
+            <span>Tillæg</span>
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); goToQualityAssurance(); }}
+            className="flex flex-col items-center p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+          >
+            <span className="font-medium text-gray-800">{project.qualityAssurance || 0}%</span>
+            <span>KS</span>
+          </button>
+        </div>
+
+        {project.messages && (
+          <div className="flex items-center justify-center mt-4 space-x-2">
+            {project.messages.high > 0 && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="rounded-full bg-red-100 w-6 h-6 flex items-center justify-center text-xs text-red-700">
+                    {project.messages.high}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{project.messages.high} højprioritets beskeder</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+            {project.messages.medium > 0 && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="rounded-full bg-yellow-100 w-6 h-6 flex items-center justify-center text-xs text-yellow-700">
+                    {project.messages.medium}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{project.messages.medium} medium prioritets beskeder</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+            {project.messages.low > 0 && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="rounded-full bg-green-100 w-6 h-6 flex items-center justify-center text-xs text-green-700">
+                    {project.messages.low}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{project.messages.low} lavprioritet beskeder</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+        )}
+      </CardContent>
+
+      <CardFooter className="px-5 py-3 bg-gray-50 border-t flex justify-between">
+        <div className="text-xs text-gray-500">
+          {project.startDate && <span>Start: {project.startDate}</span>}
+          {project.startDate && project.endDate && <span className="mx-1">•</span>}
+          {project.endDate && <span>Slut: {project.endDate}</span>}
+          {project.completionDate && <span>Afsluttet: {project.completionDate}</span>}
+        </div>
+        <Button
+          variant="ghost" 
+          size="sm" 
+          className="text-xs text-gray-700 hover:bg-gray-200"
+          onClick={goToProjectDetails}
+        >
+          Se detaljer
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
