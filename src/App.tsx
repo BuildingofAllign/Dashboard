@@ -6,7 +6,6 @@ import { ThemeProvider } from './components/ui/ThemeProvider';
 import { Toaster } from './components/ui/toaster';
 import { DataProvider } from './context/DataContext';
 import { TooltipProvider } from './components/ui/tooltip';
-import { SidebarProvider } from './components/ui/sidebar';
 
 // Pages
 import Dashboard from './pages/Dashboard';
