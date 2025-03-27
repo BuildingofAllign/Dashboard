@@ -7,7 +7,7 @@ import { ProjectCard } from "@/components/projects/ProjectCard";
 import { ProjectRowCard } from "@/components/projects/ProjectRowCard";
 import { ProjectListItem } from "@/components/projects/ProjectListItem";
 import { ViewToggle, ViewMode } from "@/components/ui/ViewToggle";
-import { Plus, Star, AlertCircle } from "lucide-react";
+import { Plus, Pin, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableRow, TableHead, TableBody } from "@/components/ui/table";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -296,7 +296,7 @@ const Projects = () => {
                 {filteredAndSortedProjects.some(p => p.isPinned) && (
                   <div>
                     <h2 className="text-lg font-medium mb-4 flex items-center">
-                      <Star className="h-5 w-5 text-yellow-500 mr-2" />
+                      <Pin className="h-5 w-5 text-yellow-500 mr-2" />
                       Fastgjorte projekter
                     </h2>
                     <Table>
@@ -483,7 +483,7 @@ const Projects = () => {
                 {filteredAndSortedProjects.some(p => p.isPinned) && (
                   <div>
                     <h2 className="text-lg font-medium mb-4 flex items-center">
-                      <Star className="h-5 w-5 text-yellow-500 mr-2" />
+                      <Pin className="h-5 w-5 text-yellow-500 mr-2" />
                       Fastgjorte projekter
                     </h2>
                     {viewMode === "grid" && (
