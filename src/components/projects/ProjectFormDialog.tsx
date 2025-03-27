@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Dialog,
@@ -13,13 +14,15 @@ interface ProjectFormDialogProps {
   onOpenChange: (open: boolean) => void;
   initialData?: Partial<ProjectFormValues>;
   mode: "create" | "edit";
+  onSubmit?: (data: any) => Promise<any>;
 }
 
 export const ProjectFormDialog = ({
   open,
   onOpenChange,
   initialData,
-  mode
+  mode,
+  onSubmit
 }: ProjectFormDialogProps) => {
   const handleSuccess = () => {
     onOpenChange(false);
@@ -69,6 +72,7 @@ export const ProjectFormDialog = ({
           initialData={formattedInitialData} 
           onSuccess={handleSuccess}
           onCancel={handleCancel}
+          onSubmit={onSubmit}
         />
       </DialogContent>
     </Dialog>

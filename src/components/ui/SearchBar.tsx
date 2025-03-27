@@ -6,15 +6,17 @@ interface SearchBarProps {
   placeholder: string;
   onChange?: (value: string) => void;
   value?: string;
+  className?: string;
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
   placeholder,
   onChange,
   value,
+  className,
 }) => {
   return (
-    <div className="relative w-full md:w-64">
+    <div className={`relative w-full md:w-64 ${className || ''}`}>
       <input
         type="text"
         placeholder={placeholder}

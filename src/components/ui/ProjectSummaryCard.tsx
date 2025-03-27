@@ -18,14 +18,20 @@ interface ProjectSummaryCardProps {
 }
 
 export const ProjectSummaryCard: React.FC<ProjectSummaryCardProps> = ({ project, className }) => {
+  // Convert string priority to the Priority type
+  const priorityValue = (project.priority || "green") as "red" | "yellow" | "green" | "grey";
+  
+  // Convert string status to StatusType
+  const statusValue = (project.status || "active") as any;
+  
   return (
     <Card className={cn("overflow-hidden transition-all hover:shadow-md", className)}>
       <CardHeader className="p-4 pb-0 space-y-2">
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <PriorityIndicator priority={project.priority} size="sm" />
-              <StatusBadge status={project.status} />
+              <PriorityIndicator priority={priorityValue} size="sm" />
+              <StatusBadge status={statusValue} />
             </div>
             <h3 className="font-medium text-lg leading-tight">{project.name}</h3>
           </div>
@@ -71,7 +77,7 @@ export const ProjectSummaryCard: React.FC<ProjectSummaryCardProps> = ({ project,
       
       <CardFooter className="p-4 pt-0 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {project.team ? (
+          {project.team && project.team.length > 0 ? (
             <AvatarCircles items={project.team} limit={3} size="sm" />
           ) : (
             <div className="flex items-center text-sm text-muted-foreground">

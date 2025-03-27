@@ -15,4 +15,5 @@ export type Project = {
   end_date?: string;
   created_at?: string;
   updated_at?: string;
+  team?: Array<{ name: string; initials: string; color?: string; }>;
 };

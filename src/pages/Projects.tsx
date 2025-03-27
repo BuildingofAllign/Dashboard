@@ -46,7 +46,7 @@ const Projects = () => {
   };
   
   const handlePinWithToast = (projectId: string, isPinned: boolean) => {
-    handleTogglePin(projectId);
+    handleTogglePin(projectId, isPinned);
     toast.success(isPinned ? "Projekt fjernet fra favoritter" : "Projekt tilføjet til favoritter", {
       description: isPinned 
         ? "Projektet vil ikke længere være fastgjort til toppen" 
@@ -164,7 +164,7 @@ const Projects = () => {
       <ProjectFormDialog
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
-        onSubmit={handleCreateProject}
+        mode="create"
       />
       
       <CommandPalette

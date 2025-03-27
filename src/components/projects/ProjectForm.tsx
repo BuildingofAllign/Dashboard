@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -48,9 +47,10 @@ interface ProjectFormProps {
   initialData?: Partial<ProjectFormValues>;
   onSuccess?: () => void;
   onCancel?: () => void;
+  onSubmit?: (data: any) => Promise<any>;
 }
 
-export const ProjectForm = ({ initialData, onSuccess, onCancel }: ProjectFormProps) => {
+export const ProjectForm = ({ initialData, onSuccess, onCancel, onSubmit }: ProjectFormProps) => {
   const { handleCreateProject, handleUpdateProject } = useProjects();
   const isEditing = !!initialData;
 
@@ -74,7 +74,7 @@ export const ProjectForm = ({ initialData, onSuccess, onCancel }: ProjectFormPro
     }
   });
 
-  const onSubmit = async (data: ProjectFormValues) => {
+  const handleSubmit = async (data: ProjectFormValues) => {
     try {
       // Format dates to ISO strings for API submission
       const formattedData = {
@@ -84,7 +84,10 @@ export const ProjectForm = ({ initialData, onSuccess, onCancel }: ProjectFormPro
         end_date: data.end_date ? data.end_date.toISOString().split('T')[0] : undefined,
       };
 
-      if (isEditing && initialData?.project_id) {
+      if (onSubmit) {
+        // Use the custom onSubmit handler if provided
+        await onSubmit(formattedData);
+      } else if (isEditing && initialData?.project_id) {
         await handleUpdateProject(initialData.project_id, formattedData);
         toast.success("Projektet blev opdateret");
       } else {
@@ -102,7 +105,7 @@ export const ProjectForm = ({ initialData, onSuccess, onCancel }: ProjectFormPro
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
