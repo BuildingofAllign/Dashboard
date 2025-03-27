@@ -128,12 +128,12 @@ export const ProjectCard = ({ project, onTogglePin }: ProjectCardProps) => {
       </CardHeader>
       
       <CardContent className="pb-2">
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex justify-between items-center mb-1">
           <div className="flex items-center bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
             <Play className="h-4 w-4 mr-1 fill-blue-700" />
             <span className="text-sm font-medium">{project.status}</span>
           </div>
-          <div className="text-xl font-bold">{project.progress}%</div>
+          <div className="text-sm font-medium">{project.progress}%</div>
         </div>
         
         <div className="mb-4">
