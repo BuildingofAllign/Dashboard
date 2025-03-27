@@ -3,6 +3,7 @@ import React from "react";
 import { Combobox, ComboboxOption } from "./Combobox";
 import { Filters } from "./filters";
 import { cva } from "class-variance-authority";
+import { Filter } from "lucide-react";
 
 interface FilterButtonProps {
   children?: React.ReactNode;
@@ -79,8 +80,9 @@ export const FilterButton: React.FC<FilterButtonProps> = ({
   return (
     <button
       onClick={onClick}
-      className={`border border-gray-300 text-[15px] text-black bg-indigo-100 px-[17px] py-[9px] rounded-lg border-solid max-sm:flex-1 hover:bg-indigo-200 transition-colors ${className}`}
+      className={`border border-gray-300 text-[15px] text-black bg-indigo-100 px-[17px] py-[9px] rounded-lg border-solid max-sm:flex-1 hover:bg-indigo-200 transition-colors flex items-center gap-2 ${className}`}
     >
+      <Filter className="h-4 w-4" />
       {children}
     </button>
   );

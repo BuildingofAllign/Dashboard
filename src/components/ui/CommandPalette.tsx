@@ -46,7 +46,7 @@ export const useCommandPalette = () => {
   
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      // Check for both K and G shortcuts
+      // Make sure Cmd+G works across all pages
       if ((e.key.toLowerCase() === shortcut.key || e.key.toLowerCase() === 'g') && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setOpen(true);
@@ -69,7 +69,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      // Check for both K and G shortcuts
+      // Make sure Cmd+G works across all pages
       if ((e.key.toLowerCase() === shortcut.key || e.key.toLowerCase() === 'g') && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         onOpenChange(!open);
