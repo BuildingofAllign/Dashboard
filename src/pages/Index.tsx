@@ -47,7 +47,7 @@ const Index = () => {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen bg-gray-100">
+      <div className="flex min-h-screen w-full bg-gray-100">
         <Sidebar />
         <main className="flex-1 overflow-auto">
           <Header title="Medarbejdere" userInitials="BL" />

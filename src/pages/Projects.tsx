@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { FilterSelect } from "@/components/ui/FilterButton";
 import { ProjectCard } from "@/components/projects/ProjectCard";
@@ -24,7 +25,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { ProjectProgressIndicator } from "@/components/ui/ProjectProgressIndicator";
 import { toast } from "sonner";
-import { SidebarProvider } from "@/components/ui/sidebar";
 
 const Projects = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");

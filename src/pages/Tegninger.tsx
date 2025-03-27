@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { FilterSelect } from "@/components/ui/FilterButton";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,6 @@ import { DrawingCard } from "@/components/drawings/DrawingCard";
 import { AddDrawingCard } from "@/components/drawings/AddDrawingCard";
 import { useData } from "@/context/DataContext";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import { SidebarProvider } from "@/components/ui/sidebar";
 
 const Tegninger: React.FC = () => {
   const { drawings, loadingDrawings, fetchDrawings, projects } = useData();
@@ -45,7 +44,7 @@ const Tegninger: React.FC = () => {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen bg-gray-100">
+      <div className="flex h-screen w-full bg-gray-100">
         <Sidebar />
         <div className="flex-1 flex flex-col overflow-hidden">
           <Header title="Tegninger" userInitials="BL" />

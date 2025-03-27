@@ -7,7 +7,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 const Tillagsopgaver: React.FC = () => {
   return (
     <SidebarProvider>
-      <div className="flex h-screen bg-gray-100">
+      <div className="flex h-screen w-full bg-gray-100">
         <Sidebar />
         <div className="flex-1 flex flex-col overflow-hidden">
           <Header title="Tillægsopgaver" userInitials="BL" />
