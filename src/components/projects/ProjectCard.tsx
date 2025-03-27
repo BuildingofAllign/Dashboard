@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Card, 
@@ -17,8 +16,7 @@ import {
   Pin, 
   ClipboardCheck, 
   AlertTriangle, 
-  PlusCircle,
-  Play
+  PlusCircle
 } from "lucide-react";
 import { 
   Tooltip, 
@@ -69,7 +67,6 @@ interface ProjectCardProps {
 }
 
 export const ProjectCard = ({ project, onTogglePin }: ProjectCardProps) => {
-  // Get color for progress based on status and progress
   const getProgressColor = () => {
     if (project.status === "afsluttet") return "bg-gray-400";
     if (project.progress >= 75) return "bg-green-500";
@@ -130,7 +127,6 @@ export const ProjectCard = ({ project, onTogglePin }: ProjectCardProps) => {
       <CardContent className="pb-2">
         <div className="flex justify-between items-center mb-1">
           <div className="flex items-center bg-indigo-700 text-white px-3 py-1 rounded-full">
-            <Play className="h-4 w-4 mr-1 fill-white" />
             <span className="text-sm font-medium">{project.status}</span>
           </div>
           <div className="text-sm font-medium">{project.progress}%</div>
