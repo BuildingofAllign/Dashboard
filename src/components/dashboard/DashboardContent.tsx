@@ -1,15 +1,14 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MetricCard } from "@/components/ui/cards/metric-card"
 import { ChartCard } from "@/components/ui/cards/chart-card"
-import { RecentSales } from "@/components/ui/cards/recent-sales"
 import { ActivityGoal } from "@/components/ui/cards/activity-goal"
+import { AnimatedList } from "@/components/ui/AnimatedList"
 import { 
   Building, Building2, Home, User, Clock, CheckCircle, AlertTriangle, 
   PlusCircle, TrendingUp, Calendar, ArrowUp, ArrowDown, 
   LineChart as LineChartIcon, PieChart as PieChartIcon, 
-  BarChart as BarChartIcon, Activity
+  BarChart as BarChartIcon, Activity, MessageSquare, FileText
 } from "lucide-react"
 import { BreadcrumbNav } from "@/components/ui/BreadcrumbNav"
 
@@ -49,6 +48,41 @@ const DEMO_RECENT_ACTIVITIES = [
   { name: "Peter Madsen", email: "peter@example.com", amount: "Projekt opdateret" },
 ];
 
+const DEMO_NOTIFICATIONS = [
+  {
+    id: "1",
+    title: "New event",
+    description: "A new event has been scheduled",
+    time: new Date(Date.now() - 2 * 60 * 1000), // 2 minutes ago
+    icon: <Calendar className="h-5 w-5 text-primary" />,
+    read: false
+  },
+  {
+    id: "2",
+    title: "New message",
+    description: "You have received a new message",
+    time: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
+    icon: <MessageSquare className="h-5 w-5 text-indigo-500" />,
+    read: false
+  },
+  {
+    id: "3",
+    title: "User signed up",
+    description: "A new user has registered on the platform",
+    time: new Date(Date.now() - 10 * 60 * 1000), // 10 minutes ago
+    icon: <User className="h-5 w-5 text-amber-500" />,
+    read: true
+  },
+  {
+    id: "4",
+    title: "Project updated",
+    description: "Project 'Renovering Vestergade' has been updated",
+    time: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+    icon: <FileText className="h-5 w-5 text-green-500" />,
+    read: true
+  }
+];
+
 const DEMO_WEEKLY_ACTIVITY = {
   title: "Ugentlige aktiviteter",
   description: "Dit aktivitetsmål for denne uge",
@@ -66,7 +100,6 @@ const DEMO_WEEKLY_ACTIVITY = {
 };
 
 export function DashboardContent() {
-  // Get current date in Danish format
   const currentDate = new Date().toLocaleDateString('da-DK', {
     weekday: 'long',
     year: 'numeric',
@@ -74,15 +107,12 @@ export function DashboardContent() {
     day: 'numeric'
   });
   
-  // Capitalize first letter of the date
   const formattedDate = currentDate.charAt(0).toUpperCase() + currentDate.slice(1);
 
-  // Bread crumb items
   const breadcrumbItems = [
     { label: "Dashboard" }
   ];
 
-  // Demo data for stats
   const stats = {
     activeProjects: 7,
     openDeviations: 12,
@@ -169,7 +199,7 @@ export function DashboardContent() {
                   <CardTitle>Seneste aktiviteter</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <RecentSales data={DEMO_RECENT_ACTIVITIES} />
+                  <AnimatedList items={DEMO_NOTIFICATIONS} />
                 </CardContent>
               </Card>
             </div>
