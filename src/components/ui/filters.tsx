@@ -85,7 +85,7 @@ const Filters = React.forwardRef<
   ) => {
     const [open, setOpen] = React.useState(false)
     const [selected, setSelected] = React.useState<string[]>(
-      selectedOptions ?? []
+      selectedOptions ? [...selectedOptions] : []
     )
 
     const handleSelect = React.useCallback(
@@ -108,7 +108,7 @@ const Filters = React.forwardRef<
 
     React.useEffect(() => {
       if (selectedOptions) {
-        setSelected(selectedOptions)
+        setSelected([...selectedOptions])
       }
     }, [selectedOptions])
 
