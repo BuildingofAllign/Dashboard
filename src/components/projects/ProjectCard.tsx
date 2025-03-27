@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Card, 
@@ -84,7 +85,7 @@ export const ProjectCard = ({ project, onTogglePin }: ProjectCardProps) => {
     >
       {project.isPinned && (
         <div className="absolute top-0 right-0">
-          <div className="w-12 h-12 bg-primary transform rotate-45 translate-x-6 -translate-y-6" />
+          <div className="w-12 h-12 bg-indigo-700 transform rotate-45 translate-x-6 -translate-y-6" />
           <Pin 
             className="absolute top-1 right-1 h-4 w-4 text-white cursor-pointer"
             onClick={(e) => {
