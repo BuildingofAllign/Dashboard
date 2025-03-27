@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,40 +8,116 @@ import { BreadcrumbNav } from "@/components/ui/BreadcrumbNav";
 import { BarChart, LineChart, PieChart, DonutChart } from "@/components/ui/charts";
 import { useTheme } from "@/hooks/use-theme";
 import { Building, Building2, Home, User, Clock, CheckCircle, AlertTriangle, PlusCircle, TrendingUp, Calendar, ArrowUp, ArrowDown } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useData } from "@/context/DataContext";
 
 const Dashboard: React.FC = () => {
   const { isDarkMode } = useTheme();
+  const { projects, deviations, additionalTasks, loadingProjects, loadingDeviations, loadingAdditionalTasks } = useData();
   const chartTheme = isDarkMode ? "dark" : "light";
   
-  // Placeholder data for charts
-  const projectsByCategory = [
-    { name: "Boliger", count: 18 },
-    { name: "Erhverv", count: 12 },
-    { name: "Institutioner", count: 8 },
-    { name: "Andet", count: 5 },
-  ];
+  // Derived data for charts
+  const [projectsByCategory, setProjectsByCategory] = useState<any[]>([]);
+  const [projectProgress, setProjectProgress] = useState<any[]>([]);
+  const [projectStatuses, setProjectStatuses] = useState<any[]>([]);
+  const [qualityAssurance, setQualityAssurance] = useState<any[]>([]);
+  const [stats, setStats] = useState({
+    activeProjects: 0,
+    openDeviations: 0,
+    qualityAssurancePercent: 0,
+    additionalTasksCount: 0,
+    projectsIncrease: 0,
+    deviationsIncrease: 0,
+    qaIncrease: 0,
+    additionalTasksDecrease: 0
+  });
+
+  useEffect(() => {
+    if (!loadingProjects && projects.length > 0) {
+      // Process projects by category
+      const categoryMap: Record<string, number> = {};
+      projects.forEach(project => {
+        if (project.category) {
+          categoryMap[project.category] = (categoryMap[project.category] || 0) + 1;
+        }
+      });
+      
+      const projectsByCategoryData = Object.entries(categoryMap).map(([name, count]) => ({
+        name,
+        count
+      }));
+      setProjectsByCategory(projectsByCategoryData);
+      
+      // Process projects by status
+      const statusMap: Record<string, number> = {};
+      projects.forEach(project => {
+        if (project.status) {
+          statusMap[project.status] = (statusMap[project.status] || 0) + 1;
+        }
+      });
+      
+      const projectStatusesData = Object.entries(statusMap).map(([name, count]) => ({
+        name,
+        count
+      }));
+      setProjectStatuses(projectStatusesData);
+      
+      // Set active projects count
+      const activeProjectsCount = projects.filter(p => p.status === 'Igangværende').length;
+      setStats(prev => ({
+        ...prev,
+        activeProjects: activeProjectsCount,
+        projectsIncrease: 8 // Mock data, could be calculated from historical data
+      }));
+    }
+  }, [loadingProjects, projects]);
   
-  const projectProgress = [
-    { month: "Jan", afvigelser: 5, tillægsopgaver: 2 },
-    { month: "Feb", afvigelser: 8, tillægsopgaver: 3 },
-    { month: "Mar", afvigelser: 12, tillægsopgaver: 5 },
-    { month: "Apr", afvigelser: 7, tillægsopgaver: 8 },
-    { month: "Maj", afvigelser: 15, tillægsopgaver: 10 },
-    { month: "Jun", afvigelser: 10, tillægsopgaver: 7 },
-  ];
+  useEffect(() => {
+    if (!loadingDeviations && deviations.length > 0) {
+      // Set open deviations count
+      const openDeviationsCount = deviations.filter(d => d.status !== 'Lukket' && d.status !== 'Godkendt').length;
+      setStats(prev => ({
+        ...prev,
+        openDeviations: openDeviationsCount,
+        deviationsIncrease: 12 // Mock data, could be calculated from historical data
+      }));
+      
+      // Mock data for monthly progress
+      // In a real application, this would come from actual historical data
+      setProjectProgress([
+        { month: "Jan", afvigelser: 5, tillægsopgaver: 2 },
+        { month: "Feb", afvigelser: 8, tillægsopgaver: 3 },
+        { month: "Mar", afvigelser: 12, tillægsopgaver: 5 },
+        { month: "Apr", afvigelser: 7, tillægsopgaver: 8 },
+        { month: "Maj", afvigelser: 15, tillægsopgaver: 10 },
+        { month: "Jun", afvigelser: 10, tillægsopgaver: 7 },
+      ]);
+      
+      // Mock data for quality assurance
+      // In a real application, this would be calculated from actual data
+      setQualityAssurance([
+        { name: "Godkendt", percentage: 65 },
+        { name: "Afventer", percentage: 25 },
+        { name: "Fejl", percentage: 10 },
+      ]);
+      
+      setStats(prev => ({
+        ...prev,
+        qualityAssurancePercent: 65,
+        qaIncrease: 5 // Mock data, could be calculated from historical data
+      }));
+    }
+  }, [loadingDeviations, deviations]);
   
-  const projectStatuses = [
-    { name: "Igangværende", count: 20 },
-    { name: "Afsluttet", count: 15 },
-    { name: "Planlagt", count: 8 },
-    { name: "Paused", count: 2 },
-  ];
-  
-  const qualityAssurance = [
-    { name: "Godkendt", percentage: 65 },
-    { name: "Afventer", percentage: 25 },
-    { name: "Fejl", percentage: 10 },
-  ];
+  useEffect(() => {
+    if (!loadingAdditionalTasks && additionalTasks.length > 0) {
+      setStats(prev => ({
+        ...prev,
+        additionalTasksCount: additionalTasks.length,
+        additionalTasksDecrease: 3 // Mock data, could be calculated from historical data
+      }));
+    }
+  }, [loadingAdditionalTasks, additionalTasks]);
   
   // Get current date in Danish format
   const currentDate = new Date().toLocaleDateString('da-DK', {
@@ -73,6 +149,26 @@ const Dashboard: React.FC = () => {
     { label: "Dashboard" }
   ];
 
+  // Loading state handling
+  if (loadingProjects || loadingDeviations || loadingAdditionalTasks) {
+    return (
+      <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header title="Dashboard" userInitials="BL" />
+          <div className="p-6 overflow-auto">
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <h2 className="text-xl font-medium text-gray-700 dark:text-gray-300">Indlæser data...</h2>
+                <p className="text-gray-500 dark:text-gray-400 mt-2">Et øjeblik...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
       <Sidebar />
@@ -95,10 +191,10 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Aktive projekter</p>
-                  <h4 className="text-2xl font-bold">24</h4>
+                  <h4 className="text-2xl font-bold">{stats.activeProjects}</h4>
                   <div className="flex items-center mt-1 text-sm text-green-600 dark:text-green-400">
                     <ArrowUp className="h-3 w-3 mr-1" />
-                    <span>8% siden sidst</span>
+                    <span>{stats.projectsIncrease}% siden sidst</span>
                   </div>
                 </div>
               </CardContent>
@@ -111,10 +207,10 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Åbne afvigelser</p>
-                  <h4 className="text-2xl font-bold">37</h4>
+                  <h4 className="text-2xl font-bold">{stats.openDeviations}</h4>
                   <div className="flex items-center mt-1 text-sm text-red-600 dark:text-red-400">
                     <ArrowUp className="h-3 w-3 mr-1" />
-                    <span>12% siden sidst</span>
+                    <span>{stats.deviationsIncrease}% siden sidst</span>
                   </div>
                 </div>
               </CardContent>
@@ -127,10 +223,10 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">KS godkendt</p>
-                  <h4 className="text-2xl font-bold">65%</h4>
+                  <h4 className="text-2xl font-bold">{stats.qualityAssurancePercent}%</h4>
                   <div className="flex items-center mt-1 text-sm text-green-600 dark:text-green-400">
                     <ArrowUp className="h-3 w-3 mr-1" />
-                    <span>5% siden sidst</span>
+                    <span>{stats.qaIncrease}% siden sidst</span>
                   </div>
                 </div>
               </CardContent>
@@ -143,10 +239,10 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Tillægsopgaver</p>
-                  <h4 className="text-2xl font-bold">15</h4>
+                  <h4 className="text-2xl font-bold">{stats.additionalTasksCount}</h4>
                   <div className="flex items-center mt-1 text-sm text-red-600 dark:text-red-400">
                     <ArrowDown className="h-3 w-3 mr-1" />
-                    <span>3% siden sidst</span>
+                    <span>{stats.additionalTasksDecrease}% siden sidst</span>
                   </div>
                 </div>
               </CardContent>

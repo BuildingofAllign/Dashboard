@@ -187,7 +187,7 @@ export const PieChart: React.FC<BaseChartProps> = ({
           fill="#8884d8"
           isAnimationActive={showAnimation}
           label={({ name, percent }) => 
-            `${name}: ${valueFormatter(percent * 100)}`
+            `${name}: ${Math.round(percent * 1000) / 10}%`
           }
         >
           {data.map((entry, i) => (
@@ -200,7 +200,14 @@ export const PieChart: React.FC<BaseChartProps> = ({
               active={active}
               payload={payload}
               nameKey={index}
-              formatter={(value, name) => valueFormatter(Number(value))}
+              formatter={(value, name) => {
+                // For percentage values, round to 1 decimal
+                if (typeof value === 'number' && name === category) {
+                  const percentage = Math.round(value * 1000) / 10;
+                  return `${percentage}%`;
+                }
+                return valueFormatter(Number(value));
+              }}
             />
           )}
         />
@@ -250,7 +257,7 @@ export const DonutChart: React.FC<BaseChartProps> = ({
           fill="#8884d8"
           isAnimationActive={showAnimation}
           label={({ name, percent }) => 
-            `${name}: ${valueFormatter(percent * 100)}`
+            `${name}: ${Math.round(percent * 1000) / 10}%`
           }
         >
           {data.map((entry, i) => (
@@ -263,7 +270,14 @@ export const DonutChart: React.FC<BaseChartProps> = ({
               active={active}
               payload={payload}
               nameKey={index}
-              formatter={(value, name) => valueFormatter(Number(value))}
+              formatter={(value, name) => {
+                // For percentage values, round to 1 decimal
+                if (typeof value === 'number' && name === category) {
+                  const percentage = Math.round(value * 1000) / 10;
+                  return `${percentage}%`;
+                }
+                return valueFormatter(Number(value));
+              }}
             />
           )}
         />
