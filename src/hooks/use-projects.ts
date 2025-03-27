@@ -1,77 +1,19 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useData } from '@/context/DataContext';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useProjects = () => {
-  const [projects, setProjects] = useState([]);
-  const [loadingProjects, setLoadingProjects] = useState(true);
+  const { projects, loadingProjects, fetchProjects } = useData();
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
 
-  // Fetch projects from Supabase
-  const fetchProjects = useCallback(async () => {
-    try {
-      setLoadingProjects(true);
-      
-      const { data, error } = await supabase
-        .from('projects')
-        .select(`
-          *,
-          project_team_members(*),
-          project_stats(*),
-          project_communication_tools(*),
-          project_messages(*)
-        `);
-      
-      if (error) throw error;
-      
-      // Transform data to match the expected format in components
-      const transformedProjects = data.map(project => ({
-        id: project.id,
-        projectId: project.project_id,
-        name: project.name,
-        type: project.type,
-        category: project.category,
-        status: project.status,
-        progress: project.progress,
-        isPinned: project.is_pinned,
-        priority: project.priority || 'green',
-        startDate: project.start_date,
-        endDate: project.end_date,
-        description: project.description,
-        team: project.project_team_members,
-        deviations: project.project_stats?.[0]?.deviations || 0,
-        additions: project.project_stats?.[0]?.additions || 0,
-        qualityAssurance: project.project_stats?.[0]?.quality_assurance || 0,
-        communicationTools: project.project_communication_tools?.map(tool => tool.tool) || [],
-        messages: {
-          high: project.project_messages?.find(m => m.priority === 'high')?.count || 0,
-          medium: project.project_messages?.find(m => m.priority === 'medium')?.count || 0,
-          low: project.project_messages?.find(m => m.priority === 'low')?.count || 0,
-        }
-      }));
-      
-      setProjects(transformedProjects);
-    } catch (error) {
-      console.error('Error fetching projects:', error);
-      toast.error('Kunne ikke hente projekter');
-    } finally {
-      setLoadingProjects(false);
-    }
-  }, []);
-
-  // Load projects on mount
-  useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
-
   // Sort projects: First by priority (red, yellow, green, grey), 
   // then pinned, then by status
-  const sortProjects = (projectsToSort) => {
+  const sortProjects = useCallback((projectsToSort) => {
     return [...projectsToSort].sort((a, b) => {
       // First sort by pinned status
       if (a.isPinned && !b.isPinned) return -1;
@@ -105,16 +47,16 @@ export const useProjects = () => {
       
       return (statusPriority[aStatus] || 99) - (statusPriority[bStatus] || 99);
     });
-  };
+  }, []);
 
-  // Filter and sort projects
-  const filteredAndSortedProjects = sortProjects(
+  // Filter and sort projects using useMemo to avoid unnecessary recalculations
+  const filteredAndSortedProjects = useMemo(() => sortProjects(
     projects.filter(project => {
       // Search filter
       const matchesSearch = 
         project.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.type?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.projectId?.toLowerCase().includes(searchQuery.toLowerCase());
+        project.project_id?.toLowerCase().includes(searchQuery.toLowerCase());
       
       // Type filter
       const matchesType = typeFilter === "all" || 
@@ -130,7 +72,7 @@ export const useProjects = () => {
       
       return matchesSearch && matchesType && matchesStatus && matchesPriority;
     })
-  );
+  ), [projects, searchQuery, typeFilter, statusFilter, priorityFilter, sortProjects]);
 
   // Toggle pin status
   const handleTogglePin = async (projectId, isPinned) => {
@@ -142,15 +84,7 @@ export const useProjects = () => {
       
       if (error) throw error;
       
-      // Update local state
-      setProjects(prevProjects => 
-        prevProjects.map(project => 
-          project.id === projectId 
-            ? { ...project, isPinned: !isPinned } 
-            : project
-        )
-      );
-      
+      await fetchProjects(true); // Force refresh after update
       toast.success(isPinned ? 'Projekt afpinnet' : 'Projekt pinnet');
     } catch (error) {
       console.error('Error toggling pin:', error);
@@ -185,7 +119,7 @@ export const useProjects = () => {
       if (error) throw error;
       
       // Refresh projects to get the updated list
-      await fetchProjects();
+      await fetchProjects(true); // Force refresh
       
       return data;
     } catch (error) {
@@ -222,7 +156,7 @@ export const useProjects = () => {
       if (error) throw error;
       
       // Refresh projects to get the updated list
-      await fetchProjects();
+      await fetchProjects(true); // Force refresh
       
       return data;
     } catch (error) {
@@ -244,7 +178,7 @@ export const useProjects = () => {
     setStatusFilter,
     priorityFilter,
     setPriorityFilter,
-    fetchProjects, // Changed from refreshProjects to fetchProjects
+    fetchProjects,
     handleTogglePin,
     handleCreateProject,
     handleUpdateProject

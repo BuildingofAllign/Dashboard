@@ -1,16 +1,47 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { FilterSelect } from "@/components/ui/FilterButton";
 import { Button } from "@/components/ui/button";
-import { Upload, Image, MoreVertical, Info, Clock, FileImage } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Upload } from "lucide-react";
 import { DrawingCard } from "@/components/drawings/DrawingCard";
 import { AddDrawingCard } from "@/components/drawings/AddDrawingCard";
+import { useData } from "@/context/DataContext";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const Tegninger: React.FC = () => {
+  const { drawings, loadingDrawings, fetchDrawings, projects } = useData();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [projectFilter, setProjectFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+
+  useEffect(() => {
+    fetchDrawings();
+  }, [fetchDrawings]);
+
+  const filteredDrawings = drawings.filter(drawing => {
+    // Search filter
+    const matchesSearch = drawing.title?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // Project filter
+    const matchesProject = projectFilter === "all" || 
+      drawing.project_id === projectFilter;
+    
+    // Drawing type filter - assuming drawing titles contain type information
+    const matchesType = typeFilter === "all" || 
+      drawing.title?.toLowerCase().includes(typeFilter.toLowerCase());
+    
+    return matchesSearch && matchesProject && matchesType;
+  });
+
+  // Get unique projects for filter dropdown
+  const uniqueProjects = [...new Set(projects.map(p => ({ id: p.id, name: p.name })))];
+
+  // Common drawing types for filter dropdown
+  const drawingTypes = ["Plantegning", "Snittegning", "Detailtegning", "El", "VVS"];
+
   return (
     <div className="flex h-screen bg-gray-100">
       <Sidebar />
@@ -19,21 +50,29 @@ const Tegninger: React.FC = () => {
         
         <div className="p-6 pb-3">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-            <SearchBar placeholder="Søg efter tegning..." />
+            <SearchBar 
+              placeholder="Søg efter tegning..." 
+              onChange={setSearchQuery}
+              value={searchQuery}
+            />
             <div className="flex gap-2 mt-4 md:mt-0">
-              <FilterSelect>
-                <option>Alle projekter</option>
-                <option>Projekt Skovvej 12</option>
-                <option>Projekt Havnegade 8</option>
-                <option>Projekt Stationsvej 23</option>
+              <FilterSelect 
+                value={projectFilter} 
+                onChange={(e) => setProjectFilter(e.target.value)}
+              >
+                <option value="all">Alle projekter</option>
+                {uniqueProjects.map((project) => (
+                  <option key={project.id} value={project.id}>Projekt {project.name}</option>
+                ))}
               </FilterSelect>
-              <FilterSelect>
-                <option>Alle typer</option>
-                <option>Plantegning</option>
-                <option>Snittegning</option>
-                <option>Detailtegning</option>
-                <option>El</option>
-                <option>VVS</option>
+              <FilterSelect 
+                value={typeFilter} 
+                onChange={(e) => setTypeFilter(e.target.value)}
+              >
+                <option value="all">Alle typer</option>
+                {drawingTypes.map((type, index) => (
+                  <option key={index} value={type.toLowerCase()}>{type}</option>
+                ))}
               </FilterSelect>
               <Button className="bg-indigo-600 hover:bg-indigo-700">
                 <Upload className="h-5 w-5 mr-1" />
@@ -44,47 +83,36 @@ const Tegninger: React.FC = () => {
         </div>
         
         <div className="p-6 pt-0 overflow-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <DrawingCard 
-              title="Plantegning stue"
-              project="Projekt Skovvej 12"
-              version="v2.1"
-              imageSrc="https://images.unsplash.com/photo-1461749280684-dccba630e2f6"
-              deviations={2}
-              additionalTasks={1}
-              updatedDaysAgo={3}
-              annotationMarkers={[
-                { id: 1, position: "top-1/4 left-1/3", color: "bg-indigo-500" },
-                { id: 2, position: "top-1/2 right-1/4", color: "bg-red-500" }
-              ]}
-            />
-            
-            <DrawingCard 
-              title="VVS installationsplan"
-              project="Projekt Skovvej 12"
-              version="v1.5"
-              imageSrc="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7"
-              deviations={1}
-              additionalTasks={0}
-              updatedDaysAgo={7}
-              annotationMarkers={[
-                { id: 1, position: "bottom-1/3 left-1/4", color: "bg-red-500" }
-              ]}
-            />
-            
-            <DrawingCard 
-              title="Facadetegning"
-              project="Projekt Skovvej 12"
-              version="v1.0"
-              imageSrc="https://images.unsplash.com/photo-1531297484001-80022131f5a1"
-              deviations={0}
-              additionalTasks={0}
-              updatedDaysAgo={14}
-              annotationMarkers={[]}
-            />
-            
-            <AddDrawingCard />
-          </div>
+          {loadingDrawings ? (
+            <div className="flex justify-center items-center h-64">
+              <LoadingSpinner size="lg" />
+            </div>
+          ) : filteredDrawings.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredDrawings.map((drawing) => (
+                <DrawingCard 
+                  key={drawing.id}
+                  title={drawing.title}
+                  project={projects.find(p => p.id === drawing.project_id)?.name || "Ukendt projekt"}
+                  version={drawing.version}
+                  imageSrc={drawing.image_url}
+                  deviations={drawing.deviations || 0}
+                  additionalTasks={drawing.additional_tasks || 0}
+                  updatedDaysAgo={drawing.updated_days_ago || 0}
+                  annotationMarkers={drawing.drawing_annotation_markers?.map(marker => ({
+                    id: marker.id,
+                    position: marker.position,
+                    color: marker.color
+                  })) || []}
+                />
+              ))}
+              <AddDrawingCard />
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500">Ingen tegninger fundet med de valgte filtre.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

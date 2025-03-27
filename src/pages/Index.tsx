@@ -1,45 +1,22 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { FilterSelect } from "@/components/ui/FilterButton";
 import { EmployeeCard } from "@/components/employees/EmployeeCard";
-
-const employees = [
-  {
-    initials: "JP",
-    name: "Jens Paulsen",
-    role: "Håndværker - Tømrer",
-    status: "online" as const,
-    project: "Skovvej 12",
-    phone: "+45 20 23 34 45",
-    communicationTools: ["meet", "teams", "zoom"],
-  },
-  {
-    initials: "BS",
-    name: "Boktogan Saruhan",
-    role: "Håndværker - Elektriker",
-    status: "online" as const,
-    project: "Havnegade 8",
-    phone: "+45 31 45 56 67",
-    communicationTools: ["meet", "teams", "zoom"],
-  },
-  {
-    initials: "MN",
-    name: "Mette Nielsen",
-    role: "Ingeniør",
-    status: "busy" as const,
-    project: "Stationsvej 23",
-    phone: "+45 28 34 45 56",
-    communicationTools: ["meet"],
-  },
-];
+import { useData } from "@/context/DataContext";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const Index = () => {
+  const { employees, loadingEmployees, fetchEmployees } = useData();
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [projectFilter, setProjectFilter] = useState("all");
+
+  useEffect(() => {
+    fetchEmployees();
+  }, [fetchEmployees]);
 
   const filteredEmployees = employees.filter(
     (employee) => {
@@ -47,7 +24,7 @@ const Index = () => {
       const matchesSearch = 
         employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         employee.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        employee.project.toLowerCase().includes(searchQuery.toLowerCase());
+        (employee.project && employee.project.toLowerCase().includes(searchQuery.toLowerCase()));
       
       // Role filter
       const matchesRole = roleFilter === "all" || 
@@ -61,6 +38,12 @@ const Index = () => {
     }
   );
 
+  // Get unique projects for filter dropdown
+  const uniqueProjects = [...new Set(employees.map(emp => emp.project))].filter(Boolean);
+  
+  // Get unique roles for filter dropdown
+  const uniqueRoles = [...new Set(employees.map(emp => emp.role))].filter(Boolean);
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar />
@@ -72,34 +55,56 @@ const Index = () => {
             <SearchBar
               placeholder="Søg efter medarbejder..."
               onChange={setSearchQuery}
+              value={searchQuery}
             />
             <div className="flex space-x-2 mt-4 md:mt-0">
               <FilterSelect 
                 onChange={(e) => setRoleFilter(e.target.value)}
+                value={roleFilter}
               >
                 <option value="all">Alle roller</option>
-                <option value="håndværker">Håndværker</option>
-                <option value="byggeleder">Byggeleder</option>
-                <option value="ingeniør">Ingeniør</option>
+                {uniqueRoles.map((role, index) => (
+                  <option key={index} value={role}>{role}</option>
+                ))}
               </FilterSelect>
               <FilterSelect
                 onChange={(e) => setProjectFilter(e.target.value)}
+                value={projectFilter}
               >
                 <option value="all">Alle projekter</option>
-                <option value="Skovvej 12">Projekt Skovvej 12</option>
-                <option value="Havnegade 8">Projekt Havnegade 8</option>
-                <option value="Stationsvej 23">Projekt Stationsvej 23</option>
+                {uniqueProjects.map((project, index) => (
+                  <option key={index} value={project}>Projekt {project}</option>
+                ))}
               </FilterSelect>
             </div>
           </div>
         </div>
 
         <div className="p-6 pt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredEmployees.map((employee, index) => (
-              <EmployeeCard key={index} {...employee} />
-            ))}
-          </div>
+          {loadingEmployees ? (
+            <div className="flex justify-center items-center h-64">
+              <LoadingSpinner size="lg" />
+            </div>
+          ) : filteredEmployees.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredEmployees.map((employee, index) => (
+                <EmployeeCard 
+                  key={employee.id || index} 
+                  initials={employee.initials} 
+                  name={employee.name}
+                  role={employee.role}
+                  status={employee.status}
+                  project={employee.project}
+                  phone={employee.phone}
+                  communicationTools={employee.employee_communication_tools?.map(tool => tool.tool) || []}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500">Ingen medarbejdere fundet med de valgte filtre.</p>
+            </div>
+          )}
         </div>
       </main>
     </div>

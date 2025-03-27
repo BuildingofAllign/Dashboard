@@ -1,5 +1,4 @@
-
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import { supabase, generateEntityId } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Database } from '@/integrations/supabase/types';
@@ -45,22 +44,30 @@ type DataContextType = {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
+// Cache time in milliseconds (5 minutes)
+const CACHE_TIME = 5 * 60 * 1000;
+
 export const DataProvider = ({ children }: { children: ReactNode }) => {
   // State for each data type
   const [projects, setProjects] = useState<any[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
+  const [projectsLastFetch, setProjectsLastFetch] = useState(0);
   
   const [deviations, setDeviations] = useState<any[]>([]);
   const [loadingDeviations, setLoadingDeviations] = useState(true);
+  const [deviationsLastFetch, setDeviationsLastFetch] = useState(0);
   
   const [additionalTasks, setAdditionalTasks] = useState<any[]>([]);
   const [loadingAdditionalTasks, setLoadingAdditionalTasks] = useState(true);
+  const [additionalTasksLastFetch, setAdditionalTasksLastFetch] = useState(0);
   
   const [drawings, setDrawings] = useState<any[]>([]);
   const [loadingDrawings, setLoadingDrawings] = useState(true);
+  const [drawingsLastFetch, setDrawingsLastFetch] = useState(0);
   
   const [employees, setEmployees] = useState<any[]>([]);
   const [loadingEmployees, setLoadingEmployees] = useState(true);
+  const [employeesLastFetch, setEmployeesLastFetch] = useState(0);
   
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   
@@ -86,8 +93,18 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Fetch functions
-  const fetchProjects = async () => {
+  // Helper to check if cache is stale
+  const isCacheStale = (lastFetchTime: number) => {
+    return Date.now() - lastFetchTime > CACHE_TIME;
+  };
+
+  // Fetch functions with caching
+  const fetchProjects = useCallback(async (forceRefresh = false) => {
+    // Skip if data is fresh and not forced
+    if (!forceRefresh && !isCacheStale(projectsLastFetch) && projects.length > 0) {
+      return;
+    }
+
     try {
       setLoadingProjects(true);
       const { data, error } = await supabase
@@ -96,15 +113,20 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       
       if (error) throw error;
       setProjects(data || []);
+      setProjectsLastFetch(Date.now());
     } catch (error: any) {
       toast.error('Error loading projects', { description: error.message });
       console.error('Error fetching projects:', error);
     } finally {
       setLoadingProjects(false);
     }
-  };
+  }, [projects.length, projectsLastFetch]);
   
-  const fetchDeviations = async () => {
+  const fetchDeviations = useCallback(async (forceRefresh = false) => {
+    if (!forceRefresh && !isCacheStale(deviationsLastFetch) && deviations.length > 0) {
+      return;
+    }
+
     try {
       setLoadingDeviations(true);
       const { data, error } = await supabase
@@ -113,15 +135,20 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       
       if (error) throw error;
       setDeviations(data || []);
+      setDeviationsLastFetch(Date.now());
     } catch (error: any) {
       toast.error('Error loading deviations', { description: error.message });
       console.error('Error fetching deviations:', error);
     } finally {
       setLoadingDeviations(false);
     }
-  };
+  }, [deviations.length, deviationsLastFetch]);
   
-  const fetchAdditionalTasks = async () => {
+  const fetchAdditionalTasks = useCallback(async (forceRefresh = false) => {
+    if (!forceRefresh && !isCacheStale(additionalTasksLastFetch) && additionalTasks.length > 0) {
+      return;
+    }
+
     try {
       setLoadingAdditionalTasks(true);
       const { data, error } = await supabase
@@ -130,15 +157,20 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       
       if (error) throw error;
       setAdditionalTasks(data || []);
+      setAdditionalTasksLastFetch(Date.now());
     } catch (error: any) {
       toast.error('Error loading additional tasks', { description: error.message });
       console.error('Error fetching additional tasks:', error);
     } finally {
       setLoadingAdditionalTasks(false);
     }
-  };
+  }, [additionalTasks.length, additionalTasksLastFetch]);
   
-  const fetchDrawings = async () => {
+  const fetchDrawings = useCallback(async (forceRefresh = false) => {
+    if (!forceRefresh && !isCacheStale(drawingsLastFetch) && drawings.length > 0) {
+      return;
+    }
+
     try {
       setLoadingDrawings(true);
       const { data, error } = await supabase
@@ -147,15 +179,20 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       
       if (error) throw error;
       setDrawings(data || []);
+      setDrawingsLastFetch(Date.now());
     } catch (error: any) {
       toast.error('Error loading drawings', { description: error.message });
       console.error('Error fetching drawings:', error);
     } finally {
       setLoadingDrawings(false);
     }
-  };
+  }, [drawings.length, drawingsLastFetch]);
   
-  const fetchEmployees = async () => {
+  const fetchEmployees = useCallback(async (forceRefresh = false) => {
+    if (!forceRefresh && !isCacheStale(employeesLastFetch) && employees.length > 0) {
+      return;
+    }
+
     try {
       setLoadingEmployees(true);
       const { data, error } = await supabase
@@ -164,13 +201,14 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       
       if (error) throw error;
       setEmployees(data || []);
+      setEmployeesLastFetch(Date.now());
     } catch (error: any) {
       toast.error('Error loading employees', { description: error.message });
       console.error('Error fetching employees:', error);
     } finally {
       setLoadingEmployees(false);
     }
-  };
+  }, [employees.length, employeesLastFetch]);
 
   // Create and update functions
   const createProject = async (projectData: any) => {
@@ -374,9 +412,20 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     fetchAdditionalTasks();
     fetchDrawings();
     fetchEmployees();
-  }, []);
+    
+    // Set up a refresh interval - refresh all data every 5 minutes
+    const refreshInterval = setInterval(() => {
+      fetchProjects(true);
+      fetchDeviations(true);
+      fetchAdditionalTasks(true);
+      fetchDrawings(true);
+      fetchEmployees(true);
+    }, CACHE_TIME);
+    
+    return () => clearInterval(refreshInterval);
+  }, [fetchProjects, fetchDeviations, fetchAdditionalTasks, fetchDrawings, fetchEmployees]);
 
-  const value = {
+  const value = useMemo(() => ({
     // Projects
     projects,
     loadingProjects,
@@ -413,7 +462,14 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     // User preferences
     theme,
     toggleTheme,
-  };
+  }), [
+    projects, loadingProjects, fetchProjects,
+    deviations, loadingDeviations, fetchDeviations,
+    additionalTasks, loadingAdditionalTasks, fetchAdditionalTasks,
+    drawings, loadingDrawings, fetchDrawings,
+    employees, loadingEmployees, fetchEmployees,
+    theme
+  ]);
 
   return (
     <DataContext.Provider value={value}>
