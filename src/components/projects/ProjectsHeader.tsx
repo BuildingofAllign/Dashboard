@@ -1,7 +1,6 @@
-
 import React from "react";
 import { SearchBar } from "@/components/ui/SearchBar";
-import { Command, CircleInfo } from "lucide-react";
+import { Command, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FilterSelect } from "@/components/ui/FilterButton";
 import { ViewToggle, ViewMode } from "@/components/ui/ViewToggle";
@@ -85,7 +84,7 @@ export const ProjectsHeader: React.FC<ProjectsHeaderProps> = ({
         <HoverCard>
           <HoverCardTrigger asChild>
             <Button variant="ghost" size="icon" className="hidden md:flex">
-              <CircleInfo className="h-5 w-5 text-blue-500" />
+              <Info className="h-5 w-5 text-blue-500" />
             </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-80">
