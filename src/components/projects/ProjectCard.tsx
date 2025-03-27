@@ -1,237 +1,135 @@
 
 import React from 'react';
-import { 
-  Card, 
-  CardContent, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Building, 
-  CalendarDays, 
-  Clock, 
-  MessageSquare, 
-  Pin, 
-  ClipboardCheck, 
-  AlertTriangle, 
-  PlusCircle
-} from "lucide-react";
-import { 
-  Tooltip, 
-  TooltipContent, 
-  TooltipProvider, 
-  TooltipTrigger 
-} from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { PriorityIndicator, Priority } from "@/components/ui/PriorityIndicator";
 import { AvatarCircles } from "../ui/avatar-circles";
-
-export interface Project {
-  id: number;
-  projectId: string;
-  name: string;
-  type: string;
-  category: "bolig" | "erhverv" | "institution" | "renovering";
-  status: "aktiv" | "problem" | "udfordring" | "afsluttet";
-  progress: number;
-  team?: {
-    initials: string;
-    name: string;
-    color: string;
-    role: string;
-  }[];
-  additionalTeamMembers?: number;
-  deviations: number;
-  additions: number;
-  qualityAssurance: number;
-  communicationTools?: string[];
-  startDate: string;
-  endDate: string;
-  completionDate?: string;
-  duration?: string;
-  messages: {
-    high: number;
-    medium: number;
-    low: number;
-  };
-  isPinned: boolean;
-  priority: Priority;
-}
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, CheckCircle, ExternalLink, MoreVertical, Pencil, Pin, PlusCircle } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { format } from 'date-fns';
+import { da } from 'date-fns/locale';
 
 interface ProjectCardProps {
-  project: Project;
-  onTogglePin: (projectId: number) => void;
+  project: any;
+  onTogglePin: () => void;
+  onEdit?: () => void;
+  onDelete?: React.ReactNode;
 }
 
-export const ProjectCard = ({ project, onTogglePin }: ProjectCardProps) => {
-  // Get color for progress based on status and progress
-  const getProgressColor = () => {
-    if (project.status === "afsluttet") return "bg-gray-400";
-    if (project.progress >= 75) return "bg-green-500";
-    if (project.progress >= 50) return "bg-blue-500";
-    if (project.progress >= 25) return "bg-yellow-500";
-    return "bg-red-500";
-  };
-
-  const getStatusStyles = () => {
-    switch(project.status) {
-      case "aktiv":
-        return "bg-green-500 text-white";
-      case "problem":
-        return "bg-red-500 text-white";
-      case "udfordring":
-        return "bg-yellow-500 text-white";
-      case "afsluttet":
-        return "bg-gray-400 bg-opacity-70 text-white";
-      default:
-        return "bg-indigo-700 text-white";
-    }
-  };
-
-  // Map status to capitalized display text
-  const getStatusDisplayText = () => {
-    switch(project.status) {
-      case "aktiv":
-        return "Aktiv";
-      case "problem":
-        return "Problem";
-      case "udfordring":
-        return "Udfordring";
-      case "afsluttet":
-        return "Afsluttet";
-      default:
-        return project.status;
-    }
-  };
+export const ProjectCard = ({ project, onTogglePin, onEdit, onDelete }: ProjectCardProps) => {
+  const isPinned = project.is_pinned || project.isPinned;
+  const formattedDate = project.updated_at 
+    ? format(new Date(project.updated_at), 'dd. MMM yyyy', { locale: da })
+    : '';
 
   return (
-    <Card 
-      className={cn(
-        "transition-all duration-200 hover:shadow-md relative overflow-hidden",
-        project.isPinned && "border-primary shadow-sm",
-      )}
-    >
-      {project.isPinned && (
-        <div className="absolute top-0 right-0">
-          <div className="w-12 h-12 bg-indigo-700 transform rotate-45 translate-x-6 -translate-y-6" />
-          <Pin 
-            className="absolute top-1 right-1 h-4 w-4 text-white cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              onTogglePin(project.id);
-            }}
-          />
-        </div>
-      )}
-      
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <div className="text-sm text-muted-foreground mb-1">
-              {project.projectId}
+    <Card className={cn(
+      "overflow-hidden transition-all hover:shadow-md",
+      isPinned && "ring-2 ring-primary/10"
+    )}>
+      <CardHeader className="p-0">
+        <div className="relative h-24 w-full bg-gradient-to-r from-primary/80 to-primary">
+          <div className="absolute inset-0 flex items-center justify-between p-4">
+            <div>
+              <PriorityIndicator priority={project.priority as Priority} size="md" />
             </div>
-            <CardTitle className="text-lg font-bold">
-              {project.name}
-            </CardTitle>
-          </div>
-          {!project.isPinned && (
-            <Pin 
-              onClick={(e) => {
-                e.stopPropagation();
-                onTogglePin(project.id);
-              }}
-              className="h-4 w-4 text-muted-foreground hover:text-primary cursor-pointer"
-            />
-          )}
-        </div>
-        
-        <div className="flex items-center space-x-1 mt-1">
-          <PriorityIndicator priority={project.priority} size="sm" />
-          <div className="text-sm text-muted-foreground">
-            {project.type}
+            <div className="flex items-center space-x-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full bg-white/20 text-white hover:bg-white/30"
+                onClick={onTogglePin}
+              >
+                <Pin className={cn("h-4 w-4", isPinned && "fill-white")} />
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-full bg-white/20 text-white hover:bg-white/30"
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuLabel>Projekt Handlinger</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={onEdit} className="cursor-pointer">
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Rediger
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive" asChild>
+                    {onDelete}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={onTogglePin} className="cursor-pointer">
+                    <Pin className={cn("mr-2 h-4 w-4", isPinned && "fill-primary")} />
+                    {isPinned ? 'Fjern pin' : 'Pin projekt'}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
       </CardHeader>
-      
-      <CardContent className="pb-2">
-        <div className="flex justify-between items-center mb-1">
-          <div className={cn("flex items-center px-3 py-1 rounded-full", getStatusStyles())}>
-            <span className="text-sm font-medium">{getStatusDisplayText()}</span>
+      <CardContent className="p-4">
+        <div className="space-y-2">
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-muted-foreground">{project.project_id}</div>
+              <StatusBadge status={project.status} />
+            </div>
+            <h3 className="font-semibold truncate" title={project.name}>
+              {project.name}
+            </h3>
+            <p className="text-sm text-muted-foreground truncate" title={project.type}>
+              {project.type}
+            </p>
           </div>
-          <div className="text-sm font-medium">{project.progress}%</div>
-        </div>
-        
-        <div className="mb-4">
-          <Progress value={project.progress} className="h-2 bg-slate-200 [&>div]:bg-indigo-700" />
-        </div>
-        
-        <div className="grid grid-cols-1 gap-3">
-          {project.startDate && (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">Start:</span>
-              </div>
-              <span className="text-sm">{project.startDate}</span>
-            </div>
-          )}
-          
-          {project.endDate && (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">Slut:</span>
-              </div>
-              <span className="text-sm">{project.endDate}</span>
-            </div>
-          )}
           
           {project.team && (
-            <div>
-              <div className="flex items-center space-x-2 mb-2">
-                <span className="text-sm">Team:</span>
-              </div>
-              <AvatarCircles 
-                items={project.team} 
-                limit={3} 
-                size="sm"
-                className="ml-1"
-              />
-            </div>
+            <AvatarCircles 
+              items={project.team} 
+              limit={5} 
+              size="sm"
+            />
           )}
+          
+          <div className="pt-2">
+            <div className="flex justify-between text-sm mb-1">
+              <span>Fremgang</span>
+              <span className="font-medium">{project.progress}%</span>
+            </div>
+            <Progress value={project.progress} className="h-2" />
+          </div>
         </div>
       </CardContent>
       
-      <CardFooter className="text-xs text-muted-foreground">
-        <div className="w-full">
-          <div className="flex justify-between items-center space-x-2">
-            <Badge variant="outline" className="flex items-center gap-1">
-              <AlertTriangle className="h-3 w-3" />
-              {project.deviations || 0}
-            </Badge>
-            
-            <Badge variant="outline" className="flex items-center gap-1">
-              <PlusCircle className="h-3 w-3" />
-              {project.additions || 0}
-            </Badge>
-            
-            <Badge variant="outline" className="flex items-center gap-1">
-              <ClipboardCheck className="h-3 w-3" />
-              {project.qualityAssurance || 0}%
-            </Badge>
-            
-            {project.messages && (
-              <Badge variant="outline" className="flex items-center gap-1">
-                <MessageSquare className="h-3 w-3" />
-                {project.messages.high + project.messages.medium + project.messages.low}
-              </Badge>
-            )}
-          </div>
-        </div>
+      <CardFooter className="p-4 pt-0 grid grid-cols-3 gap-2 text-xs">
+        <Badge variant="outline" className="flex items-center gap-1 justify-center">
+          <AlertTriangle className="h-3 w-3" />
+          {project.deviations || 0}
+        </Badge>
+        <Badge variant="outline" className="flex items-center gap-1 justify-center">
+          <PlusCircle className="h-3 w-3" />
+          {project.additions || 0}
+        </Badge>
+        <Badge variant="outline" className="flex items-center gap-1 justify-center">
+          <CheckCircle className="h-3 w-3" />
+          {project.quality_assurance || 0}%
+        </Badge>
       </CardFooter>
     </Card>
   );

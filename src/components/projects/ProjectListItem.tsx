@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   TableRow, 
@@ -8,6 +9,7 @@ import {
   CheckCircle, 
   ChevronRight, 
   MessageSquare, 
+  Pencil,
   Pin, 
   PlusCircle
 } from "lucide-react";
@@ -17,13 +19,17 @@ import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { PriorityIndicator, Priority } from "@/components/ui/PriorityIndicator";
 import { AvatarCircles } from "../ui/avatar-circles";
+import { DeleteConfirmationDialog } from "../ui/DeleteConfirmationDialog";
+import { Button } from "../ui/button";
 
 interface ProjectListItemProps {
   project: any;
   onTogglePin: (id: number) => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-export const ProjectListItem = ({ project, onTogglePin }: ProjectListItemProps) => {
+export const ProjectListItem = ({ project, onTogglePin, onEdit, onDelete }: ProjectListItemProps) => {
   // Get color for progress based on status and progress
   const getProgressColor = () => {
     if (project.status === "afsluttet") return "bg-gray-400";
@@ -64,15 +70,17 @@ export const ProjectListItem = ({ project, onTogglePin }: ProjectListItemProps) 
     }
   };
 
+  const isPinned = project.is_pinned || project.isPinned;
+
   return (
     <TableRow className={cn(
-      project.isPinned && "border-l-2 border-l-primary"
+      isPinned && "border-l-2 border-l-primary"
     )}>
       <TableCell>
         <PriorityIndicator priority={project.priority as Priority} />
       </TableCell>
       
-      <TableCell className="font-medium">{project.projectId}</TableCell>
+      <TableCell className="font-medium">{project.project_id}</TableCell>
       
       <TableCell>{project.name}</TableCell>
       
@@ -127,17 +135,35 @@ export const ProjectListItem = ({ project, onTogglePin }: ProjectListItemProps) 
       </TableCell>
       
       <TableCell>
-        <div className="flex items-center space-x-2">
-          <Pin 
-            onClick={(e) => {
-              e.stopPropagation();
-              onTogglePin(project.id);
-            }}
-            className={cn(
-              "h-4 w-4 cursor-pointer",
-              project.isPinned ? "text-primary" : "text-muted-foreground hover:text-primary"
-            )}
-          />
+        <div className="flex items-center space-x-1 justify-end">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            onClick={() => onTogglePin(project.id)}
+          >
+            <Pin className={cn("h-4 w-4", isPinned && "fill-primary text-primary")} />
+          </Button>
+          
+          {onEdit && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-primary"
+              onClick={onEdit}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
+          
+          {onDelete && (
+            <DeleteConfirmationDialog 
+              title="Slet projekt"
+              description={`Er du sikker på at du vil slette projektet "${project.name}"?`}
+              onDelete={onDelete}
+            />
+          )}
+          
           <ChevronRight className="h-5 w-5 text-muted-foreground" />
         </div>
       </TableCell>

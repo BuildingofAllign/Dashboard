@@ -30,6 +30,21 @@ export const ProjectFormDialog = ({
     onOpenChange(false);
   };
 
+  // Map database field names to form field names if needed
+  const formattedInitialData = initialData ? {
+    ...initialData,
+    project_id: initialData.project_id || '',
+    name: initialData.name || '',
+    type: initialData.type || '',
+    category: initialData.category || 'bolig',
+    status: initialData.status || 'aktiv',
+    progress: initialData.progress || 0,
+    priority: initialData.priority || 'green',
+    description: initialData.description || '',
+    start_date: initialData.start_date || '',
+    end_date: initialData.end_date || '',
+  } : undefined;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
@@ -44,7 +59,7 @@ export const ProjectFormDialog = ({
           </DialogDescription>
         </DialogHeader>
         <ProjectForm 
-          initialData={initialData} 
+          initialData={formattedInitialData} 
           onSuccess={handleSuccess}
           onCancel={handleCancel}
         />

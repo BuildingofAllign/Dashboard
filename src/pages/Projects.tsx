@@ -1,74 +1,154 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { SearchBar } from "@/components/ui/SearchBar";
-import { FilterSelect, FilterButton } from "@/components/ui/FilterButton";
+import { FilterSelect } from "@/components/ui/FilterButton";
 import { ProjectCard } from "@/components/projects/ProjectCard";
 import { ProjectRowCard } from "@/components/projects/ProjectRowCard";
 import { ProjectListItem } from "@/components/projects/ProjectListItem";
 import { ViewToggle, ViewMode } from "@/components/ui/ViewToggle";
-import { Plus, Pin, AlertCircle } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableRow, TableHead, TableBody } from "@/components/ui/table";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ProjectFormDialog } from "@/components/projects/ProjectFormDialog";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { EmptyState } from "@/components/ui/EmptyState";
-
-// Demo project data
-const DEMO_PROJECTS = [
-  {
-    id: 1,
-    projectId: "P-2023-001",
-    name: "Demo Boligbyggeri",
-    status: "aktiv",
-    type: "Nybyggeri",
-    isPinned: true,
-    priority: "green",
-    progress: 45,
-    deviations: 2,
-    additions: 1,
-    qualityAssurance: 78,
-    team: [
-      { name: "Anders Jensen", initials: "AJ", color: "#4f46e5" },
-      { name: "Mette Nielsen", initials: "MN", color: "#10b981" }
-    ]
-  },
-  {
-    id: 2,
-    projectId: "P-2023-002",
-    name: "Demo Renovering",
-    status: "problem",
-    type: "Renovering",
-    isPinned: false,
-    priority: "red",
-    progress: 30,
-    deviations: 7,
-    additions: 3,
-    qualityAssurance: 45,
-    team: [
-      { name: "Lars Pedersen", initials: "LP", color: "#f59e0b" }
-    ]
-  }
-];
+import { useProjects } from "@/hooks/use-projects";
+import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
 
 const Projects = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [priorityFilter, setPriorityFilter] = useState("all");
-  const [isDataAvailable, setIsDataAvailable] = useState(false);
+  const [editingProject, setEditingProject] = useState<any>(null);
   
-  // Demo implementation that doesn't rely on DataContext
-  const handleTogglePin = (projectId) => {
-    console.log(`Toggle pin for project ${projectId}`);
+  const {
+    filteredAndSortedProjects,
+    loadingProjects,
+    searchQuery,
+    setSearchQuery,
+    typeFilter,
+    setTypeFilter,
+    statusFilter,
+    setStatusFilter,
+    priorityFilter,
+    setPriorityFilter,
+    fetchProjects,
+    handleTogglePin,
+    handleDeleteProject
+  } = useProjects();
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
+
+  const handleEditProject = (project) => {
+    setEditingProject(project);
+    setIsCreateDialogOpen(true);
   };
 
-  const filteredProjects = isDataAvailable ? DEMO_PROJECTS : [];
+  const handleCloseDialog = () => {
+    setIsCreateDialogOpen(false);
+    setEditingProject(null);
+  };
+
+  const renderProjectContent = () => {
+    if (loadingProjects) {
+      return (
+        <div className="flex justify-center items-center py-20">
+          <LoadingSpinner size="lg" />
+        </div>
+      );
+    }
+
+    if (filteredAndSortedProjects.length === 0) {
+      return (
+        <EmptyState
+          title="Ingen projekter"
+          description="Der er ingen projekter at vise på nuværende tidspunkt."
+          icon="file"
+          actionLabel="Opret nyt projekt"
+          onAction={() => setIsCreateDialogOpen(true)}
+        />
+      );
+    }
+
+    if (viewMode === "grid") {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {filteredAndSortedProjects.map(project => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              onTogglePin={() => handleTogglePin(project.id, project.is_pinned || project.isPinned)}
+              onEdit={() => handleEditProject(project)}
+              onDelete={
+                <DeleteConfirmationDialog 
+                  title="Slet projekt"
+                  description={`Er du sikker på at du vil slette projektet "${project.name}"?`}
+                  onDelete={() => handleDeleteProject(project.id)}
+                />
+              }
+            />
+          ))}
+        </div>
+      );
+    }
+
+    if (viewMode === "rows") {
+      return (
+        <div className="space-y-2">
+          {filteredAndSortedProjects.map(project => (
+            <ProjectRowCard
+              key={project.id}
+              project={project}
+              onTogglePin={() => handleTogglePin(project.id, project.is_pinned || project.isPinned)}
+              onEdit={() => handleEditProject(project)}
+              onDelete={
+                <DeleteConfirmationDialog 
+                  title="Slet projekt"
+                  description={`Er du sikker på at du vil slette projektet "${project.name}"?`}
+                  onDelete={() => handleDeleteProject(project.id)}
+                />
+              }
+            />
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-10">Status</TableHead>
+            <TableHead>ID</TableHead>
+            <TableHead>Navn</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead>Team</TableHead>
+            <TableHead>Fremgang</TableHead>
+            <TableHead>Afvigelser</TableHead>
+            <TableHead>Tillæg</TableHead>
+            <TableHead>KS</TableHead>
+            <TableHead className="text-right">Handlinger</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredAndSortedProjects.map(project => (
+            <ProjectListItem
+              key={project.id}
+              project={project}
+              onTogglePin={() => handleTogglePin(project.id, project.is_pinned || project.isPinned)}
+              onEdit={() => handleEditProject(project)}
+              onDelete={() => handleDeleteProject(project.id)}
+            />
+          ))}
+        </TableBody>
+      </Table>
+    );
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -134,54 +214,17 @@ const Projects = () => {
             </div>
           </div>
 
-          {!isDataAvailable ? (
-            <EmptyState
-              title="Ingen projekter"
-              description="Der er ingen projekter at vise på nuværende tidspunkt."
-              icon="file"
-              actionLabel="Opret nyt projekt"
-              onAction={() => setIsCreateDialogOpen(true)}
-            />
-          ) : (
-            <TooltipProvider>
-              {viewMode === "list" ? (
-                // List view would go here
-                <div className="space-y-8">
-                  <EmptyState
-                    title="Listevisning"
-                    description="Denne visning er under udvikling."
-                    icon="search"
-                  />
-                </div>
-              ) : (
-                <div className="space-y-8">
-                  {filteredProjects.length === 0 ? (
-                    <EmptyState
-                      title="Ingen matchende projekter"
-                      description="Der blev ikke fundet nogen projekter der matcher dine filtre."
-                      icon="search"
-                    />
-                  ) : (
-                    <>
-                      {/* Grid or rows view would go here */}
-                      <EmptyState
-                        title="Ingen projekter matcher filtre"
-                        description="Prøv at ændre dine filtre for at se flere projekter."
-                        icon="search"
-                      />
-                    </>
-                  )}
-                </div>
-              )}
-            </TooltipProvider>
-          )}
+          <TooltipProvider>
+            {renderProjectContent()}
+          </TooltipProvider>
         </div>
       </main>
 
       <ProjectFormDialog
         open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
-        mode="create"
+        onOpenChange={handleCloseDialog}
+        mode={editingProject ? "edit" : "create"}
+        initialData={editingProject}
       />
     </div>
   );
