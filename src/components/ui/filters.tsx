@@ -1,7 +1,6 @@
 
 import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
-import { Check, ChevronsUpDown, X, Filter } from "lucide-react"
+import { Filter, X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
@@ -9,45 +8,19 @@ import { Button } from "@/components/ui/button"
 import {
   Command,
   CommandEmpty,
-  CommandGroup,
   CommandInput,
-  CommandItem,
   CommandList,
-  CommandSeparator,
 } from "@/components/ui/command"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Separator } from "@/components/ui/separator"
+import { FilterGroup } from "./filter-group"
+import { FilterClearAction } from "./filter-clear-action"
+import { FilterItem, filterItemVariants } from "./filter-item"
 
-const filterItemVariants = cva(
-  "inline-flex items-center whitespace-nowrap rounded-md text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
-  {
-    variants: {
-      variant: {
-        default:
-          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
-        secondary:
-          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-        outline:
-          "border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground",
-      },
-      size: {
-        default: "h-8 px-3 py-1",
-        sm: "h-7 px-2 text-xs",
-        lg: "h-10 px-3",
-      },
-    },
-    defaultVariants: {
-      variant: "outline",
-      size: "default",
-    },
-  }
-)
-
-interface FiltersOptions {
+export interface FiltersOptions {
   title: string
   options: Array<{
     label: string
@@ -139,53 +112,22 @@ const Filters = React.forwardRef<
             <CommandInput placeholder="Search filters..." />
             <CommandList>
               <CommandEmpty>{emptyText ?? "No results found."}</CommandEmpty>
+              
               {filtersOptions.map((filterOption, filterOptionIndex) => (
-                <React.Fragment key={filterOption.title}>
-                  {filterOptionIndex > 0 && <CommandSeparator />}
-                  <CommandGroup heading={filterOption.title}>
-                    {filterOption.options.map((option) => {
-                      const isSelected = selected.includes(option.value)
-                      const Icon = option.icon
-
-                      return (
-                        <CommandItem
-                          key={option.value}
-                          onSelect={() => handleSelect(option.value)}
-                        >
-                          <div
-                            className={cn(
-                              "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                              isSelected
-                                ? "bg-primary text-primary-foreground"
-                                : "opacity-50 [&_svg]:invisible"
-                            )}
-                          >
-                            <Check className="h-4 w-4" />
-                          </div>
-                          {Icon && (
-                            <Icon className="mr-2 h-4 w-4 text-muted-foreground" />
-                          )}
-                          <span>{option.label}</span>
-                        </CommandItem>
-                      )
-                    })}
-                  </CommandGroup>
-                </React.Fragment>
+                <FilterGroup
+                  key={filterOption.title}
+                  title={filterOption.title}
+                  options={filterOption.options}
+                  selectedOptions={selected}
+                  onSelect={handleSelect}
+                  index={filterOptionIndex}
+                />
               ))}
-              {selected.length > 0 && (
-                <>
-                  <CommandSeparator />
-                  <CommandGroup>
-                    <CommandItem
-                      onSelect={handleClear}
-                      className="justify-center text-center"
-                    >
-                      <X className="mr-2 h-4 w-4" />
-                      Clear filters
-                    </CommandItem>
-                  </CommandGroup>
-                </>
-              )}
+              
+              <FilterClearAction 
+                onClear={handleClear}
+                hasSelectedOptions={selected.length > 0}
+              />
             </CommandList>
           </Command>
         </PopoverContent>
@@ -194,17 +136,5 @@ const Filters = React.forwardRef<
   }
 )
 Filters.displayName = "Filters"
-
-const FilterItem = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof filterItemVariants>
->(({ className, variant, size, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(filterItemVariants({ variant, size, className }))}
-    {...props}
-  />
-))
-FilterItem.displayName = "FilterItem"
 
 export { Filters, FilterItem }
