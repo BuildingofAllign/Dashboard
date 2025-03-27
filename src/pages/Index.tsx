@@ -74,13 +74,17 @@ const Index = () => {
               onChange={setSearchQuery}
             />
             <div className="flex space-x-2 mt-4 md:mt-0">
-              <FilterSelect onChange={() => setRoleFilter("all")}>
+              <FilterSelect 
+                onChange={(e) => setRoleFilter(e.target.value)}
+              >
                 <option value="all">Alle roller</option>
                 <option value="håndværker">Håndværker</option>
                 <option value="byggeleder">Byggeleder</option>
                 <option value="ingeniør">Ingeniør</option>
               </FilterSelect>
-              <FilterSelect onChange={() => setProjectFilter("all")}>
+              <FilterSelect
+                onChange={(e) => setProjectFilter(e.target.value)}
+              >
                 <option value="all">Alle projekter</option>
                 <option value="Skovvej 12">Projekt Skovvej 12</option>
                 <option value="Havnegade 8">Projekt Havnegade 8</option>

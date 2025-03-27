@@ -4,15 +4,20 @@ import React from "react";
 interface FilterButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
+  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
 export const FilterSelect: React.FC<FilterButtonProps> = ({
   children,
   onClick,
+  onChange,
 }) => {
   return (
     <select
-      onChange={(e) => onClick?.()}
+      onChange={(e) => {
+        onChange?.(e);
+        onClick?.();
+      }}
       className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
     >
       {children}
