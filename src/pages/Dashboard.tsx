@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
@@ -7,9 +6,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BreadcrumbNav } from "@/components/ui/BreadcrumbNav";
 import { BarChart, LineChart, PieChart, DonutChart } from "@/components/ui/charts";
 import { useTheme } from "@/hooks/use-theme";
-import { Building, Building2, Home, User, Clock, CheckCircle, AlertTriangle, PlusCircle, TrendingUp, Calendar, ArrowUp, ArrowDown } from "lucide-react";
+import { 
+  Building, Building2, Home, User, Clock, CheckCircle, AlertTriangle, 
+  PlusCircle, TrendingUp, Calendar, ArrowUp, ArrowDown, 
+  LineChart as LineChartIcon, PieChart as PieChartIcon, 
+  BarChart as BarChartIcon, Activity
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useData } from "@/context/DataContext";
+import { BentoGrid, BentoCard } from "@/components/ui/bento-grid";
+import { DataCard } from "@/components/ui/DataCard";
 
 const Dashboard: React.FC = () => {
   const { isDarkMode } = useTheme();
@@ -184,69 +190,45 @@ const Dashboard: React.FC = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            <Card>
-              <CardContent className="p-6 flex items-center">
-                <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-full mr-4">
-                  <Building className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Aktive projekter</p>
-                  <h4 className="text-2xl font-bold">{stats.activeProjects}</h4>
-                  <div className="flex items-center mt-1 text-sm text-green-600 dark:text-green-400">
-                    <ArrowUp className="h-3 w-3 mr-1" />
-                    <span>{stats.projectsIncrease}% siden sidst</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <DataCard
+              title="Aktive projekter"
+              value={stats.activeProjects}
+              icon={<Building className="h-5 w-5" />}
+              trend={{
+                value: stats.projectsIncrease,
+                positive: true
+              }}
+            />
             
-            <Card>
-              <CardContent className="p-6 flex items-center">
-                <div className="p-3 bg-red-100 dark:bg-red-900 rounded-full mr-4">
-                  <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Åbne afvigelser</p>
-                  <h4 className="text-2xl font-bold">{stats.openDeviations}</h4>
-                  <div className="flex items-center mt-1 text-sm text-red-600 dark:text-red-400">
-                    <ArrowUp className="h-3 w-3 mr-1" />
-                    <span>{stats.deviationsIncrease}% siden sidst</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <DataCard
+              title="Åbne afvigelser"
+              value={stats.openDeviations}
+              icon={<AlertTriangle className="h-5 w-5" />}
+              trend={{
+                value: stats.deviationsIncrease,
+                positive: false
+              }}
+            />
             
-            <Card>
-              <CardContent className="p-6 flex items-center">
-                <div className="p-3 bg-green-100 dark:bg-green-900 rounded-full mr-4">
-                  <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">KS godkendt</p>
-                  <h4 className="text-2xl font-bold">{stats.qualityAssurancePercent}%</h4>
-                  <div className="flex items-center mt-1 text-sm text-green-600 dark:text-green-400">
-                    <ArrowUp className="h-3 w-3 mr-1" />
-                    <span>{stats.qaIncrease}% siden sidst</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <DataCard
+              title="KS godkendt"
+              value={`${stats.qualityAssurancePercent}%`}
+              icon={<CheckCircle className="h-5 w-5" />}
+              trend={{
+                value: stats.qaIncrease,
+                positive: true
+              }}
+            />
             
-            <Card>
-              <CardContent className="p-6 flex items-center">
-                <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-full mr-4">
-                  <PlusCircle className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Tillægsopgaver</p>
-                  <h4 className="text-2xl font-bold">{stats.additionalTasksCount}</h4>
-                  <div className="flex items-center mt-1 text-sm text-red-600 dark:text-red-400">
-                    <ArrowDown className="h-3 w-3 mr-1" />
-                    <span>{stats.additionalTasksDecrease}% siden sidst</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <DataCard
+              title="Tillægsopgaver"
+              value={stats.additionalTasksCount}
+              icon={<PlusCircle className="h-5 w-5" />}
+              trend={{
+                value: stats.additionalTasksDecrease,
+                positive: false
+              }}
+            />
           </div>
           
           <Tabs defaultValue="overview" className="space-y-4">
@@ -258,85 +240,82 @@ const Dashboard: React.FC = () => {
             </TabsList>
             
             <TabsContent value="overview" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Projekter efter kategori</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <PieChart 
-                      data={projectsByCategory} 
-                      index="name" 
-                      categories={["count"]} 
-                      valueFormatter={(value) => `${value} projekter`}
-                      className="h-80"
-                      theme={chartTheme}
-                      showAnimation={true}
-                    />
-                    <div className="grid grid-cols-2 gap-4 mt-6">
-                      {projectsByCategory.map((category) => (
-                        <div key={category.name} className="flex items-center">
-                          {getCategoryIcon(category.name)}
-                          <span className="ml-2 text-sm">{category.name} ({category.count})</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Afvigelser og tillægsopgaver</CardTitle>
-                  </CardHeader>
-                  <CardContent>
+              <BentoGrid>
+                <BentoCard 
+                  className="col-span-1 row-span-2 md:col-span-2"
+                  title="Afvigelser og tillægsopgaver"
+                  icon={<Activity className="h-5 w-5 text-blue-500" />}
+                  content={
                     <BarChart 
                       data={projectProgress} 
                       index="month"
                       categories={["afvigelser", "tillægsopgaver"]}
                       stack={true}
-                      className="h-80"
+                      className="h-80 mt-4"
                       theme={chartTheme}
                       showAnimation={true}
                     />
-                  </CardContent>
-                </Card>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Projekt status</CardTitle>
-                  </CardHeader>
-                  <CardContent>
+                  }
+                />
+                
+                <BentoCard
+                  title="Projekter efter kategori"
+                  icon={<PieChartIcon className="h-5 w-5 text-blue-500" />}
+                  content={
+                    <div>
+                      <PieChart 
+                        data={projectsByCategory} 
+                        index="name" 
+                        categories={["count"]} 
+                        valueFormatter={(value) => `${value} projekter`}
+                        className="h-60 mt-4"
+                        theme={chartTheme}
+                        showAnimation={true}
+                      />
+                      <div className="grid grid-cols-2 gap-2 mt-4">
+                        {projectsByCategory.map((category) => (
+                          <div key={category.name} className="flex items-center">
+                            {getCategoryIcon(category.name)}
+                            <span className="ml-2 text-xs">{category.name} ({category.count})</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  }
+                />
+                
+                <BentoCard
+                  title="Projekt status"
+                  icon={<BarChartIcon className="h-5 w-5 text-blue-500" />}
+                  content={
                     <DonutChart
                       data={projectStatuses}
                       index="name"
                       categories={["count"]}
                       valueFormatter={(value) => `${value} projekter`}
-                      className="h-60"
+                      className="h-60 mt-4"
                       theme={chartTheme}
                       showAnimation={true}
                     />
-                  </CardContent>
-                </Card>
+                  }
+                />
                 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Kvalitetssikring status</CardTitle>
-                  </CardHeader>
-                  <CardContent>
+                <BentoCard
+                  title="Kvalitetssikring status"
+                  icon={<CheckCircle className="h-5 w-5 text-blue-500" />}
+                  content={
                     <DonutChart
                       data={qualityAssurance}
                       index="name"
                       categories={["percentage"]}
                       valueFormatter={(value) => `${value}%`}
-                      className="h-60"
+                      className="h-60 mt-4"
                       theme={chartTheme}
                       showAnimation={true}
                     />
-                  </CardContent>
-                </Card>
-              </div>
+                  }
+                />
+              </BentoGrid>
             </TabsContent>
             
             <TabsContent value="projects" className="space-y-4">
