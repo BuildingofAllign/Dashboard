@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
+import Projects from "./pages/Projects";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -17,8 +18,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/projekter" element={<Projects />} />
           <Route path="/dashboard" element={<Navigate to="/" replace />} />
-          <Route path="/projekter" element={<Navigate to="/" replace />} />
           <Route path="/tegninger" element={<Navigate to="/" replace />} />
           <Route path="/afvigelser" element={<Navigate to="/" replace />} />
           <Route path="/tillagsopgaver" element={<Navigate to="/" replace />} />
