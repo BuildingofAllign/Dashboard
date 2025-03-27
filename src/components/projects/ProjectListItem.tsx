@@ -14,8 +14,8 @@ import {
   AlertTriangle,
   ClipboardList,
   CheckSquare,
-  Star, 
-  StarOff,
+  Pin, 
+  PinOff,
   Home, 
   Building, 
   Building2, 
@@ -184,7 +184,7 @@ export const ProjectListItem: React.FC<ProjectListItemProps> = ({ project, onTog
     <TableRow 
       className={`cursor-pointer hover:bg-gray-50 transition-colors ${
         project.status === 'afsluttet' ? 'opacity-75' : ''
-      } ${project.isPinned ? 'border-l-4 border-l-yellow-400 pl-0' : ''} 
+      } ${project.isPinned ? 'border-l-4 border-l-blue-600 pl-0' : ''} 
       ${!project.isPinned ? getPriorityBorderClass(project.priority) : ''}`}
       onClick={goToProjectDetails}
     >
@@ -329,11 +329,11 @@ export const ProjectListItem: React.FC<ProjectListItemProps> = ({ project, onTog
               <TooltipTrigger asChild>
                 <button 
                   onClick={handlePinToggle}
-                  className="text-gray-400 hover:text-yellow-500 transition-colors"
+                  className="text-gray-400 hover:text-blue-600 transition-colors"
                 >
                   {project.isPinned ? 
-                    <Star className="h-5 w-5 fill-yellow-400 text-yellow-500" /> : 
-                    <StarOff className="h-5 w-5" />
+                    <Pin className="h-5 w-5 fill-blue-600 text-blue-600" /> : 
+                    <PinOff className="h-5 w-5" />
                   }
                 </button>
               </TooltipTrigger>

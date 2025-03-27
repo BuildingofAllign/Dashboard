@@ -10,6 +10,7 @@ import {
   ChevronRight, 
   Home, 
   Pin, 
+  PinOff, 
   ConstructionIcon, 
   Building, 
   Factory, 
@@ -171,7 +172,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTogglePin }
     <Card 
       className={`overflow-hidden transition-all duration-200 hover:shadow-md cursor-pointer ${
         project.status === 'afsluttet' ? 'opacity-75' : ''
-      } ${project.isPinned ? 'border-2 border-yellow-400' : ''} ${
+      } ${project.isPinned ? 'border-2 border-blue-600' : ''} ${
         project.priority === 'high' ? 'ring-2 ring-red-400' : ''
       }`}
       onClick={goToProjectDetails}
@@ -184,11 +185,11 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onTogglePin }
                 <TooltipTrigger asChild>
                   <button 
                     onClick={handlePinToggle}
-                    className="text-gray-400 hover:text-yellow-500 transition-colors"
+                    className="text-gray-400 hover:text-blue-600 transition-colors"
                   >
                     {project.isPinned ? 
-                      <Pin className="h-5 w-5 fill-yellow-400 text-yellow-500" /> : 
-                      <Pin className="h-5 w-5" />
+                      <Pin className="h-5 w-5 fill-blue-600 text-blue-600" /> : 
+                      <PinOff className="h-5 w-5" />
                     }
                   </button>
                 </TooltipTrigger>
