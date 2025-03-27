@@ -8,6 +8,7 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { 
   Building, 
   CalendarDays, 
@@ -19,7 +20,6 @@ import {
   PlusCircle,
   Play
 } from "lucide-react";
-import { AnimatedCircularProgress } from "@/components/ui/animated-circular-progress";
 import { 
   Tooltip, 
   TooltipContent, 
@@ -69,13 +69,13 @@ interface ProjectCardProps {
 }
 
 export const ProjectCard = ({ project, onTogglePin }: ProjectCardProps) => {
-  // Get color for progress circle based on status and progress
+  // Get color for progress based on status and progress
   const getProgressColor = () => {
-    if (project.status === "afsluttet") return "stroke-gray-400";
-    if (project.progress >= 75) return "stroke-green-500";
-    if (project.progress >= 50) return "stroke-blue-500";
-    if (project.progress >= 25) return "stroke-yellow-500";
-    return "stroke-red-500";
+    if (project.status === "afsluttet") return "bg-gray-400";
+    if (project.progress >= 75) return "bg-green-500";
+    if (project.progress >= 50) return "bg-blue-500";
+    if (project.progress >= 25) return "bg-yellow-500";
+    return "bg-red-500";
   };
 
   return (
@@ -128,12 +128,16 @@ export const ProjectCard = ({ project, onTogglePin }: ProjectCardProps) => {
       </CardHeader>
       
       <CardContent className="pb-2">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-2">
           <div className="flex items-center bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
             <Play className="h-4 w-4 mr-1 fill-blue-700" />
             <span className="text-sm font-medium">{project.status}</span>
           </div>
           <div className="text-xl font-bold">{project.progress}%</div>
+        </div>
+        
+        <div className="mb-4">
+          <Progress value={project.progress} className="h-2" />
         </div>
         
         <div className="grid grid-cols-1 gap-3">

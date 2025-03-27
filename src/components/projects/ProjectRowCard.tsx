@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { 
   AlertTriangle, 
   Building, 
@@ -13,7 +14,6 @@ import {
   PlusCircle,
   Play
 } from "lucide-react";
-import { AnimatedCircularProgress } from "@/components/ui/animated-circular-progress";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { PriorityIndicator, Priority } from "@/components/ui/PriorityIndicator";
@@ -53,13 +53,13 @@ interface ProjectRowCardProps {
 }
 
 export const ProjectRowCard = ({ project, onTogglePin }: ProjectRowCardProps) => {
-  // Get color for progress circle based on status and progress
+  // Get color for progress based on status and progress
   const getProgressColor = () => {
-    if (project.status === "afsluttet") return "stroke-gray-400";
-    if (project.progress >= 75) return "stroke-green-500";
-    if (project.progress >= 50) return "stroke-blue-500";
-    if (project.progress >= 25) return "stroke-yellow-500";
-    return "stroke-red-500";
+    if (project.status === "afsluttet") return "bg-gray-400";
+    if (project.progress >= 75) return "bg-green-500";
+    if (project.progress >= 50) return "bg-blue-500";
+    if (project.progress >= 25) return "bg-yellow-500";
+    return "bg-red-500";
   };
 
   return (
@@ -96,7 +96,10 @@ export const ProjectRowCard = ({ project, onTogglePin }: ProjectRowCardProps) =>
             
             <div className="flex flex-col items-center">
               <div className="text-xs text-muted-foreground mb-1">Fremgang</div>
-              <div className="text-base font-bold">{project.progress}%</div>
+              <div className="w-24">
+                <div className="text-xs font-medium text-center mb-1">{project.progress}%</div>
+                <Progress value={project.progress} className="h-2" />
+              </div>
             </div>
             
             {project.team && (

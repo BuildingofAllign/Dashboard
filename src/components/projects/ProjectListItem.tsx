@@ -14,7 +14,7 @@ import {
   Play
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { AnimatedCircularProgress } from "@/components/ui/animated-circular-progress";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { PriorityIndicator, Priority } from "@/components/ui/PriorityIndicator";
@@ -26,13 +26,13 @@ interface ProjectListItemProps {
 }
 
 export const ProjectListItem = ({ project, onTogglePin }: ProjectListItemProps) => {
-  // Get color for progress circle based on status and progress
+  // Get color for progress based on status and progress
   const getProgressColor = () => {
-    if (project.status === "afsluttet") return "stroke-gray-400";
-    if (project.progress >= 75) return "stroke-green-500";
-    if (project.progress >= 50) return "stroke-blue-500";
-    if (project.progress >= 25) return "stroke-yellow-500";
-    return "stroke-red-500";
+    if (project.status === "afsluttet") return "bg-gray-400";
+    if (project.progress >= 75) return "bg-green-500";
+    if (project.progress >= 50) return "bg-blue-500";
+    if (project.progress >= 25) return "bg-yellow-500";
+    return "bg-red-500";
   };
 
   return (
@@ -71,8 +71,9 @@ export const ProjectListItem = ({ project, onTogglePin }: ProjectListItemProps) 
       </TableCell>
       
       <TableCell>
-        <div className="flex items-center justify-center">
-          <div className="text-base font-bold">{project.progress}%</div>
+        <div className="flex items-center justify-center flex-col w-28">
+          <div className="text-base font-bold mb-1">{project.progress}%</div>
+          <Progress value={project.progress} className="h-2 w-full" />
         </div>
       </TableCell>
       
