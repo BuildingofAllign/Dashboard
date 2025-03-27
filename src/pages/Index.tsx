@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { SearchBar } from "@/components/ui/SearchBar";
-import { FilterButton } from "@/components/ui/FilterButton";
+import { FilterSelect } from "@/components/ui/FilterButton";
 import { EmployeeCard } from "@/components/employees/EmployeeCard";
 
 const employees = [
@@ -38,37 +38,66 @@ const employees = [
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [projectFilter, setProjectFilter] = useState("all");
 
   const filteredEmployees = employees.filter(
-    (employee) =>
-      employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      employee.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      employee.project.toLowerCase().includes(searchQuery.toLowerCase()),
+    (employee) => {
+      // Search filter
+      const matchesSearch = 
+        employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        employee.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        employee.project.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      // Role filter
+      const matchesRole = roleFilter === "all" || 
+        employee.role.toLowerCase().includes(roleFilter.toLowerCase());
+      
+      // Project filter
+      const matchesProject = projectFilter === "all" || 
+        employee.project === projectFilter;
+      
+      return matchesSearch && matchesRole && matchesProject;
+    }
   );
 
   return (
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar />
-      <div className="flex-1">
+      <main className="flex-1 overflow-auto">
         <Header title="Medarbejdere" userInitials="BL" />
 
-        <div className="flex justify-between mt-6 px-6 py-0 max-sm:flex-col max-sm:gap-4">
-          <SearchBar
-            placeholder="Søg efter medarbejder..."
-            onChange={setSearchQuery}
-          />
-          <div className="flex gap-2 max-sm:w-full">
-            <FilterButton>Alle roller</FilterButton>
-            <FilterButton>Alle projekter</FilterButton>
+        <div className="p-6 pb-0">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+            <SearchBar
+              placeholder="Søg efter medarbejder..."
+              onChange={setSearchQuery}
+            />
+            <div className="flex space-x-2 mt-4 md:mt-0">
+              <FilterSelect onChange={() => setRoleFilter("all")}>
+                <option value="all">Alle roller</option>
+                <option value="håndværker">Håndværker</option>
+                <option value="byggeleder">Byggeleder</option>
+                <option value="ingeniør">Ingeniør</option>
+              </FilterSelect>
+              <FilterSelect onChange={() => setProjectFilter("all")}>
+                <option value="all">Alle projekter</option>
+                <option value="Skovvej 12">Projekt Skovvej 12</option>
+                <option value="Havnegade 8">Projekt Havnegade 8</option>
+                <option value="Stationsvej 23">Projekt Stationsvej 23</option>
+              </FilterSelect>
+            </div>
           </div>
         </div>
 
-        <div className="flex gap-6 flex-wrap p-6 max-md:flex-col">
-          {filteredEmployees.map((employee, index) => (
-            <EmployeeCard key={index} {...employee} />
-          ))}
+        <div className="p-6 pt-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredEmployees.map((employee, index) => (
+              <EmployeeCard key={index} {...employee} />
+            ))}
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };
