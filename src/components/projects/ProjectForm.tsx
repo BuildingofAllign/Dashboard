@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -35,7 +36,6 @@ const formSchema = z.object({
   type: z.string().min(1, "Type er påkrævet"),
   category: z.string().min(1, "Kategori er påkrævet"),
   status: z.string().min(1, "Status er påkrævet"),
-  progress: z.coerce.number().min(0).max(100),
   priority: z.string().min(1, "Prioritet er påkrævet"),
   description: z.string().optional(),
   start_date: z.date().optional(),
@@ -69,7 +69,6 @@ export const ProjectForm = ({ initialData, onSuccess, onCancel }: ProjectFormPro
       type: "",
       category: "bolig",
       status: "aktiv",
-      progress: 0,
       priority: "green",
       description: "",
     }
@@ -80,7 +79,7 @@ export const ProjectForm = ({ initialData, onSuccess, onCancel }: ProjectFormPro
       // Format dates to ISO strings for API submission
       const formattedData = {
         ...data,
-        progress: Number(data.progress),
+        progress: 50, // Set default progress to 50% for all projects
         start_date: data.start_date ? data.start_date.toISOString().split('T')[0] : undefined,
         end_date: data.end_date ? data.end_date.toISOString().split('T')[0] : undefined,
       };
@@ -223,20 +222,6 @@ export const ProjectForm = ({ initialData, onSuccess, onCancel }: ProjectFormPro
                     <SelectItem value="grey">Lav</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="progress"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fremgang (%)</FormLabel>
-                <FormControl>
-                  <Input type="number" min="0" max="100" {...field} />
-                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

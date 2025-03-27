@@ -38,7 +38,6 @@ export const ProjectFormDialog = ({
     type: initialData.type || '',
     category: initialData.category || 'bolig',
     status: initialData.status || 'aktiv',
-    progress: initialData.progress || 0,
     priority: initialData.priority || 'green',
     description: initialData.description || '',
     start_date: initialData.start_date || '',
