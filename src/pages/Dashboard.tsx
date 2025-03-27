@@ -1,10 +1,11 @@
+
 import React from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BreadcrumbNav } from "@/components/ui/BreadcrumbNav";
-import { BarChart, LineChart, PieChart, DonutChart } from "@/components/ui/chart";
+import { BarChart, LineChart, PieChart, DonutChart } from "@/components/ui/charts";
 import { useTheme } from "@/hooks/use-theme";
 import { Building, Building2, Home, User, Clock, CheckCircle, AlertTriangle, PlusCircle, TrendingUp, Calendar, ArrowUp, ArrowDown } from "lucide-react";
 
