@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +10,7 @@ import { format } from "date-fns";
 import { da } from "date-fns/locale";
 import { CalendarDays, ClipboardList } from "lucide-react";
 import { Project } from "@/hooks/projects-types";
+import { ProjectTag } from "@/components/ui/ProjectTag";
 
 interface ProjectSummaryCardProps {
   project: Project;
@@ -18,14 +18,18 @@ interface ProjectSummaryCardProps {
 }
 
 export const ProjectSummaryCard: React.FC<ProjectSummaryCardProps> = ({ project, className }) => {
-  // Convert string priority to the Priority type
   const priorityValue = (project.priority || "green") as "red" | "yellow" | "green" | "grey";
-  
-  // Convert string status to StatusType
   const statusValue = (project.status || "active") as any;
   
   return (
-    <Card className={cn("overflow-hidden transition-all hover:shadow-md", className)}>
+    <Card className={cn(
+      "overflow-hidden transition-all hover:shadow-md border-l-4 hover:translate-y-[-2px] duration-200",
+      project.priority === "red" && "border-l-red-500",
+      project.priority === "yellow" && "border-l-yellow-500",
+      project.priority === "green" && "border-l-green-500",
+      project.priority === "grey" && "border-l-gray-400",
+      className
+    )}>
       <CardHeader className="p-4 pb-0 space-y-2">
         <div className="flex items-start justify-between">
           <div className="space-y-1">
@@ -36,17 +40,12 @@ export const ProjectSummaryCard: React.FC<ProjectSummaryCardProps> = ({ project,
             <h3 className="font-medium text-lg leading-tight">{project.name}</h3>
           </div>
           
-          <Badge 
-            variant="outline" 
-            className={cn(
-              "uppercase text-xs font-medium",
-              project.type === "nybyggeri" && "bg-blue-50 text-blue-700 border-blue-200",
-              project.type === "renovering" && "bg-purple-50 text-purple-700 border-purple-200",
-              project.type === "tilbygning" && "bg-green-50 text-green-700 border-green-200"
-            )}
-          >
-            {project.type}
-          </Badge>
+          <ProjectTag 
+            label={project.type} 
+            type="type" 
+            showTooltip={true} 
+            tooltipText={`Projekttype: ${project.type}`}
+          />
         </div>
       </CardHeader>
       
@@ -89,7 +88,7 @@ export const ProjectSummaryCard: React.FC<ProjectSummaryCardProps> = ({ project,
         
         <div className="flex items-center gap-2">
           {project.end_date && (
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-xs bg-background">
               Deadline: {format(new Date(project.end_date), 'd. MMM', { locale: da })}
             </Badge>
           )}

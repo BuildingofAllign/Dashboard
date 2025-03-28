@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useProjects } from "@/hooks/use-projects";
 import { ProjectsHeader } from "@/components/projects/ProjectsHeader";
@@ -11,6 +10,11 @@ import { ProjectSummaryCard } from "@/components/ui/ProjectSummaryCard";
 import { Separator } from "@/components/ui/separator";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Badge } from "@/components/ui/badge";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
+import { ProjectHoverCard } from "@/components/ui/ProjectHoverCard";
+import { ProjectSkeleton } from "@/components/ui/ProjectSkeleton";
 
 const Projects = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -33,7 +37,8 @@ const Projects = () => {
     handleUpdateProject,
     handleDeleteProject,
     handleTogglePin,
-    loadingProjects
+    loadingProjects,
+    error
   } = useProjects();
   
   useEffect(() => {
@@ -55,10 +60,8 @@ const Projects = () => {
     });
   };
   
-  // Group projects by type (using Gestalt principle of similarity)
   const pinnedProjects = filteredAndSortedProjects.filter(p => p.is_pinned || p.isPinned);
   const projectsByType = filteredAndSortedProjects.reduce((acc, project) => {
-    // Skip pinned projects as they are shown separately
     if (project.is_pinned || project.isPinned) return acc;
     
     const type = project.type;
@@ -69,8 +72,21 @@ const Projects = () => {
     return acc;
   }, {} as Record<string, typeof filteredAndSortedProjects>);
   
-  // Sort types for consistent display (Gestalt principle of continuity)
   const sortedTypes = Object.keys(projectsByType).sort();
+
+  if (error) {
+    return (
+      <div className="container py-6 max-w-7xl mx-auto">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Fejl ved indlæsning af projekter</AlertTitle>
+          <AlertDescription>
+            Der opstod en fejl ved indlæsning af projekter. Prøv at genindlæse siden.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="container py-6 space-y-6 max-w-7xl mx-auto">
@@ -125,8 +141,8 @@ const Projects = () => {
         />
       ) : (
         loadingProjects ? (
-          <div className="h-48 flex items-center justify-center">
-            <div className="animate-pulse">Indlæser projekter...</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <ProjectSkeleton count={8} />
           </div>
         ) : filteredAndSortedProjects.length === 0 ? (
           <EmptyState
@@ -149,10 +165,13 @@ const Projects = () => {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {projectsByType[type].map(project => (
-                    <ProjectSummaryCard
-                      key={project.id}
-                      project={project}
-                    />
+                    <ProjectHoverCard key={project.id} project={project}>
+                      <div className="h-full">
+                        <ProjectSummaryCard
+                          project={project}
+                        />
+                      </div>
+                    </ProjectHoverCard>
                   ))}
                 </div>
               </div>
@@ -165,12 +184,15 @@ const Projects = () => {
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
         mode="create"
+        onSubmit={handleCreateProject}
       />
       
       <CommandPalette
         open={isCommandOpen}
         onOpenChange={setIsCommandOpen}
       />
+      
+      <ScrollToTopButton />
     </div>
   );
 };
