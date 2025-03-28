@@ -18,7 +18,7 @@ export const useCustomersFilter = (customers: Customer[]) => {
           )
         : true;
       
-      const matchesRole = roleFilter 
+      const matchesRole = roleFilter && roleFilter !== 'all'
         ? customer.role === roleFilter
         : true;
       

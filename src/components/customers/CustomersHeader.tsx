@@ -84,7 +84,6 @@ export const CustomersHeader: React.FC<CustomersHeaderProps> = ({
             value={searchQuery}
             onChange={handleSearchChange}
             placeholder="Søg efter kunder..."
-            onClear={() => setSearchQuery('')}
           />
         </div>
 
@@ -94,7 +93,7 @@ export const CustomersHeader: React.FC<CustomersHeaderProps> = ({
               <SelectValue placeholder="Alle roller" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Alle roller</SelectItem>
+              <SelectItem value="all">Alle roller</SelectItem>
               {customerRoles.map((role) => (
                 <SelectItem key={role} value={role}>{role}</SelectItem>
               ))}
