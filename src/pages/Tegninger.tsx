@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { DrawingCard, Drawing } from "@/components/drawings/DrawingCard";
@@ -11,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { 
   Search, Filter, Upload, 
   LayoutGrid, LayoutList, 
-  Plus, X 
+  Plus, X, FileText 
 } from "lucide-react";
 import { ViewToggle, ViewMode } from "@/components/ui/ViewToggle";
 import { NoData } from "@/components/ui/NoData";
@@ -172,8 +171,8 @@ const Tegninger = () => {
             </Button>
             
             <ViewToggle
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
+              currentView={viewMode}
+              onChange={setViewMode}
               gridIcon={<LayoutGrid className="h-4 w-4" />}
               listIcon={<LayoutList className="h-4 w-4" />}
             />

@@ -10,6 +10,7 @@ interface NoDataProps {
   icon?: 'file' | 'alert' | 'search' | 'database' | React.ReactNode;
   actionLabel?: string;
   onAction?: () => void;
+  action?: React.ReactNode;
   className?: string;
 }
 
@@ -19,6 +20,7 @@ export const NoData: React.FC<NoDataProps> = ({
   icon = 'file',
   actionLabel,
   onAction,
+  action,
   className,
 }) => {
   const getIcon = () => {
@@ -45,7 +47,12 @@ export const NoData: React.FC<NoDataProps> = ({
       </div>
       <h3 className="mb-2 text-lg font-medium">{title}</h3>
       <p className="max-w-md text-sm text-muted-foreground">{description}</p>
-      {actionLabel && onAction && (
+      {action && (
+        <div className="mt-4">
+          {action}
+        </div>
+      )}
+      {actionLabel && onAction && !action && (
         <Button
           onClick={onAction}
           className="mt-4"

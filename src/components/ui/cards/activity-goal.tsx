@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
 
 interface ActivityGoalProps {
   title: string
@@ -16,6 +17,7 @@ interface ActivityGoalProps {
   completed: number
   data: { day: string; value: number }[]
   target: number
+  className?: string
 }
 
 export function ActivityGoal({
@@ -24,11 +26,12 @@ export function ActivityGoal({
   completed,
   data,
   target,
+  className,
 }: ActivityGoalProps) {
   const progress = Math.round((completed / target) * 100)
 
   return (
-    <Card>
+    <Card className={cn(className)}>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>

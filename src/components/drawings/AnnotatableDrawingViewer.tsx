@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,11 +26,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Drawing } from "./DrawingCard";
 
 interface AnnotatableDrawingViewerProps {
-  imageUrl: string;
+  imageUrl?: string;
   className?: string;
   onSave?: (annotations: any) => void;
+  drawing?: Drawing;
+  onClose?: () => void;
 }
 
 type AnnotationTool = 'pointer' | 'pencil' | 'text' | 'rectangle' | 'circle';
@@ -48,8 +50,11 @@ type Annotation = {
 export const AnnotatableDrawingViewer: React.FC<AnnotatableDrawingViewerProps> = ({
   imageUrl,
   className,
-  onSave
+  onSave,
+  drawing,
+  onClose
 }) => {
+  const imageToUse = imageUrl || (drawing ? drawing.thumbnail : '');
   const [zoom, setZoom] = useState(100);
   const [selectedTool, setSelectedTool] = useState<AnnotationTool>('pointer');
   const [lineWidth, setLineWidth] = useState(2);
@@ -378,12 +383,11 @@ export const AnnotatableDrawingViewer: React.FC<AnnotatableDrawingViewerProps> =
           style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top left' }}
         >
           <img 
-            src={imageUrl} 
-            alt="Drawing" 
+            src={imageToUse} 
+            alt={drawing?.title || "Drawing"} 
             className="max-w-full min-w-[800px]"
           />
           
-          {/* Render annotations */}
           {annotations.map(annotation => (
             <div 
               key={annotation.id}
@@ -434,7 +438,6 @@ export const AnnotatableDrawingViewer: React.FC<AnnotatableDrawingViewerProps> =
             </div>
           ))}
           
-          {/* Text annotation input */}
           {isAddingTextAnnotation && tempAnnotation && (
             <div 
               className="absolute"
