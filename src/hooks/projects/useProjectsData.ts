@@ -14,6 +14,7 @@ export const useProjectsData = () => {
       setLoadingProjects(true);
       setError(null);
       
+      console.log("Fetching projects...");
       const { data, error } = await supabase
         .from('projects')
         .select('*');
@@ -21,10 +22,10 @@ export const useProjectsData = () => {
       if (error) throw error;
       
       // Map Supabase data to our project type
-      const formattedProjects = data.map(project => ({
+      const formattedProjects = data ? data.map(project => ({
         ...project,
         isPinned: project.is_pinned,
-      }));
+      })) : [];
       
       setProjects(formattedProjects);
       console.log("Projects fetched:", formattedProjects);

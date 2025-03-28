@@ -1,5 +1,9 @@
-import { useLocation } from "react-router-dom";
+
+import React from "react";
+import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const NotFound = () => {
   const location = useLocation();
@@ -12,14 +16,14 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
-          Return to Home
-        </a>
-      </div>
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+      <EmptyState
+        title="404 - Side ikke fundet"
+        description={`Siden '${location.pathname}' eksisterer ikke.`}
+        icon="alert"
+        actionLabel="Gå til forsiden"
+        onAction={() => window.location.href = "/"}
+      />
     </div>
   );
 };

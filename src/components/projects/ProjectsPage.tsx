@@ -1,22 +1,22 @@
 
 import React, { useState, useEffect } from "react";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
-import { useCommandPalette } from "@/components/ui/CommandPalette";
 import { useProjects } from "@/hooks/use-projects";
 import { ProjectsHeader } from "./ProjectsHeader";
 import { ProjectsContent } from "./ProjectsContent";
 import { ProjectFormDialog } from "./ProjectFormDialog";
 import { CommandPalette } from "@/components/ui/CommandPalette";
 import { ViewMode } from "@/components/ui/ViewToggle";
-import { ProjectFormValues } from "./ProjectForm";
+import { useCommandPalette } from "@/components/ui/CommandPalette";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const ProjectsPage = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
   const { open: commandOpen, setOpen: setCommandOpen } = useCommandPalette();
+  const navigate = useNavigate();
   
   const {
     filteredAndSortedProjects,
@@ -35,20 +35,9 @@ const ProjectsPage = () => {
   } = useProjects();
 
   useEffect(() => {
+    console.log("ProjectsPage mounted, fetching projects...");
     fetchProjects();
   }, [fetchProjects]);
-
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setCommandOpen(true);
-      }
-    };
-
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
-  }, []);
 
   const handleEditProject = (project: any) => {
     setEditingProject(project);
@@ -65,54 +54,49 @@ const ProjectsPage = () => {
   };
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
-        <Sidebar />
-        <main className="flex-1 overflow-auto">
-          <Header title="Projekter" userInitials="BL" />
+    <div className="flex-1">
+      <Header title="Projekter" userInitials="BL" />
 
-          <div className="p-6">
-            <ProjectsHeader 
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              typeFilter={typeFilter}
-              setTypeFilter={setTypeFilter}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              priorityFilter={priorityFilter}
-              setPriorityFilter={setPriorityFilter}
-              viewMode={viewMode}
-              setViewMode={setViewMode}
-              setIsCreateDialogOpen={setIsCreateDialogOpen}
-              filteredAndSortedProjects={filteredAndSortedProjects}
-              setCommandOpen={setCommandOpen}
-            />
-
-            <ProjectsContent 
-              viewMode={viewMode}
-              loadingProjects={loadingProjects}
-              filteredAndSortedProjects={filteredAndSortedProjects}
-              handlePinWithToast={handlePinWithToast}
-              handleEditProject={handleEditProject}
-              handleDeleteProject={handleDeleteProject}
-              setIsCreateDialogOpen={setIsCreateDialogOpen}
-            />
-          </div>
-        </main>
-
-        <ProjectFormDialog
-          open={isCreateDialogOpen}
-          onOpenChange={handleCloseDialog}
-          mode={editingProject ? "edit" : "create"}
-          initialData={editingProject}
+      <div className="p-6">
+        <ProjectsHeader 
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          typeFilter={typeFilter}
+          setTypeFilter={setTypeFilter}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          priorityFilter={priorityFilter}
+          setPriorityFilter={setPriorityFilter}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          setIsCreateDialogOpen={setIsCreateDialogOpen}
+          filteredAndSortedProjects={filteredAndSortedProjects}
+          setCommandOpen={setCommandOpen}
         />
-        
-        <CommandPalette
-          open={commandOpen}
-          onOpenChange={setCommandOpen}
+
+        <ProjectsContent 
+          viewMode={viewMode}
+          loadingProjects={loadingProjects}
+          filteredAndSortedProjects={filteredAndSortedProjects}
+          handlePinWithToast={handlePinWithToast}
+          handleEditProject={handleEditProject}
+          handleDeleteProject={handleDeleteProject}
+          setIsCreateDialogOpen={setIsCreateDialogOpen}
         />
       </div>
-    </SidebarProvider>
+
+      <ProjectFormDialog
+        open={isCreateDialogOpen}
+        onOpenChange={handleCloseDialog}
+        mode={editingProject ? "edit" : "create"}
+        initialData={editingProject}
+      />
+      
+      <CommandPalette
+        open={commandOpen}
+        onOpenChange={setCommandOpen}
+      />
+    </div>
   );
 };
 
