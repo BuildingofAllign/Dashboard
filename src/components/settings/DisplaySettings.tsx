@@ -126,7 +126,7 @@ export const DisplaySettings = () => {
             </div>
             
             <p className="text-xs text-muted-foreground mt-1">
-              Bemærk: Cmd + G virker også altid som en alternativ genvej
+              Bemærk: Cmd/Ctrl + G virker altid som en universel genvej, uanset indstillingen ovenfor
             </p>
           </div>
         </div>

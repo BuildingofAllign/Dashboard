@@ -46,7 +46,7 @@ export const useCommandPalette = () => {
   
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      // Make sure Cmd+G works across all pages
+      // Make sure both Cmd+G and Cmd+shortcut.key work across all pages
       if ((e.key.toLowerCase() === shortcut.key || e.key.toLowerCase() === 'g') && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setOpen(true);
@@ -69,16 +69,16 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      // Make sure Cmd+G works across all pages
+      // Make sure both Cmd+G and Cmd+shortcut.key work across all pages
       if ((e.key.toLowerCase() === shortcut.key || e.key.toLowerCase() === 'g') && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        onOpenChange(!open);
+        onOpenChange(true);
       }
     };
     
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, [onOpenChange, open, shortcut.key]);
+  }, [onOpenChange, shortcut.key]);
   
   const navigateTo = (path: string) => {
     navigate(path);
