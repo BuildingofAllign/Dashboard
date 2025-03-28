@@ -43,8 +43,9 @@ export const CustomersHeader: React.FC<CustomersHeaderProps> = ({
   setIsCreateDialogOpen,
   filteredAndSortedCustomers,
 }) => {
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+  // Modified to directly pass the string value
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
   };
 
   const handleRoleChange = (value: string) => {
@@ -106,7 +107,7 @@ export const CustomersHeader: React.FC<CustomersHeaderProps> = ({
             </Button>
           )}
 
-          <ViewToggle viewMode={viewMode} onChange={setViewMode} />
+          <ViewToggle currentView={viewMode} onChange={setViewMode} />
         </div>
       </div>
     </div>
