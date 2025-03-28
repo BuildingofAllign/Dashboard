@@ -13,6 +13,7 @@ import {
   ChevronDown,
   ChevronRight,
   Files,
+  Building2,
   LucideIcon
 } from "lucide-react";
 
@@ -65,6 +66,7 @@ export const Sidebar: React.FC = () => {
   const navItems: SidebarNavItem[] = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     { icon: FolderKanban, label: "Projekter", path: "/projekter" },
+    { icon: Building2, label: "Kunder", path: "/kunder" },
     { icon: Users, label: "Medarbejdere", path: "/" },
     { 
       icon: Files, 

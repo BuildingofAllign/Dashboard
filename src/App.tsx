@@ -22,6 +22,8 @@ import Tillagsopgaver from './pages/Tillagsopgaver';
 import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 import Index from './pages/Index';
+import Customers from './pages/Customers';
+import CustomerDetails from './pages/CustomerDetails';
 
 // Configure the query client with better error handling and caching
 const queryClient = new QueryClient({
@@ -45,6 +47,8 @@ function AppRoutes() {
       <Route path="/kvalitetssikring" element={<Kvalitetssikring />} />
       <Route path="/tegninger" element={<Tegninger />} />
       <Route path="/tillagsopgaver" element={<Tillagsopgaver />} />
+      <Route path="/kunder" element={<Customers />} />
+      <Route path="/kunder/:id" element={<CustomerDetails />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
