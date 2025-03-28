@@ -12,6 +12,10 @@ interface ViewToggleProps {
   gridIcon?: React.ReactNode;
   listIcon?: React.ReactNode;
   rowsIcon?: React.ReactNode;
+  
+  // Add the aliases for backward compatibility
+  viewMode?: ViewMode;
+  onViewModeChange?: (view: ViewMode) => void;
 }
 
 export const ViewToggle: React.FC<ViewToggleProps> = ({ 
@@ -19,11 +23,19 @@ export const ViewToggle: React.FC<ViewToggleProps> = ({
   onChange,
   gridIcon = <LayoutGrid className="h-4 w-4" />,
   listIcon = <List className="h-4 w-4" />,
-  rowsIcon = <GalleryHorizontal className="h-4 w-4" />
+  rowsIcon = <GalleryHorizontal className="h-4 w-4" />,
+  
+  // Use provided viewMode or currentView
+  viewMode,
+  onViewModeChange
 }) => {
+  // Use the props that are provided, falling back to the primary props
+  const activeView = viewMode || currentView;
+  const handleChange = onViewModeChange || onChange;
+  
   return (
     <TooltipProvider>
-      <ToggleGroup type="single" value={currentView} onValueChange={(value) => value && onChange(value as ViewMode)}>
+      <ToggleGroup type="single" value={activeView} onValueChange={(value) => value && handleChange(value as ViewMode)}>
         <Tooltip>
           <TooltipTrigger asChild>
             <ToggleGroupItem value="grid" aria-label="Grid view">
