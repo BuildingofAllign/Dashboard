@@ -60,7 +60,7 @@ export const FilterItem = React.forwardRef<HTMLDivElement, FilterItemProps>(
         {...props}
       >
         <div className="flex items-center gap-2 truncate">
-          <Checkbox checked={selected} className="transition-all" readOnly />
+          <Checkbox checked={selected} className="transition-all" onCheckedChange={() => {}} />
           {icon && <span className="text-muted-foreground">{icon}</span>}
           <span className="truncate">{label}</span>
         </div>
