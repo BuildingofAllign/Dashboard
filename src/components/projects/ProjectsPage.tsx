@@ -6,16 +6,15 @@ import { useProjects } from "@/hooks/use-projects";
 import { ProjectsHeader } from "./ProjectsHeader";
 import { ProjectsContent } from "./ProjectsContent";
 import { ProjectFormDialog } from "./ProjectFormDialog";
-import { CommandPalette } from "@/components/ui/CommandPalette";
-import { ViewMode } from "@/components/ui/ViewToggle";
 import { useCommandPalette } from "@/components/ui/CommandPalette";
+import { ViewMode } from "@/components/ui/ViewToggle";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 const ProjectsPage = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
-  const { open: commandOpen, setOpen: setCommandOpen } = useCommandPalette();
+  const { setOpen: setCommandOpen } = useCommandPalette();
   const navigate = useNavigate();
   
   const {
@@ -90,11 +89,6 @@ const ProjectsPage = () => {
         onOpenChange={handleCloseDialog}
         mode={editingProject ? "edit" : "create"}
         initialData={editingProject}
-      />
-      
-      <CommandPalette
-        open={commandOpen}
-        onOpenChange={setCommandOpen}
       />
     </div>
   );

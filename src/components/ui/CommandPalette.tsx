@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, createContext, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   CommandDialog, 
@@ -21,43 +21,85 @@ import {
   Users
 } from "lucide-react";
 
-interface CommandPaletteProps {
+interface CommandPaletteContextType {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  setOpen: (open: boolean) => void;
 }
 
-// Get the command shortcut from localStorage or use default
-const getCommandShortcut = (): { key: string; displayKey: string } => {
-  const savedShortcut = localStorage.getItem('commandShortcut');
-  if (savedShortcut) {
-    try {
-      return JSON.parse(savedShortcut);
-    } catch (e) {
-      console.error('Error parsing command shortcut from localStorage:', e);
-    }
-  }
-  // Default to 'k'
-  return { key: 'k', displayKey: 'K' };
-};
+const CommandPaletteContext = createContext<CommandPaletteContextType>({
+  open: false,
+  setOpen: () => {},
+});
 
-export const useCommandPalette = () => {
+interface CommandPaletteProviderProps {
+  children: React.ReactNode;
+}
+
+export const CommandPaletteProvider: React.FC<CommandPaletteProviderProps> = ({ children }) => {
   const [open, setOpen] = useState(false);
-  const shortcut = getCommandShortcut();
   
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      // Make sure both Cmd+G and Cmd+shortcut.key work across all pages
-      if ((e.key.toLowerCase() === shortcut.key || e.key.toLowerCase() === 'g') && (e.metaKey || e.ctrlKey)) {
+      // Universal Cmd+G (or Ctrl+G) shortcut
+      if (e.key.toLowerCase() === 'g' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setOpen(true);
+        setOpen(open => !open);
+        return;
+      }
+      
+      // Also support custom shortcut from localStorage if available
+      const savedShortcut = localStorage.getItem('commandShortcut');
+      if (savedShortcut) {
+        try {
+          const { key } = JSON.parse(savedShortcut);
+          if (e.key.toLowerCase() === key.toLowerCase() && (e.metaKey || e.ctrlKey)) {
+            e.preventDefault();
+            setOpen(open => !open);
+          }
+        } catch (e) {
+          console.error('Error parsing command shortcut:', e);
+        }
       }
     };
     
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, [shortcut.key]);
+  }, []);
   
-  return { open, setOpen };
+  return (
+    <CommandPaletteContext.Provider value={{ open, setOpen }}>
+      {children}
+      <CommandPalette open={open} onOpenChange={setOpen} />
+    </CommandPaletteContext.Provider>
+  );
+};
+
+export const useCommandPalette = () => {
+  const context = useContext(CommandPaletteContext);
+  if (!context) {
+    throw new Error('useCommandPalette must be used within a CommandPaletteProvider');
+  }
+  return context;
+};
+
+interface CommandPaletteProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+// Get the command shortcut display text
+const getCommandShortcutDisplay = (): string => {
+  const savedShortcut = localStorage.getItem('commandShortcut');
+  if (savedShortcut) {
+    try {
+      const { displayKey } = JSON.parse(savedShortcut);
+      return `⌘${displayKey}`;
+    } catch (e) {
+      console.error('Error parsing command shortcut:', e);
+    }
+  }
+  // Default to G
+  return '⌘G';
 };
 
 export const CommandPalette: React.FC<CommandPaletteProps> = ({
@@ -65,20 +107,6 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   onOpenChange
 }) => {
   const navigate = useNavigate();
-  const shortcut = getCommandShortcut();
-  
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      // Make sure both Cmd+G and Cmd+shortcut.key work across all pages
-      if ((e.key.toLowerCase() === shortcut.key || e.key.toLowerCase() === 'g') && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        onOpenChange(true);
-      }
-    };
-    
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
-  }, [onOpenChange, shortcut.key]);
   
   const navigateTo = (path: string) => {
     navigate(path);
@@ -87,14 +115,18 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
-      <CommandInput placeholder="Type a command or search..." />
+      <CommandInput placeholder={`Søg eller skriv en kommando (${getCommandShortcutDisplay()})`} />
       <CommandList>
         <CommandEmpty>Ingen resultater fundet.</CommandEmpty>
         
         <CommandGroup heading="Navigation">
           <CommandItem onSelect={() => navigateTo("/")}>
-            <Home className="mr-2 h-4 w-4" />
+            <Users className="mr-2 h-4 w-4" />
             <span>Medarbejdere</span>
+          </CommandItem>
+          <CommandItem onSelect={() => navigateTo("/dashboard")}>
+            <Home className="mr-2 h-4 w-4" />
+            <span>Dashboard</span>
           </CommandItem>
           <CommandItem onSelect={() => navigateTo("/projekter")}>
             <FileText className="mr-2 h-4 w-4" />
@@ -112,10 +144,6 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
             <FileText className="mr-2 h-4 w-4" />
             <span>Tegninger</span>
           </CommandItem>
-          <CommandItem onSelect={() => navigateTo("/dashboard")}>
-            <Home className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
-          </CommandItem>
         </CommandGroup>
         
         <CommandSeparator />
@@ -132,6 +160,10 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
           <CommandItem onSelect={() => navigateTo("/kvalitetssikring")}>
             <CircleCheck className="mr-2 h-4 w-4" />
             <span>Kvalitetssikring</span>
+          </CommandItem>
+          <CommandItem onSelect={() => navigateTo("/settings")}>
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Indstillinger</span>
           </CommandItem>
         </CommandGroup>
       </CommandList>

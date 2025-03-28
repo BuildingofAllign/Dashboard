@@ -1,12 +1,13 @@
 
 import React from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 const NotFound = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     console.error(
@@ -15,14 +16,18 @@ const NotFound = () => {
     );
   }, [location.pathname]);
 
+  const handleGoHome = () => {
+    navigate("/");
+  };
+
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
       <EmptyState
         title="404 - Side ikke fundet"
         description={`Siden '${location.pathname}' eksisterer ikke.`}
         icon="alert"
         actionLabel="Gå til forsiden"
-        onAction={() => window.location.href = "/"}
+        onAction={handleGoHome}
       />
     </div>
   );
