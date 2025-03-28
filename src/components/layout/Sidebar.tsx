@@ -23,7 +23,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
-  SidebarFooter
+  SidebarFooter,
+  SidebarRail
 } from "@/components/ui/sidebar";
 
 interface NavItem {
@@ -46,55 +47,59 @@ export const Sidebar: React.FC = () => {
   const location = useLocation();
   
   return (
-    <ShadcnSidebar className="border-r">
-      <SidebarHeader className="flex flex-col items-start px-4 py-4">
-        <div className="text-3xl font-bold text-primary">Allign</div>
-      </SidebarHeader>
-      
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Menu</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navItems.map((item, index) => {
-                const isActive = location.pathname === item.path;
-                const Icon = item.icon;
-                
-                return (
-                  <SidebarMenuItem key={index}>
-                    <SidebarMenuButton 
-                      asChild 
-                      isActive={isActive}
-                      tooltip={item.label}
-                    >
-                      <Link to={item.path}>
-                        <Icon className="h-5 w-5" />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-      
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild
-              tooltip="Indstillinger"
-            >
-              <Link to="/indstillinger">
-                <Settings className="h-5 w-5" />
-                <span>Indstillinger</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-    </ShadcnSidebar>
+    <>
+      <ShadcnSidebar className="border-r">
+        <SidebarHeader className="flex flex-col items-start px-4 py-4">
+          <div className="text-3xl font-bold text-primary">Allign</div>
+        </SidebarHeader>
+        
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Menu</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {navItems.map((item, index) => {
+                  const isActive = location.pathname === item.path;
+                  const Icon = item.icon;
+                  
+                  return (
+                    <SidebarMenuItem key={index}>
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={isActive}
+                        tooltip={item.label}
+                      >
+                        <Link to={item.path}>
+                          <Icon className="h-5 w-5" />
+                          <span>{item.label}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+        
+        <SidebarFooter>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton 
+                asChild
+                tooltip="Indstillinger"
+                isActive={location.pathname === "/settings"}
+              >
+                <Link to="/settings">
+                  <Settings className="h-5 w-5" />
+                  <span>Indstillinger</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+        <SidebarRail />
+      </ShadcnSidebar>
+    </>
   );
 };

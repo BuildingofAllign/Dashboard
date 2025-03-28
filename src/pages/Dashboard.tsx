@@ -1,10 +1,8 @@
 
 import React, { useState, useEffect } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { useTheme } from "@/hooks/use-theme";
-import { SidebarProvider } from "@/components/ui/sidebar";
 
 const Dashboard: React.FC = () => {
   const { isDarkMode } = useTheme();
@@ -33,18 +31,13 @@ const Dashboard: React.FC = () => {
   }, []);
 
   return (
-    <SidebarProvider>
-      <div className="flex h-screen w-full bg-background">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header title="Dashboard" userInitials="BL" />
-          
-          <div className="flex-1 overflow-auto">
-            <DashboardContent />
-          </div>
-        </div>
+    <>
+      <Header title="Dashboard" userInitials="BL" />
+      
+      <div className="flex-1 overflow-auto">
+        <DashboardContent />
       </div>
-    </SidebarProvider>
+    </>
   );
 };
 

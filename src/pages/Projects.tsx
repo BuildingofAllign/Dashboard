@@ -15,6 +15,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { ProjectHoverCard } from "@/components/ui/ProjectHoverCard";
 import { ProjectSkeleton } from "@/components/ui/ProjectSkeleton";
+import { Header } from "@/components/layout/Header";
 
 const Projects = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -46,7 +47,6 @@ const Projects = () => {
   }, [viewMode]);
   
   const handleEditProject = (project: any) => {
-    // Implement editing functionality
     toast.info(`Redigerer projekt: ${project.name}`);
   };
   
@@ -76,124 +76,130 @@ const Projects = () => {
 
   if (error) {
     return (
-      <div className="container py-6 max-w-7xl mx-auto">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Fejl ved indlæsning af projekter</AlertTitle>
-          <AlertDescription>
-            Der opstod en fejl ved indlæsning af projekter. Prøv at genindlæse siden.
-          </AlertDescription>
-        </Alert>
-      </div>
+      <>
+        <Header title="Projekter" userInitials="BL" />
+        <div className="container py-6 max-w-7xl mx-auto">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Fejl ved indlæsning af projekter</AlertTitle>
+            <AlertDescription>
+              Der opstod en fejl ved indlæsning af projekter. Prøv at genindlæse siden.
+            </AlertDescription>
+          </Alert>
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="container py-6 space-y-6 max-w-7xl mx-auto">
-      <ProjectsHeader
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        typeFilter={typeFilter}
-        setTypeFilter={setTypeFilter}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        priorityFilter={priorityFilter}
-        setPriorityFilter={setPriorityFilter}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        setIsCreateDialogOpen={setIsCreateDialogOpen}
-        filteredAndSortedProjects={filteredAndSortedProjects}
-        setCommandOpen={setIsCommandOpen}
-      />
-      
-      {viewMode !== "list" && pinnedProjects.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-medium">Fastgjorte projekter</h2>
-            <Badge variant="secondary" className="rounded-full">
-              {pinnedProjects.length}
-            </Badge>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {pinnedProjects.map(project => (
-              <ProjectSummaryCard
-                key={`pinned-${project.id}`}
-                project={project}
-                className="border-primary/30 shadow-sm"
-              />
-            ))}
-          </div>
-          
-          <Separator />
-        </div>
-      )}
-      
-      {viewMode === "list" ? (
-        <ProjectsContent 
+    <>
+      <Header title="Projekter" userInitials="BL" />
+      <div className="container py-6 space-y-6 max-w-7xl mx-auto">
+        <ProjectsHeader
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          typeFilter={typeFilter}
+          setTypeFilter={setTypeFilter}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          priorityFilter={priorityFilter}
+          setPriorityFilter={setPriorityFilter}
           viewMode={viewMode}
-          loadingProjects={loadingProjects}
-          filteredAndSortedProjects={filteredAndSortedProjects}
-          handlePinWithToast={handlePinWithToast}
-          handleEditProject={handleEditProject}
-          handleDeleteProject={handleDeleteProject}
+          setViewMode={setViewMode}
           setIsCreateDialogOpen={setIsCreateDialogOpen}
+          filteredAndSortedProjects={filteredAndSortedProjects}
+          setCommandOpen={setIsCommandOpen}
         />
-      ) : (
-        loadingProjects ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            <ProjectSkeleton count={8} />
+        
+        {viewMode !== "list" && pinnedProjects.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-medium">Fastgjorte projekter</h2>
+              <Badge variant="secondary" className="rounded-full">
+                {pinnedProjects.length}
+              </Badge>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {pinnedProjects.map(project => (
+                <ProjectSummaryCard
+                  key={`pinned-${project.id}`}
+                  project={project}
+                  className="border-primary/30 shadow-sm"
+                />
+              ))}
+            </div>
+            
+            <Separator />
           </div>
-        ) : filteredAndSortedProjects.length === 0 ? (
-          <EmptyState
-            title="Ingen projekter fundet"
-            description="Prøv at justere dine filtre eller opret et nyt projekt."
-            icon="file"
-            actionLabel="Opret nyt projekt"
-            onAction={() => setIsCreateDialogOpen(true)}
+        )}
+        
+        {viewMode === "list" ? (
+          <ProjectsContent 
+            viewMode={viewMode}
+            loadingProjects={loadingProjects}
+            filteredAndSortedProjects={filteredAndSortedProjects}
+            handlePinWithToast={handlePinWithToast}
+            handleEditProject={handleEditProject}
+            handleDeleteProject={handleDeleteProject}
+            setIsCreateDialogOpen={setIsCreateDialogOpen}
           />
         ) : (
-          <div className="space-y-8">
-            {sortedTypes.map(type => (
-              <div key={type} className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-medium capitalize">{type}</h2>
-                  <Badge variant="outline" className="rounded-full">
-                    {projectsByType[type].length}
-                  </Badge>
+          loadingProjects ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <ProjectSkeleton count={8} />
+            </div>
+          ) : filteredAndSortedProjects.length === 0 ? (
+            <EmptyState
+              title="Ingen projekter fundet"
+              description="Prøv at justere dine filtre eller opret et nyt projekt."
+              icon="file"
+              actionLabel="Opret nyt projekt"
+              onAction={() => setIsCreateDialogOpen(true)}
+            />
+          ) : (
+            <div className="space-y-8">
+              {sortedTypes.map(type => (
+                <div key={type} className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-medium capitalize">{type}</h2>
+                    <Badge variant="outline" className="rounded-full">
+                      {projectsByType[type].length}
+                    </Badge>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {projectsByType[type].map(project => (
+                      <ProjectHoverCard key={project.id} project={project}>
+                        <div className="h-full">
+                          <ProjectSummaryCard
+                            project={project}
+                          />
+                        </div>
+                      </ProjectHoverCard>
+                    ))}
+                  </div>
                 </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {projectsByType[type].map(project => (
-                    <ProjectHoverCard key={project.id} project={project}>
-                      <div className="h-full">
-                        <ProjectSummaryCard
-                          project={project}
-                        />
-                      </div>
-                    </ProjectHoverCard>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )
-      )}
-      
-      <ProjectFormDialog
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
-        mode="create"
-        onSubmit={handleCreateProject}
-      />
-      
-      <CommandPalette
-        open={isCommandOpen}
-        onOpenChange={setIsCommandOpen}
-      />
-      
-      <ScrollToTopButton />
-    </div>
+              ))}
+            </div>
+          )
+        )}
+        
+        <ProjectFormDialog
+          open={isCreateDialogOpen}
+          onOpenChange={setIsCreateDialogOpen}
+          mode="create"
+          onSubmit={handleCreateProject}
+        />
+        
+        <CommandPalette
+          open={isCommandOpen}
+          onOpenChange={setIsCommandOpen}
+        />
+        
+        <ScrollToTopButton />
+      </div>
+    </>
   );
 };
 
