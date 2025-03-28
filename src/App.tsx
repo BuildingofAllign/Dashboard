@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './components/ui/ThemeProvider';
@@ -55,11 +55,13 @@ function AppContent() {
   return (
     <div className="flex h-screen w-full bg-background">
       <Sidebar />
-      <main className="flex-1 overflow-auto p-0">
-        <div className="p-4 md:hidden">
+      <main className="flex-1 flex flex-col overflow-hidden">
+        <div className="md:hidden p-4">
           <SidebarTrigger />
         </div>
-        <AppRoutes />
+        <div className="flex-1 overflow-auto">
+          <AppRoutes />
+        </div>
       </main>
     </div>
   );
