@@ -3,7 +3,7 @@ import React from "react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { CheckCircle2, Clock, AlertCircle, Activity } from "lucide-react";
 
 export type StatusType = "aktiv" | "ikke-startet" | "afsluttet" | "standset" | string;
 
@@ -15,6 +15,7 @@ interface ProjectProgressIndicatorProps {
   showIcon?: boolean;
   className?: string;
   showTooltip?: boolean;
+  animate?: boolean;
 }
 
 export const ProjectProgressIndicator: React.FC<ProjectProgressIndicatorProps> = ({
@@ -25,6 +26,7 @@ export const ProjectProgressIndicator: React.FC<ProjectProgressIndicatorProps> =
   showIcon = true,
   className,
   showTooltip = true,
+  animate = true,
 }) => {
   const normalizedProgress = Math.min(Math.max(0, progress), 100);
   
@@ -38,7 +40,8 @@ export const ProjectProgressIndicator: React.FC<ProjectProgressIndicatorProps> =
     color: string, 
     icon: React.ElementType,
     indicatorClass: string,
-    label: string 
+    label: string,
+    pulseColor?: string
   }> = {
     "afsluttet": { 
       color: "text-green-600", 
@@ -48,9 +51,10 @@ export const ProjectProgressIndicator: React.FC<ProjectProgressIndicatorProps> =
     },
     "aktiv": { 
       color: "text-blue-600", 
-      icon: Clock,
+      icon: Activity,
       indicatorClass: "bg-blue-500",
-      label: "Aktiv" 
+      label: "Aktiv",
+      pulseColor: "bg-blue-400" 
     },
     "ikke-startet": { 
       color: "text-gray-500", 
@@ -68,7 +72,7 @@ export const ProjectProgressIndicator: React.FC<ProjectProgressIndicatorProps> =
   
   // Default to 'aktiv' if status is not recognized
   const statusKey = Object.keys(statusConfig).includes(status) ? status : "aktiv";
-  const { color, icon: Icon, indicatorClass, label } = statusConfig[statusKey];
+  const { color, icon: Icon, indicatorClass, label, pulseColor } = statusConfig[statusKey];
   
   const progressComponent = (
     <div className={cn("w-full", className)}>
@@ -85,11 +89,30 @@ export const ProjectProgressIndicator: React.FC<ProjectProgressIndicatorProps> =
           {normalizedProgress}%
         </span>
       </div>
-      <Progress 
-        value={normalizedProgress} 
-        className={cn(sizeConfig[size].height, "bg-secondary")}
-        indicatorClassName={cn(indicatorClass)}
-      />
+      <div className="relative">
+        <Progress 
+          value={normalizedProgress} 
+          className={cn(sizeConfig[size].height, "bg-secondary")}
+          indicatorClassName={cn(
+            indicatorClass,
+            animate && status === "aktiv" && "transition-all duration-1000"
+          )}
+        />
+        
+        {animate && status === "aktiv" && normalizedProgress > 0 && (
+          <span 
+            className={cn(
+              "absolute top-0 right-0 h-full w-4 opacity-70 blur-sm", 
+              pulseColor,
+              "animate-pulse"
+            )}
+            style={{ 
+              left: `${Math.max(0, normalizedProgress - 4)}%`,
+              width: "4%"
+            }}
+          />
+        )}
+      </div>
     </div>
   );
   

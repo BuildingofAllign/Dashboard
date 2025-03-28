@@ -3,12 +3,15 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProjectProgressIndicator } from "@/components/ui/ProjectProgressIndicator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Building, AlertTriangle, Calendar, Users, CheckCircle2 } from "lucide-react";
+import { Building, AlertTriangle, Calendar, Users, CheckCircle2, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { Button } from "@/components/ui/button";
+import { format, formatDistanceToNow } from "date-fns";
+import { da } from "date-fns/locale";
 
 type ProjectUpdate = {
   id: string;
@@ -29,8 +32,9 @@ export const RealTimeProjectStatus: React.FC = () => {
   const [refreshTime, setRefreshTime] = useState<string>(new Date().toLocaleTimeString());
   const [projectUpdates, setProjectUpdates] = useState<ProjectUpdate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null);
   
-  // Simulate real-time updates for the time display
+  // Update refresh time every minute
   useEffect(() => {
     const interval = setInterval(() => {
       setRefreshTime(new Date().toLocaleTimeString());
@@ -72,7 +76,10 @@ export const RealTimeProjectStatus: React.FC = () => {
           name: update.projects?.name || "Unknown Project",
           status: update.status,
           progress: update.progress,
-          lastUpdate: "For " + getRelativeTimeString(new Date(update.last_update)),
+          lastUpdate: formatDistanceToNow(new Date(update.last_update), { 
+            addSuffix: true,
+            locale: da 
+          }),
           updatedBy: update.updated_by,
           activity: update.activity,
           alert: update.alert,
@@ -109,29 +116,12 @@ export const RealTimeProjectStatus: React.FC = () => {
     };
   }, []);
   
-  // Helper function to convert timestamp to relative time string
-  const getRelativeTimeString = (date: Date): string => {
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    
-    if (diffInSeconds < 60) {
-      return `${diffInSeconds} sekunder siden`;
-    }
-    
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes} ${diffInMinutes === 1 ? 'minut' : 'minutter'} siden`;
-    }
-    
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) {
-      return `${diffInHours} ${diffInHours === 1 ? 'time' : 'timer'} siden`;
-    }
-    
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays} ${diffInDays === 1 ? 'dag' : 'dage'} siden`;
+  // Toggle expanded project
+  const toggleExpandProject = (projectId: string) => {
+    setExpandedProjectId(expandedProjectId === projectId ? null : projectId);
   };
   
+  // Filter projects based on active tab
   const filteredProjects = activeTab === "all" 
     ? projectUpdates 
     : activeTab === "alerts" 
@@ -139,7 +129,7 @@ export const RealTimeProjectStatus: React.FC = () => {
     : projectUpdates.filter(p => p.status === activeTab);
   
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-md font-medium">
@@ -149,7 +139,7 @@ export const RealTimeProjectStatus: React.FC = () => {
             Opdateret: {refreshTime}
           </div>
         </div>
-        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mt-2">
           <TabsList className="grid grid-cols-4">
             <TabsTrigger value="all">Alle</TabsTrigger>
             <TabsTrigger value="aktiv">Aktive</TabsTrigger>
@@ -169,59 +159,117 @@ export const RealTimeProjectStatus: React.FC = () => {
         ) : (
           <div className="space-y-4">
             {filteredProjects.length === 0 ? (
-              <p className="text-center text-muted-foreground py-4">
-                Ingen projekter at vise for dette filter
-              </p>
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <Building className="h-12 w-12 text-gray-300 mb-3" />
+                <p className="text-muted-foreground">
+                  Ingen projekter at vise for dette filter
+                </p>
+              </div>
             ) : (
               filteredProjects.map((project) => (
                 <div 
                   key={project.id}
                   className={cn(
-                    "space-y-3 rounded-lg border p-3",
-                    project.alert && "border-red-200 dark:border-red-900/30"
+                    "rounded-lg border p-3 transition-all duration-200",
+                    project.alert && "border-red-200 dark:border-red-900/30",
+                    "hover:shadow-sm cursor-pointer"
                   )}
+                  onClick={() => toggleExpandProject(project.id)}
                 >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <Building className="h-4 w-4 text-primary" />
-                        <h3 className="font-medium">{project.name}</h3>
-                        {project.alert && (
-                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Building className="h-4 w-4 text-primary" />
+                          <h3 className="font-medium">{project.name}</h3>
+                          {project.alert && (
+                            <AlertTriangle className="h-4 w-4 text-red-500" />
+                          )}
+                        </div>
+                        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Users className="h-3.5 w-3.5" />
+                            <span>{project.team} team medlemmer</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-3.5 w-3.5" />
+                            <span>{project.daysLeft} dage tilbage</span>
+                          </div>
+                        </div>
+                      </div>
+                      <Badge 
+                        variant="outline" 
+                        className={cn(
+                          "flex items-center gap-1 bg-background",
+                          project.activity.toLowerCase().includes("afvigelse") && "text-amber-600 border-amber-200 bg-amber-50/50",
+                          project.activity.toLowerCase().includes("tegning") && "text-blue-600 border-blue-200 bg-blue-50/50",
+                          project.activity.toLowerCase().includes("ks") && "text-green-600 border-green-200 bg-green-50/50"
                         )}
-                      </div>
-                      <div className="mt-1 flex items-center gap-3 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Users className="h-3.5 w-3.5" />
-                          <span>{project.team} team medlemmer</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3.5 w-3.5" />
-                          <span>{project.daysLeft} dage tilbage</span>
-                        </div>
-                      </div>
+                      >
+                        {project.activity}
+                      </Badge>
                     </div>
-                    <Badge 
-                      variant="outline" 
-                      className="flex items-center gap-1 bg-background"
-                    >
-                      {project.activity}
-                    </Badge>
-                  </div>
-                  
-                  <ProjectProgressIndicator 
-                    progress={project.progress} 
-                    status={project.status} 
-                    size="md"
-                    showIcon={false}
-                  />
-                  
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      <span>{project.lastUpdate}</span>
+                    
+                    <ProjectProgressIndicator 
+                      progress={project.progress} 
+                      status={project.status} 
+                      size="md"
+                      showIcon={false}
+                    />
+                    
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        <span>{project.lastUpdate}</span>
+                      </div>
+                      <span>Opdateret af: {project.updatedBy}</span>
                     </div>
-                    <span>Opdateret af: {project.updatedBy}</span>
+                    
+                    {expandedProjectId === project.id && (
+                      <div className="mt-3 pt-3 border-t border-border/50">
+                        <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Status</p>
+                            <p className="font-medium">
+                              {project.status === "aktiv" ? "Aktiv" : 
+                               project.status === "ikke-startet" ? "Ikke startet" : 
+                               project.status === "afsluttet" ? "Afsluttet" : project.status}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Fremskridt</p>
+                            <p className="font-medium">{project.progress}%</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex justify-between gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Navigate to project details
+                              toast.info("Navigation til projektdetaljer");
+                            }}
+                          >
+                            Se detaljer
+                          </Button>
+                          
+                          <Button 
+                            size="sm"
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Open project update dialog
+                              toast.info("Åbner opdateringsdialog");
+                            }}
+                          >
+                            Opdater
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))

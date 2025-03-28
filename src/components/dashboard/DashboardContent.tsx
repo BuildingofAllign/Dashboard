@@ -51,9 +51,6 @@ const DEMO_RECENT_ACTIVITIES = [
   { name: "Peter Madsen", email: "peter@example.com", amount: "Projekt opdateret" },
 ];
 
-// No longer needed as we're fetching from Supabase
-// const DEMO_NOTIFICATIONS = [...] - This is removed
-
 const DEMO_WEEKLY_ACTIVITY = {
   title: "Ugentlige aktiviteter",
   description: "Dit aktivitetsmål for denne uge",
@@ -160,8 +157,12 @@ export function DashboardContent() {
             
             {/* New real-time project status and prioritized tasks */}
             <div className="grid gap-4 md:grid-cols-7">
-              <RealTimeProjectStatus className="col-span-4" />
-              <PrioritizedTasksList className="col-span-3" />
+              <div className="md:col-span-4">
+                <RealTimeProjectStatus />
+              </div>
+              <div className="md:col-span-3">
+                <PrioritizedTasksList />
+              </div>
             </div>
             
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
