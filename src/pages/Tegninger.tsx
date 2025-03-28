@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { AddDrawingCard } from "@/components/drawings/AddDrawingCard";
-import { DrawingCard } from "@/components/drawings/DrawingCard";
+import { DrawingCard, Drawing } from "@/components/drawings/DrawingCard";
 import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,7 +19,7 @@ import { PlusCircle, Filter, Layers, History, Clock } from "lucide-react";
 import { toast } from "sonner";
 
 // Mock data for drawings
-const DEMO_DRAWINGS = [
+const DEMO_DRAWINGS: Drawing[] = [
   {
     id: "draw-1",
     title: "Grundplan 1. sal, Building A",
@@ -72,7 +72,7 @@ const DEMO_DRAWINGS = [
 
 const Tegninger: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDrawing, setSelectedDrawing] = useState<any | null>(null);
+  const [selectedDrawing, setSelectedDrawing] = useState<Drawing | null>(null);
   const [activeTab, setActiveTab] = useState("all");
   
   const handleSearch = (value: string) => {
@@ -94,7 +94,7 @@ const Tegninger: React.FC = () => {
     return matchesSearch && matchesTab;
   });
   
-  const handleOpenDrawing = (drawing: any) => {
+  const handleOpenDrawing = (drawing: Drawing) => {
     setSelectedDrawing(drawing);
   };
   

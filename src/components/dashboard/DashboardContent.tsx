@@ -155,14 +155,10 @@ export function DashboardContent() {
               />
             </div>
             
-            {/* New real-time project status and prioritized tasks */}
+            {/* Real-time project status and prioritized tasks */}
             <div className="grid gap-4 md:grid-cols-7">
-              <div className="md:col-span-4">
-                <RealTimeProjectStatus />
-              </div>
-              <div className="md:col-span-3">
-                <PrioritizedTasksList />
-              </div>
+              <RealTimeProjectStatus className="md:col-span-4" />
+              <PrioritizedTasksList className="md:col-span-3" />
             </div>
             
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
