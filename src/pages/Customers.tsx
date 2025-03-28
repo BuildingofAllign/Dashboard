@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useCustomers } from "@/hooks/use-customers";
 import { CustomersHeader } from "@/components/customers/CustomersHeader";
 import { CustomersContent } from "@/components/customers/CustomersContent";
@@ -7,12 +7,31 @@ import { CustomerFormDialog } from "@/components/customers/CustomerFormDialog";
 import { ViewMode } from "@/components/ui/ViewToggle";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Download, Upload, Filter } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { Header } from "@/components/layout/Header";
 import { Separator } from "@/components/ui/separator";
 import { CustomerCard } from "@/components/customers/CustomerCard";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { 
+  Breadcrumb, 
+  BreadcrumbItem, 
+  BreadcrumbLink, 
+  BreadcrumbList, 
+  BreadcrumbPage, 
+  BreadcrumbSeparator
+} from "@/components/ui/breadcrumb";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuGroup, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 
 const Customers = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -35,7 +54,7 @@ const Customers = () => {
     error
   } = useCustomers();
   
-  React.useEffect(() => {
+  useEffect(() => {
     localStorage.setItem('customerViewMode', viewMode);
   }, [viewMode]);
   
@@ -66,6 +85,18 @@ const Customers = () => {
   
   const pinnedCustomers = filteredAndSortedCustomers.filter(c => c.is_pinned);
 
+  const handleImportExport = (action: 'import' | 'export') => {
+    if (action === 'import') {
+      toast.success("Importfunktion", {
+        description: "Importfunktionen er ikke implementeret endnu"
+      });
+    } else {
+      toast.success("Eksportfunktion", {
+        description: "Eksportfunktionen er ikke implementeret endnu"
+      });
+    }
+  };
+
   if (error) {
     return (
       <>
@@ -87,6 +118,54 @@ const Customers = () => {
     <>
       <Header title="Kunder" userInitials="BL" />
       <div className="container py-6 space-y-6 max-w-7xl mx-auto">
+        {/* Breadcrumb and action buttons */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/">Hjem</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Kunder</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Filter className="h-4 w-4 mr-1" />
+                  Avanceret
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Avancerede handlinger</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => handleImportExport('import')}>
+                    <Upload className="h-4 w-4 mr-2" />
+                    <span>Importer kunder</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleImportExport('export')}>
+                    <Download className="h-4 w-4 mr-2" />
+                    <span>Eksporter kunder</span>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
+            <Button 
+              onClick={() => setIsCreateDialogOpen(true)}
+              className="transition-all hover:bg-primary/90"
+              size="sm"
+            >
+              Opret kunde
+            </Button>
+          </div>
+        </div>
+        
         <CustomersHeader
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
