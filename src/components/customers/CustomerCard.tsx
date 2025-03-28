@@ -20,8 +20,8 @@ export const CustomerCard: React.FC<CustomerCardProps> = ({
 
   return (
     <Card className={cn(
-      "h-full transition-all hover:shadow-md",
-      customer.is_pinned && "border-primary/30 shadow-sm"
+      "h-full transition-all hover:shadow-md hover:translate-y-[-2px] group",
+      customer.is_pinned && "border-primary/30 shadow-sm bg-primary/[0.03]"
     )}>
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
         <CardTitle className="text-lg font-bold">
@@ -32,10 +32,11 @@ export const CustomerCard: React.FC<CustomerCardProps> = ({
           size="icon"
           onClick={() => onPinToggle(customer.id, !!customer.is_pinned)}
           aria-label={customer.is_pinned ? "Fjern fra favoritter" : "Tilføj til favoritter"}
+          className="transition-all hover:bg-primary/10"
         >
           <Pin className={cn(
-            "h-4 w-4",
-            customer.is_pinned ? "fill-primary text-primary" : "text-muted-foreground"
+            "h-4 w-4 transition-all",
+            customer.is_pinned ? "fill-primary text-primary" : "text-muted-foreground group-hover:text-primary/70"
           )} />
         </Button>
       </CardHeader>
@@ -75,12 +76,20 @@ export const CustomerCard: React.FC<CustomerCardProps> = ({
         <div className="pt-2">
           <div className="flex justify-between">
             <div className="flex items-center gap-1">
-              <span className="px-2 py-1 rounded text-xs bg-slate-100 dark:bg-slate-800">
+              <span className={cn(
+                "px-2 py-1 rounded-full text-xs font-medium capitalize transition-colors",
+                customer.role === "bygherre" && "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+                customer.role === "hovedentreprenør" && "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+                customer.role === "underentreprenør" && "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+                customer.role === "leverandør" && "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+                customer.role === "rådgiver" && "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300",
+                customer.role === "andet" && "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300"
+              )}>
                 {customer.role}
               </span>
             </div>
             <Link to={`/kunder/${customer.id}`}>
-              <Button variant="ghost" size="sm">Se detaljer</Button>
+              <Button variant="ghost" size="sm" className="hover:bg-primary/10 hover:text-primary">Se detaljer</Button>
             </Link>
           </div>
         </div>
