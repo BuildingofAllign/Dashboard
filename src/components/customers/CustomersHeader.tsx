@@ -107,7 +107,7 @@ export const CustomersHeader: React.FC<CustomersHeaderProps> = ({
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Alle roller</SelectItem>
+              <SelectItem value="all">Alle roller</SelectItem>
               {customerRoles.map((role) => (
                 <SelectItem key={role} value={role} className="capitalize">{role}</SelectItem>
               ))}
