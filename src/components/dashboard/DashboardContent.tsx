@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MetricCard } from "@/components/ui/cards/metric-card"
@@ -11,6 +12,8 @@ import {
   BarChart as BarChartIcon, Activity, MessageSquare, FileText
 } from "lucide-react"
 import { BreadcrumbNav } from "@/components/ui/BreadcrumbNav"
+import { PrioritizedTasksList } from "./PrioritizedTasksList"
+import { RealTimeProjectStatus } from "./RealTimeProjectStatus"
 
 // Demo data for when real data is not available
 const DEMO_PROJECT_CATEGORIES = [
@@ -153,6 +156,12 @@ export function DashboardContent() {
                   positive: false
                 }}
               />
+            </div>
+            
+            {/* New real-time project status and prioritized tasks */}
+            <div className="grid gap-4 md:grid-cols-7">
+              <RealTimeProjectStatus className="col-span-4" />
+              <PrioritizedTasksList className="col-span-3" />
             </div>
             
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
