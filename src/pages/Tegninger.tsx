@@ -1,8 +1,6 @@
 
 import React, { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { FilterSelect } from "@/components/ui/FilterButton";
 import { Button } from "@/components/ui/button";
@@ -61,75 +59,70 @@ const Tegninger: React.FC = () => {
   ];
 
   return (
-    <SidebarProvider>
-      <div className="flex h-screen w-full bg-gray-100">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header title="Tegninger" userInitials="BL" />
-          
-          <div className="p-6 pb-3">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-              <SearchBar 
-                placeholder="Søg efter tegning..." 
-                onChange={setSearchQuery}
-                value={searchQuery}
-              />
-              <div className="flex gap-2 mt-4 md:mt-0">
-                <FilterSelect 
-                  options={projectOptions}
-                  value={projectFilter}
-                  onValueChange={setProjectFilter}
-                  className="min-w-[180px]"
-                />
-                <FilterSelect 
-                  options={drawingTypeOptions}
-                  value={typeFilter}
-                  onValueChange={setTypeFilter}
-                  className="min-w-[150px]"
-                />
-                <Button className="bg-indigo-600 hover:bg-indigo-700">
-                  <Upload className="h-5 w-5 mr-1" />
-                  Upload tegning
-                </Button>
-              </div>
-            </div>
-          </div>
-          
-          <div className="p-6 pt-0 overflow-auto">
-            {loadingDrawings ? (
-              <div className="flex justify-center items-center h-64">
-                <LoadingSpinner size="lg" />
-              </div>
-            ) : filteredDrawings.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredDrawings.map((drawing) => (
-                  <DrawingCard 
-                    key={drawing.id}
-                    title={drawing.title}
-                    project={projects.find(p => p.id === drawing.project_id)?.name || "Ukendt projekt"}
-                    version={drawing.version}
-                    imageSrc={drawing.image_url}
-                    deviations={drawing.deviations || 0}
-                    additionalTasks={drawing.additional_tasks || 0}
-                    updatedDaysAgo={drawing.updated_days_ago || 0}
-                    annotationMarkers={drawing.drawing_annotation_markers?.map(marker => ({
-                      id: marker.id,
-                      position: marker.position,
-                      color: marker.color
-                    })) || []}
-                  />
-                ))}
-                <AddDrawingCard />
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-500">Ingen tegninger fundet med de valgte filtre.</p>
-              </div>
-            )}
+    <div className="flex flex-col h-full">
+      <Header title="Tegninger" userInitials="BL" />
+      
+      <div className="p-6 pb-3">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <SearchBar 
+            placeholder="Søg efter tegning..." 
+            onChange={setSearchQuery}
+            value={searchQuery}
+          />
+          <div className="flex gap-2 mt-4 md:mt-0">
+            <FilterSelect 
+              options={projectOptions}
+              value={projectFilter}
+              onValueChange={setProjectFilter}
+              className="min-w-[180px]"
+            />
+            <FilterSelect 
+              options={drawingTypeOptions}
+              value={typeFilter}
+              onValueChange={setTypeFilter}
+              className="min-w-[150px]"
+            />
+            <Button className="bg-indigo-600 hover:bg-indigo-700">
+              <Upload className="h-5 w-5 mr-1" />
+              Upload tegning
+            </Button>
           </div>
         </div>
       </div>
-    </SidebarProvider>
+      
+      <div className="p-6 pt-0 overflow-auto">
+        {loadingDrawings ? (
+          <div className="flex justify-center items-center h-64">
+            <LoadingSpinner size="lg" />
+          </div>
+        ) : filteredDrawings.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredDrawings.map((drawing) => (
+              <DrawingCard 
+                key={drawing.id}
+                title={drawing.title}
+                project={projects.find(p => p.id === drawing.project_id)?.name || "Ukendt projekt"}
+                version={drawing.version}
+                imageSrc={drawing.image_url}
+                deviations={drawing.deviations || 0}
+                additionalTasks={drawing.additional_tasks || 0}
+                updatedDaysAgo={drawing.updated_days_ago || 0}
+                annotationMarkers={drawing.drawing_annotation_markers?.map(marker => ({
+                  id: marker.id,
+                  position: marker.position,
+                  color: marker.color
+                })) || []}
+              />
+            ))}
+            <AddDrawingCard />
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-500">Ingen tegninger fundet med de valgte filtre.</p>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 

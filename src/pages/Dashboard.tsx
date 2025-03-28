@@ -18,13 +18,13 @@ const Dashboard: React.FC = () => {
   }, []);
 
   return (
-    <>
+    <div className="flex flex-col h-full">
       <Header title="Dashboard" userInitials="BL" />
       
       <div className="flex-1 overflow-auto">
         <DashboardContent />
       </div>
-    </>
+    </div>
   );
 };
 

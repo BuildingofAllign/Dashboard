@@ -55,7 +55,7 @@ function AppContent() {
   return (
     <div className="flex h-screen w-full bg-background">
       <Sidebar />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto p-0">
         <div className="p-4 md:hidden">
           <SidebarTrigger />
         </div>

@@ -53,10 +53,10 @@ const ProjectsPage = () => {
   };
 
   return (
-    <div className="flex-1">
+    <div className="flex flex-col h-full">
       <Header title="Projekter" userInitials="BL" />
 
-      <div className="p-6">
+      <div className="p-6 flex-1 overflow-auto">
         <ProjectsHeader 
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
