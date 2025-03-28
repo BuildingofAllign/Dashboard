@@ -45,6 +45,7 @@ export const DataCard: React.FC<DataCardProps> = ({
   actionIcon = <ChevronRight className="h-4 w-4" />,
   onAction,
 }) => {
+  // Trend indicator
   const TrendIndicator = () => {
     if (!trend) return null;
     

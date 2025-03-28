@@ -1,9 +1,13 @@
 
 import React from "react";
-import { MoreVertical, Info, Clock } from "lucide-react";
+import { MoreVertical, Info, Clock, FileText } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-interface AnnotationMarker {
+export interface AnnotationMarker {
   id: number;
   position: string;
   color: string;
@@ -25,11 +29,13 @@ export interface Drawing {
 export interface DrawingCardProps {
   drawing: Drawing;
   onView?: () => void;
+  className?: string;
 }
 
 export const DrawingCard: React.FC<DrawingCardProps> = ({
   drawing,
-  onView
+  onView,
+  className
 }) => {
   // Generate some random annotation markers for demo
   const annotationMarkers: AnnotationMarker[] = drawing.hasAnnotations 
@@ -49,7 +55,12 @@ export const DrawingCard: React.FC<DrawingCardProps> = ({
   };
 
   return (
-    <Card className="overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={onView}>
+    <Card className={cn(
+      "overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group",
+      "border-t-4",
+      drawing.hasAnnotations ? "border-t-amber-500" : "border-t-green-500",
+      className
+    )} onClick={onView}>
       <div className="relative aspect-[4/3] bg-gray-100">
         <div className="absolute inset-0 flex items-center justify-center">
           <img src={drawing.thumbnail} alt={drawing.title} className="w-full h-full object-cover" />
@@ -62,34 +73,66 @@ export const DrawingCard: React.FC<DrawingCardProps> = ({
         
         {annotationMarkers.map((marker) => (
           <div key={marker.id} className={`absolute ${marker.position}`}>
-            <div className={`w-6 h-6 rounded-full ${marker.color} border-2 border-white text-white flex items-center justify-center text-xs font-bold`}>
-              {marker.id}
-            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className={`w-6 h-6 rounded-full ${marker.color} border-2 border-white text-white flex items-center justify-center text-xs font-bold cursor-pointer transition-transform hover:scale-110`}>
+                    {marker.id}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <p>Afvigelse #{marker.id}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         ))}
+
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200"></div>
       </div>
       
       <div className="p-4">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800">{drawing.title}</h3>
+            <h3 className="text-lg font-semibold text-gray-800 group-hover:text-primary transition-colors">{drawing.title}</h3>
             <p className="text-sm text-gray-600">{drawing.project}</p>
           </div>
           <div className="flex">
-            <button className="text-gray-500 hover:text-indigo-600" onClick={(e) => e.stopPropagation()}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-indigo-600" onClick={(e) => {
+              e.stopPropagation();
+              // Add menu functionality here
+            }}>
               <MoreVertical className="h-5 w-5" />
-            </button>
+            </Button>
           </div>
         </div>
         
         <div className="mt-3 flex items-center text-sm text-gray-500">
+          <FileText className="h-4 w-4 mr-1 text-indigo-500" />
+          <span className="font-medium text-indigo-600">{drawing.tradeType}</span>
+        </div>
+        
+        <div className="mt-3 flex items-center text-sm text-gray-500">
           <Info className="h-4 w-4 mr-1" />
-          {drawing.hasAnnotations ? "3 afvigelser, 1 tillægsopgave" : "Ingen afvigelser"}
+          <span className={cn(
+            drawing.hasAnnotations && "text-amber-600 font-medium"
+          )}>
+            {drawing.hasAnnotations ? "3 afvigelser, 1 tillægsopgave" : "Ingen afvigelser"}
+          </span>
         </div>
         
         <div className="mt-3 flex items-center text-sm text-gray-500">
           <Clock className="h-4 w-4 mr-1" />
           {getUpdatedText()}
+        </div>
+
+        <div className="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center">
+          <Badge variant="outline" className="bg-gray-50">
+            {drawing.status}
+          </Badge>
+          <span className="text-xs text-gray-500">
+            {drawing.uploadedBy}
+          </span>
         </div>
       </div>
     </Card>

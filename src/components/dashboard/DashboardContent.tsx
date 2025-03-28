@@ -1,9 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { MetricCard } from "@/components/ui/cards/metric-card"
-import { ChartCard } from "@/components/ui/cards/chart-card"
-import { ActivityGoal } from "@/components/ui/cards/activity-goal"
 import { AnimatedList } from "@/components/ui/AnimatedList"
 import { 
   Building, Building2, Home, User, Clock, CheckCircle, AlertTriangle, 
@@ -14,6 +11,13 @@ import {
 import { BreadcrumbNav } from "@/components/ui/BreadcrumbNav"
 import { PrioritizedTasksList } from "./PrioritizedTasksList"
 import { RealTimeProjectStatus } from "./RealTimeProjectStatus"
+import { ChartCard } from "@/components/ui/cards/chart-card"
+import { ActivityGoal } from "@/components/ui/cards/activity-goal"
+import { StatCard } from "@/components/ui/StatCard"
+import { DataCard } from "@/components/ui/DataCard"
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { supabase } from "@/integrations/supabase/client"
 
 // Demo data for when real data is not available
 const DEMO_PROJECT_CATEGORIES = [
@@ -43,14 +47,6 @@ const DEMO_QUALITY_ASSURANCE = [
   { name: "Fejl", percentage: 10 },
 ];
 
-const DEMO_RECENT_ACTIVITIES = [
-  { name: "Anders Jensen", email: "anders@example.com", amount: "2 afvigelser" },
-  { name: "Mette Nielsen", email: "mette@example.com", amount: "1 tegning" },
-  { name: "Lars Petersen", email: "lars@example.com", amount: "KS godkendt" },
-  { name: "Sofie Hansen", email: "sofie@example.com", amount: "3 tillæg" },
-  { name: "Peter Madsen", email: "peter@example.com", amount: "Projekt opdateret" },
-];
-
 const DEMO_WEEKLY_ACTIVITY = {
   title: "Ugentlige aktiviteter",
   description: "Dit aktivitetsmål for denne uge",
@@ -67,45 +63,83 @@ const DEMO_WEEKLY_ACTIVITY = {
   ],
 };
 
+interface DashboardStats {
+  activeProjects: number;
+  openDeviations: number;
+  qualityAssurancePercent: number;
+  additionalTasksCount: number;
+  projectsIncrease: number;
+  deviationsIncrease: number;
+  qaIncrease: number;
+  additionalTasksDecrease: number;
+  loading: boolean;
+}
+
 export function DashboardContent() {
-  const currentDate = new Date().toLocaleDateString('da-DK', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+  const [stats, setStats] = useState<DashboardStats>({
+    activeProjects: 0,
+    openDeviations: 0,
+    qualityAssurancePercent: 0,
+    additionalTasksCount: 0,
+    projectsIncrease: 0,
+    deviationsIncrease: 0,
+    qaIncrease: 0,
+    additionalTasksDecrease: 0,
+    loading: true
   });
-  
-  const formattedDate = currentDate.charAt(0).toUpperCase() + currentDate.slice(1);
+
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+        // Simulate API call with timeout
+        setTimeout(() => {
+          setStats({
+            activeProjects: 7,
+            openDeviations: 12,
+            qualityAssurancePercent: 65,
+            additionalTasksCount: 15,
+            projectsIncrease: 8,
+            deviationsIncrease: 12,
+            qaIncrease: 5,
+            additionalTasksDecrease: 3,
+            loading: false
+          });
+        }, 800);
+      } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+        setStats(prev => ({ ...prev, loading: false }));
+      }
+    };
+
+    fetchDashboardStats();
+  }, []);
 
   const breadcrumbItems = [
     { label: "Dashboard" }
   ];
 
-  const stats = {
-    activeProjects: 7,
-    openDeviations: 12,
-    qualityAssurancePercent: 65,
-    additionalTasksCount: 15,
-    projectsIncrease: 8,
-    deviationsIncrease: 12,
-    qaIncrease: 5,
-    additionalTasksDecrease: 3
-  };
-
   return (
     <>
       <div className="flex-1 space-y-4 p-8 pt-6">
-        <BreadcrumbNav items={breadcrumbItems} className="mb-4" />
-        
-        <div className="flex items-center justify-between space-y-2">
-          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+          <div>
+            <BreadcrumbNav items={breadcrumbItems} className="mb-2" />
+            <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+          </div>
           <div className="flex items-center space-x-2">
-            <p className="text-gray-500 dark:text-gray-400">{formattedDate}</p>
+            <Button variant="outline" size="sm" className="h-8">
+              <FileText className="mr-1.5 h-4 w-4" />
+              Rapport
+            </Button>
+            <Button size="sm" className="h-8">
+              <PlusCircle className="mr-1.5 h-4 w-4" />
+              Nyt projekt
+            </Button>
           </div>
         </div>
         
         <Tabs defaultValue="overview" className="space-y-4">
-          <TabsList>
+          <TabsList className="grid grid-cols-4 md:w-fit">
             <TabsTrigger value="overview">Oversigt</TabsTrigger>
             <TabsTrigger value="projects">Projekter</TabsTrigger>
             <TabsTrigger value="quality">Kvalitetssikring</TabsTrigger>
@@ -114,44 +148,56 @@ export function DashboardContent() {
           
           <TabsContent value="overview" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <MetricCard
+              <StatCard
                 title="Aktive projekter"
                 value={stats.activeProjects}
-                icon={<Building className="h-4 w-4 text-muted-foreground" />}
+                icon={<Building className="h-4 w-4" />}
+                loading={stats.loading}
                 trend={{
                   value: stats.projectsIncrease,
-                  positive: true
+                  positive: true,
+                  label: "fra sidste måned"
                 }}
+                variant="info"
               />
               
-              <MetricCard
+              <StatCard
                 title="Åbne afvigelser"
                 value={stats.openDeviations}
-                icon={<AlertTriangle className="h-4 w-4 text-muted-foreground" />}
+                icon={<AlertTriangle className="h-4 w-4" />}
+                loading={stats.loading}
                 trend={{
                   value: stats.deviationsIncrease,
-                  positive: false
+                  positive: false,
+                  label: "fra sidste måned"
                 }}
+                variant="warning"
               />
               
-              <MetricCard
+              <StatCard
                 title="KS godkendt"
                 value={`${stats.qualityAssurancePercent}%`}
-                icon={<CheckCircle className="h-4 w-4 text-muted-foreground" />}
+                icon={<CheckCircle className="h-4 w-4" />}
+                loading={stats.loading}
                 trend={{
                   value: stats.qaIncrease,
-                  positive: true
+                  positive: true,
+                  label: "fra sidste måned"
                 }}
+                variant="success"
               />
               
-              <MetricCard
+              <StatCard
                 title="Tillægsopgaver"
                 value={stats.additionalTasksCount}
-                icon={<PlusCircle className="h-4 w-4 text-muted-foreground" />}
+                icon={<PlusCircle className="h-4 w-4" />}
+                loading={stats.loading}
                 trend={{
                   value: stats.additionalTasksDecrease,
-                  positive: false
+                  positive: false,
+                  label: "fra sidste måned"
                 }}
+                variant="default"
               />
             </div>
             
@@ -197,53 +243,138 @@ export function DashboardContent() {
                 completed={DEMO_WEEKLY_ACTIVITY.completed}
                 target={DEMO_WEEKLY_ACTIVITY.target}
                 data={DEMO_WEEKLY_ACTIVITY.data}
+                className="col-span-2"
               />
             </div>
           </TabsContent>
           
           <TabsContent value="projects" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Card className="col-span-3">
-                <CardHeader>
-                  <CardTitle>Projekt oversigt</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-center text-muted-foreground py-10">
-                    Der er ingen projekt data at vise på nuværende tidspunkt.
-                  </p>
-                </CardContent>
-              </Card>
+            <div className="grid gap-4 md:grid-cols-3">
+              <DataCard
+                title="Aktive projekter"
+                value="7"
+                icon={<Building className="h-4 w-4" />}
+                trend={{ value: 8, positive: true }}
+                footer="Opdateret for 3 timer siden"
+                actionLabel="Se alle projekter"
+                onAction={() => {}}
+              />
+              
+              <DataCard
+                title="Projekter efter deadline"
+                value="2"
+                icon={<AlertTriangle className="h-4 w-4" />}
+                trend={{ value: 50, positive: false }}
+                footer="2 projekter kræver opmærksomhed"
+                actionLabel="Se projekter"
+                onAction={() => {}}
+              />
+              
+              <DataCard
+                title="Gennemførte projekter (2023)"
+                value="12"
+                icon={<CheckCircle className="h-4 w-4" />}
+                trend={{ value: 25, positive: true }}
+                footer="25% flere end sidste år"
+                actionLabel="Se statistik"
+                onAction={() => {}}
+              />
             </div>
+              
+            <Card>
+              <CardHeader>
+                <CardTitle>Projekt oversigt</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-center text-muted-foreground py-10">
+                  Vælg "Se alle projekter" ovenfor for at se en detaljeret oversigt.
+                </p>
+              </CardContent>
+            </Card>
           </TabsContent>
           
           <TabsContent value="quality" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Card className="col-span-3">
-                <CardHeader>
-                  <CardTitle>Kvalitetssikring</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-center text-muted-foreground py-10">
-                    Der er ingen kvalitetssikrings data at vise på nuværende tidspunkt.
-                  </p>
-                </CardContent>
-              </Card>
+            <div className="grid gap-4 md:grid-cols-3">
+              <DataCard
+                title="KS gennemført (i alt)"
+                value="73%"
+                icon={<CheckCircle className="h-4 w-4" />}
+                trend={{ value: 5, positive: true }}
+                footer="Opdateret i dag"
+                actionLabel="Se detaljer"
+                onAction={() => {}}
+              />
+              
+              <DataCard
+                title="Afventende KS"
+                value="18"
+                icon={<Clock className="h-4 w-4" />}
+                trend={{ value: 12, positive: false }}
+                footer="Stigning på 12% fra sidste uge"
+                actionLabel="Se liste"
+                onAction={() => {}}
+              />
+              
+              <DataCard
+                title="Godkendte tegninger"
+                value="142"
+                icon={<FileText className="h-4 w-4" />}
+                footer="Ud af 195 tegninger i alt"
+                actionLabel="Se tegninger"
+                onAction={() => {}}
+              />
             </div>
+
+            <ChartCard
+              title="Kvalitetssikring fordeling"
+              chartType="pie"
+              data={DEMO_QUALITY_ASSURANCE}
+              className="md:col-span-3"
+            />
           </TabsContent>
           
           <TabsContent value="team" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Card className="col-span-3">
-                <CardHeader>
-                  <CardTitle>Team status</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-center text-muted-foreground py-10">
-                    Der er ingen team data at vise på nuværende tidspunkt.
-                  </p>
-                </CardContent>
-              </Card>
+            <div className="grid gap-4 md:grid-cols-3">
+              <DataCard
+                title="Aktive teammedlemmer"
+                value="14"
+                icon={<User className="h-4 w-4" />}
+                footer="Opdateret i dag"
+                actionLabel="Se team"
+                onAction={() => {}}
+              />
+              
+              <DataCard
+                title="Igangværende opgaver"
+                value="23"
+                icon={<Activity className="h-4 w-4" />}
+                trend={{ value: 8, positive: true }}
+                footer="8% stigning fra sidste uge"
+                actionLabel="Se opgaver"
+                onAction={() => {}}
+              />
+              
+              <DataCard
+                title="Team beskeder"
+                value="47"
+                icon={<MessageSquare className="h-4 w-4" />}
+                trend={{ value: 24, positive: true }}
+                footer="24% stigning i aktivitet"
+                actionLabel="Åben chat"
+                onAction={() => {}}
+              />
             </div>
+              
+            <Card>
+              <CardHeader>
+                <CardTitle>Team status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-center text-muted-foreground py-10">
+                  Der er ingen team data at vise på nuværende tidspunkt.
+                </p>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

@@ -1,217 +1,238 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
-import { AddDrawingCard } from "@/components/drawings/AddDrawingCard";
 import { DrawingCard, Drawing } from "@/components/drawings/DrawingCard";
-import { Button } from "@/components/ui/button";
-import { SearchBar } from "@/components/ui/SearchBar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { AddDrawingCard } from "@/components/drawings/AddDrawingCard";
+import { BreadcrumbNav } from "@/components/ui/BreadcrumbNav";
 import { AnnotatableDrawingViewer } from "@/components/drawings/AnnotatableDrawingViewer";
-import { PlusCircle, Filter, Layers, History, Clock } from "lucide-react";
-import { toast } from "sonner";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { 
+  Search, Filter, Upload, 
+  LayoutGrid, LayoutList, 
+  Plus, X 
+} from "lucide-react";
+import { ViewToggle, ViewMode } from "@/components/ui/ViewToggle";
+import { NoData } from "@/components/ui/NoData";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
-// Mock data for drawings
-const DEMO_DRAWINGS: Drawing[] = [
+// Placeholder data for drawings
+const DRAWINGS_DATA: Drawing[] = [
   {
-    id: "draw-1",
-    title: "Grundplan 1. sal, Building A",
+    id: "1",
+    title: "Fundament plan",
     project: "Havneholmen Tower",
-    version: "v2.3",
-    uploadDate: "3. juni 2023",
+    version: "v2.1",
+    uploadDate: "2023-10-15",
     uploadedBy: "Anders Jensen",
-    thumbnail: "https://placehold.co/400x300/e6e6e6/939393?text=Floor+Plan",
-    tradeType: "Arkitekt",
-    status: "Aktuel",
+    thumbnail: "https://images.unsplash.com/photo-1616046638394-058923ed36a5?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGJ1aWxkaW5nJTIwcGxhbnxlbnwwfHwwfHx8MA%3D%3D",
+    tradeType: "Konstruktion",
+    status: "Godkendt",
+    hasAnnotations: false
+  },
+  {
+    id: "2",
+    title: "Elektrisk installation 1. sal",
+    project: "Ørestad College",
+    version: "v1.3",
+    uploadDate: "2023-10-12",
+    uploadedBy: "Mette Nielsen",
+    thumbnail: "https://images.unsplash.com/photo-1613665813446-82a78c468a1d?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NzJ8fGJ1aWxkaW5nJTIwcGxhbnxlbnwwfHwwfHx8MA%3D%3D",
+    tradeType: "El",
+    status: "Under revision",
     hasAnnotations: true
   },
   {
-    id: "draw-2",
-    title: "Elektriske installationer, Bygning B",
+    id: "3",
+    title: "Ventilation system",
+    project: "Amager Strand Apartments",
+    version: "v2.0",
+    uploadDate: "2023-10-10",
+    uploadedBy: "Lars Petersen",
+    thumbnail: "https://images.unsplash.com/photo-1624507735324-127f183f48a7?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjQ1fHxidWlsZGluZyUyMHBsYW58ZW58MHx8MHx8fDA%3D",
+    tradeType: "VVS",
+    status: "Godkendt",
+    hasAnnotations: false
+  },
+  {
+    id: "4",
+    title: "Facade elevation",
+    project: "Havneholmen Tower",
+    version: "v1.1",
+    uploadDate: "2023-10-05",
+    uploadedBy: "Sofie Hansen",
+    thumbnail: "https://images.unsplash.com/photo-1605152276897-4f618f831968?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzIwfHxidWlsZGluZyUyMHBsYW58ZW58MHx8MHx8fDA%3D",
+    tradeType: "Arkitektur",
+    status: "Under revision",
+    hasAnnotations: true
+  },
+  {
+    id: "5",
+    title: "Kælderplan",
     project: "Ørestad College",
     version: "v1.0",
-    uploadDate: "15. juli 2023",
-    uploadedBy: "Mette Nielsen",
-    thumbnail: "https://placehold.co/400x300/e6e6e6/939393?text=Electrical",
-    tradeType: "El",
-    status: "Review",
+    uploadDate: "2023-09-28",
+    uploadedBy: "Anders Jensen",
+    thumbnail: "https://images.unsplash.com/photo-1574691530338-27faaade82a3?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzYxfHxidWlsZGluZyUyMHBsYW58ZW58MHx8MHx8fDA%3D",
+    tradeType: "Konstruktion",
+    status: "Under udarbejdelse",
     hasAnnotations: false
   },
   {
-    id: "draw-3",
-    title: "VVS, Køkken detaljer",
+    id: "6",
+    title: "Tagkonstruktion",
     project: "Amager Strand Apartments",
-    version: "v3.1",
-    uploadDate: "27. maj 2023",
-    uploadedBy: "Lars Petersen",
-    thumbnail: "https://placehold.co/400x300/e6e6e6/939393?text=Plumbing",
-    tradeType: "VVS",
-    status: "Aktuel",
-    hasAnnotations: true
-  },
-  {
-    id: "draw-4",
-    title: "Facade syd, detaljering",
-    project: "Nordhavn Office Complex",
     version: "v1.2",
-    uploadDate: "10. august 2023",
-    uploadedBy: "Sofie Hansen",
-    thumbnail: "https://placehold.co/400x300/e6e6e6/939393?text=Facade",
-    tradeType: "Arkitekt",
-    status: "Forældet",
-    hasAnnotations: false
+    uploadDate: "2023-09-22",
+    uploadedBy: "Peter Madsen",
+    thumbnail: "https://images.unsplash.com/photo-1617469165786-8007eda3caa7?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDUzfHxidWlsZGluZyUyMHBsYW58ZW58MHx8MHx8fDA%3D",
+    tradeType: "Konstruktion",
+    status: "Afvist",
+    hasAnnotations: true
   }
 ];
 
-const Tegninger: React.FC = () => {
+const Tegninger = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDrawing, setSelectedDrawing] = useState<Drawing | null>(null);
-  const [activeTab, setActiveTab] = useState("all");
-  
-  const handleSearch = (value: string) => {
-    setSearchQuery(value);
-  };
-  
-  const filteredDrawings = DEMO_DRAWINGS.filter(drawing => {
-    // Filter by search query
-    const matchesSearch = drawing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         drawing.project.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         drawing.tradeType.toLowerCase().includes(searchQuery.toLowerCase());
+  const [isDrawingViewerOpen, setIsDrawingViewerOpen] = useState(false);
+  const [filteredDrawings, setFilteredDrawings] = useState<Drawing[]>([]);
+
+  // Fetch drawings
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Filter drawings based on search query
+  useEffect(() => {
+    if (!searchQuery) {
+      setFilteredDrawings(DRAWINGS_DATA);
+      return;
+    }
+
+    const lowerCaseQuery = searchQuery.toLowerCase();
+    const filtered = DRAWINGS_DATA.filter(drawing => 
+      drawing.title.toLowerCase().includes(lowerCaseQuery) ||
+      drawing.project.toLowerCase().includes(lowerCaseQuery) ||
+      drawing.tradeType.toLowerCase().includes(lowerCaseQuery)
+    );
     
-    // Filter by tab
-    const matchesTab = activeTab === "all" || 
-                      (activeTab === "architectural" && drawing.tradeType === "Arkitekt") ||
-                      (activeTab === "electrical" && drawing.tradeType === "El") ||
-                      (activeTab === "plumbing" && drawing.tradeType === "VVS");
-    
-    return matchesSearch && matchesTab;
-  });
-  
-  const handleOpenDrawing = (drawing: Drawing) => {
+    setFilteredDrawings(filtered);
+  }, [searchQuery]);
+
+  const handleViewDrawing = (drawing: Drawing) => {
     setSelectedDrawing(drawing);
-  };
-  
-  const handleSaveAnnotations = (annotations: any) => {
-    toast.success("Annotationer gemt", {
-      description: `${annotations.length} annotationer gemt til tegning.`
-    });
+    setIsDrawingViewerOpen(true);
   };
 
+  const breadcrumbItems = [
+    { label: "Home", link: "/" },
+    { label: "Tegninger" }
+  ];
+
   return (
-    <>
+    <div className="flex flex-col h-full">
       <Header title="Tegninger" userInitials="BL" />
       
-      <div className="p-6 space-y-6">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-          <div>
-            <h2 className="text-2xl font-bold">Tegninger</h2>
-            <p className="text-muted-foreground">
-              Håndter og visualiser projekttegninger
-            </p>
-          </div>
-          
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Upload ny tegning
-          </Button>
-        </div>
+      <div className="flex-1 overflow-auto p-6">
+        <BreadcrumbNav items={breadcrumbItems} />
         
-        <div className="mb-6 space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <SearchBar
-              placeholder="Søg i tegninger..."
-              onChange={handleSearch}
-              value={searchQuery}
-              onClear={() => setSearchQuery("")}
-              className="w-full sm:w-80"
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4 mb-6">
+          <h1 className="text-2xl font-semibold">Tegninger</h1>
+          
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Søg tegninger..."
+                className="pl-9 w-full"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <button 
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => setSearchQuery("")}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            
+            <Button variant="outline" className="flex gap-2 items-center">
+              <Filter className="h-4 w-4" />
+              <span>Filter</span>
+            </Button>
+            
+            <ViewToggle
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              gridIcon={<LayoutGrid className="h-4 w-4" />}
+              listIcon={<LayoutList className="h-4 w-4" />}
             />
             
-            <Button variant="outline" className="gap-2">
-              <Filter className="h-4 w-4" />
-              Filter
+            <Button className="flex gap-2 items-center">
+              <Upload className="h-4 w-4" />
+              <span>Upload</span>
             </Button>
           </div>
-          
-          <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
-              <TabsTrigger value="all">Alle tegninger</TabsTrigger>
-              <TabsTrigger value="architectural">Arkitekt</TabsTrigger>
-              <TabsTrigger value="electrical">El</TabsTrigger>
-              <TabsTrigger value="plumbing">VVS</TabsTrigger>
-            </TabsList>
-          </Tabs>
         </div>
         
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredDrawings.map(drawing => (
-            <DrawingCard 
-              key={drawing.id}
-              drawing={drawing}
-              onView={() => handleOpenDrawing(drawing)}
-            />
-          ))}
-          
-          <AddDrawingCard />
-        </div>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <LoadingSpinner size="lg" />
+          </div>
+        ) : filteredDrawings.length === 0 ? (
+          <NoData
+            title="Ingen tegninger fundet"
+            description="Prøv at søge med andre søgeord eller tilføj en ny tegning"
+            icon={<FileText className="h-12 w-12 text-muted-foreground/60" />}
+            action={
+              <Button className="flex gap-2 items-center">
+                <Plus className="h-4 w-4" />
+                <span>Upload tegning</span>
+              </Button>
+            }
+          />
+        ) : (
+          <div className={`grid gap-6 ${
+            viewMode === "grid" 
+              ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              : "grid-cols-1"
+          }`}>
+            {viewMode === "grid" && (
+              <AddDrawingCard />
+            )}
+            
+            {filteredDrawings.map((drawing) => (
+              <DrawingCard
+                key={drawing.id}
+                drawing={drawing}
+                onView={() => handleViewDrawing(drawing)}
+              />
+            ))}
+          </div>
+        )}
       </div>
       
-      <Dialog 
-        open={!!selectedDrawing} 
-        onOpenChange={(open) => !open && setSelectedDrawing(null)}
-      >
-        <DialogContent className="max-w-6xl h-[80vh] flex flex-col">
-          <DialogHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <DialogTitle>{selectedDrawing?.title}</DialogTitle>
-                <DialogDescription>
-                  {selectedDrawing?.project} - {selectedDrawing?.version}
-                </DialogDescription>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-1.5">
-                  <Layers className="h-4 w-4" />
-                  <span className="hidden sm:inline">Versioner</span>
-                </Button>
-                <Button variant="outline" size="sm" className="gap-1.5">
-                  <History className="h-4 w-4" />
-                  <span className="hidden sm:inline">Historik</span>
-                </Button>
-                <Button variant="outline" size="sm" className="gap-1.5">
-                  <Clock className="h-4 w-4" />
-                  <span className="hidden sm:inline">Tidslinje</span>
-                </Button>
-              </div>
-            </div>
-          </DialogHeader>
-          
-          <div className="flex-1 overflow-hidden">
+      <Dialog open={isDrawingViewerOpen} onOpenChange={setIsDrawingViewerOpen}>
+        <DialogContent className="max-w-6xl w-[90vw] h-[80vh] p-0">
+          {selectedDrawing && (
             <AnnotatableDrawingViewer 
-              imageUrl={selectedDrawing?.thumbnail || ""}
-              onSave={handleSaveAnnotations}
-              className="h-full"
+              drawing={selectedDrawing}
+              onClose={() => setIsDrawingViewerOpen(false)}
             />
-          </div>
-          
-          <DialogFooter>
-            <div className="w-full flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                Uploadet {selectedDrawing?.uploadDate} af {selectedDrawing?.uploadedBy}
-              </div>
-              <Button onClick={() => setSelectedDrawing(null)}>Luk</Button>
-            </div>
-          </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 };
 

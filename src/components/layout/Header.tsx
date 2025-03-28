@@ -1,156 +1,65 @@
 
-import React, { useState } from "react";
-import { Bell, Download, HelpCircle, Search, Star } from "lucide-react";
-import { DarkModeToggle } from "@/components/ui/DarkModeToggle";
-import { Input } from "@/components/ui/input";
+import React from "react";
+import { cn } from "@/lib/utils";
+import { UserAvatar } from "@/components/ui/UserAvatar";
 import { Button } from "@/components/ui/button";
-import { 
-  Tooltip, 
-  TooltipContent, 
-  TooltipProvider, 
-  TooltipTrigger 
-} from "@/components/ui/tooltip";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { KeyboardShortcutsDialog, useKeyboardShortcuts } from "@/components/ui/KeyboardShortcuts";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { Bell, HelpCircle, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 interface HeaderProps {
   title: string;
   userInitials: string;
-  onSearch?: (term: string) => void;
-  showExport?: boolean;
-  onExport?: () => void;
+  subTitle?: string;
+  backButton?: boolean;
+  onBack?: () => void;
+  actions?: React.ReactNode;
+  className?: string;
 }
 
-export const Header: React.FC<HeaderProps> = ({ 
-  title, 
-  userInitials, 
-  onSearch,
-  showExport = false,
-  onExport
+export const Header: React.FC<HeaderProps> = ({
+  title,
+  userInitials,
+  subTitle,
+  backButton = false,
+  onBack,
+  actions,
+  className
 }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const { setShowShortcutsDialog } = useKeyboardShortcuts();
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (onSearch) {
-      onSearch(searchTerm);
-    }
-  };
-
-  const notifications = [
-    { id: 1, title: "Ny afvigelse", message: "Afvigelse registreret på Skovvej 12", time: "10 min siden" },
-    { id: 2, title: "Tegning opdateret", message: "Facade tegning er blevet opdateret", time: "1 time siden" },
-    { id: 3, title: "Ny besked", message: "Boktogan har sent dig en besked", time: "3 timer siden" },
-  ];
-
   return (
-    <>
-      <div className="flex justify-between items-center shadow-[0_1px_2px_rgba(0,0,0,0.05)] bg-white px-6 py-4 dark:bg-gray-800 dark:text-white">
-        <div className="text-[23px] font-bold text-gray-800 dark:text-white">{title}</div>
-
-        <div className="flex-1 max-w-md mx-6">
-          <form onSubmit={handleSearch}>
-            <div className="relative">
-              <Input
-                type="search"
-                placeholder="Søg..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            </div>
-          </form>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {showExport && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" size="icon" onClick={onExport}>
-                    <Download className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Eksporter data</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  onClick={() => setShowShortcutsDialog(true)}
-                >
-                  <HelpCircle className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Tastatur genveje (Tryk ?)</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
-          <DarkModeToggle />
-
-          <DropdownMenu>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" className="relative">
-                      <Bell className="h-4 w-4" />
-                      <span className="absolute h-2 w-2 top-1 right-1 bg-red-500 rounded-full"></span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Notifikationer</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            
-            <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel>Notifikationer</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              
-              {notifications.map((notification) => (
-                <DropdownMenuItem key={notification.id} className="p-3 cursor-pointer">
-                  <div className="flex flex-col space-y-1">
-                    <p className="font-medium">{notification.title}</p>
-                    <p className="text-sm text-gray-500">{notification.message}</p>
-                    <p className="text-xs text-gray-400">{notification.time}</p>
-                  </div>
-                </DropdownMenuItem>
-              ))}
-              
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="justify-center text-sm text-blue-600 font-medium">
-                Se alle notifikationer
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <div className="w-10 h-10 text-white text-base font-bold bg-indigo-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-indigo-700 transition-colors">
-            {userInitials}
-          </div>
-        </div>
+    <header className={cn(
+      "bg-background shadow-sm border-b py-2.5 px-6 flex items-center justify-between",
+      className
+    )}>
+      <div className="flex flex-col">
+        <h1 className="text-2xl font-semibold leading-tight">{title}</h1>
+        {subTitle && (
+          <p className="text-sm text-muted-foreground mt-0.5">{subTitle}</p>
+        )}
       </div>
       
-      <KeyboardShortcutsDialog />
-    </>
+      <div className="flex items-center space-x-3">
+        <div className="relative hidden md:block w-64">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Søg..."
+            className="h-9 w-full pl-9 rounded-full bg-muted/50"
+          />
+        </div>
+        
+        <Button variant="ghost" size="icon" className="relative">
+          <Bell className="h-5 w-5" />
+          <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-red-500"></span>
+        </Button>
+        
+        <Button variant="ghost" size="icon">
+          <HelpCircle className="h-5 w-5" />
+        </Button>
+        
+        <ThemeToggle />
+        
+        <UserAvatar initials={userInitials} />
+      </div>
+    </header>
   );
 };

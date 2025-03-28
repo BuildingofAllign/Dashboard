@@ -68,6 +68,13 @@ export const ProjectProgressIndicator: React.FC<ProjectProgressIndicatorProps> =
       indicatorClass: "bg-red-500",
       label: "Standset" 
     },
+    "problem": {  // Added mapping for the 'problem' status
+      color: "text-amber-600", 
+      icon: AlertCircle,
+      indicatorClass: "bg-amber-500",
+      label: "Problem",
+      pulseColor: "bg-amber-400"
+    }
   };
   
   // Default to 'aktiv' if status is not recognized
@@ -95,11 +102,11 @@ export const ProjectProgressIndicator: React.FC<ProjectProgressIndicatorProps> =
           className={cn(sizeConfig[size].height, "bg-secondary")}
           indicatorClassName={cn(
             indicatorClass,
-            animate && status === "aktiv" && "transition-all duration-1000"
+            animate && (status === "aktiv" || status === "problem") && "transition-all duration-1000"
           )}
         />
         
-        {animate && status === "aktiv" && normalizedProgress > 0 && (
+        {animate && (status === "aktiv" || status === "problem") && normalizedProgress > 0 && (
           <span 
             className={cn(
               "absolute top-0 right-0 h-full w-4 opacity-70 blur-sm", 

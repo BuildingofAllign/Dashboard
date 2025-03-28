@@ -1,11 +1,13 @@
 
 import React, { useState, useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import { Calendar, Clock, AlertCircle } from "lucide-react";
+import { Calendar, Clock, AlertCircle, ChevronRight, Filter } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { toast } from "sonner";
 
 interface Task {
   id: string;
@@ -26,11 +28,13 @@ export const PrioritizedTasksList: React.FC<PrioritizedTasksListProps> = ({
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [filter, setFilter] = useState<'all' | 'critical' | 'high'>('all');
 
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from('tasks')
           .select(`
             id,
@@ -40,8 +44,13 @@ export const PrioritizedTasksList: React.FC<PrioritizedTasksListProps> = ({
             status,
             projects(name)
           `)
-          .order('priority', { ascending: false })
-          .limit(4);
+          .order('priority', { ascending: false });
+          
+        if (filter !== 'all') {
+          query = query.eq('priority', filter);
+        }
+
+        const { data, error } = await query.limit(expanded ? 8 : 4);
 
         if (error) throw error;
 
@@ -84,7 +93,7 @@ export const PrioritizedTasksList: React.FC<PrioritizedTasksListProps> = ({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [expanded, filter]);
 
   const getPriorityStyles = (priority: string) => {
     switch (priority) {
@@ -110,12 +119,51 @@ export const PrioritizedTasksList: React.FC<PrioritizedTasksListProps> = ({
     }
   };
 
+  const handleMarkAsComplete = (taskId: string) => {
+    toast.success("Opgave markeret som fuldført");
+    // Here we would update the task status in the database
+  };
+
   return (
-    <Card className={cn("h-full", className)}>
-      <CardHeader>
+    <Card className={cn("h-full overflow-hidden flex flex-col", className)}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle>Prioriterede opgaver</CardTitle>
+        <div className="flex gap-2">
+          <div className="flex items-center bg-secondary text-xs rounded-md overflow-hidden">
+            <button 
+              className={cn(
+                "px-2 py-1 transition-colors",
+                filter === 'all' ? "bg-primary text-primary-foreground" : "hover:bg-secondary-foreground/10"
+              )}
+              onClick={() => setFilter('all')}
+            >
+              Alle
+            </button>
+            <button 
+              className={cn(
+                "px-2 py-1 transition-colors",
+                filter === 'critical' ? "bg-primary text-primary-foreground" : "hover:bg-secondary-foreground/10"
+              )}
+              onClick={() => setFilter('critical')}
+            >
+              Kritiske
+            </button>
+            <button 
+              className={cn(
+                "px-2 py-1 transition-colors",
+                filter === 'high' ? "bg-primary text-primary-foreground" : "hover:bg-secondary-foreground/10"
+              )}
+              onClick={() => setFilter('high')}
+            >
+              Høj
+            </button>
+          </div>
+          <Button variant="outline" size="icon" className="h-6 w-6">
+            <Filter className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 overflow-auto pb-0">
         {isLoading ? (
           <div className="flex justify-center py-8">
             <LoadingSpinner />
@@ -164,11 +212,36 @@ export const PrioritizedTasksList: React.FC<PrioritizedTasksListProps> = ({
                     </span>
                   </div>
                 </div>
+                
+                <div className="flex justify-end mt-1">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 text-xs"
+                    onClick={() => handleMarkAsComplete(task.id)}
+                  >
+                    Markér som fuldført
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
         )}
       </CardContent>
+      <CardFooter className="flex justify-between items-center pt-4 pb-4 border-t mt-4">
+        <span className="text-sm text-muted-foreground">
+          {tasks.length} opgaver vist
+        </span>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="flex items-center gap-1 text-primary"
+          onClick={() => setExpanded(!expanded)}
+        >
+          {expanded ? 'Vis færre' : 'Vis flere'}
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </CardFooter>
     </Card>
   );
 };
