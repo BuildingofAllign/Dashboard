@@ -21,7 +21,7 @@ export const CustomerCard: React.FC<CustomerCardProps> = ({
   return (
     <Card className={cn(
       "h-full transition-all hover:shadow-md",
-      customer.is_pinned && "border-primary/30"
+      customer.is_pinned && "border-primary/30 shadow-sm"
     )}>
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
         <CardTitle className="text-lg font-bold">

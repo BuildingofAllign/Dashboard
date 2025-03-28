@@ -43,16 +43,6 @@ const Customers = () => {
     setEditingCustomer(customer);
     setIsCreateDialogOpen(true);
   };
-  
-  const handlePinWithToast = (customerId: string, isPinned: boolean) => {
-    handleTogglePin(customerId, isPinned);
-    toast.success(isPinned ? "Kunde fjernet fra favoritter" : "Kunde tilføjet til favoritter", {
-      description: isPinned 
-        ? "Kunden vil ikke længere være fastgjort til toppen" 
-        : "Kunden vil nu være fastgjort til toppen af listen",
-      duration: 3000,
-    });
-  };
 
   const handleFormSubmit = (data: any) => {
     if (editingCustomer) {
@@ -122,7 +112,7 @@ const Customers = () => {
                 <CustomerCard
                   key={`pinned-${customer.id}`}
                   customer={customer}
-                  onPinToggle={handlePinWithToast}
+                  onPinToggle={handleTogglePin}
                 />
               ))}
             </div>
@@ -135,7 +125,7 @@ const Customers = () => {
           viewMode={viewMode}
           loadingCustomers={loadingCustomers}
           filteredAndSortedCustomers={filteredAndSortedCustomers}
-          handlePinWithToast={handlePinWithToast}
+          handlePinWithToast={handleTogglePin}
           handleEditCustomer={handleEditCustomer}
           handleDeleteCustomer={handleDeleteCustomer}
           setIsCreateDialogOpen={setIsCreateDialogOpen}

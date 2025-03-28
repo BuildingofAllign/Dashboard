@@ -84,6 +84,7 @@ export const CustomersHeader: React.FC<CustomersHeaderProps> = ({
             value={searchQuery}
             onChange={handleSearchChange}
             placeholder="Søg efter kunder..."
+            onClear={() => setSearchQuery('')}
           />
         </div>
 

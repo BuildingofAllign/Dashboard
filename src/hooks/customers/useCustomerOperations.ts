@@ -1,4 +1,5 @@
 
+import { toast } from 'sonner';
 import { Customer } from '../customers-types';
 
 export const useCustomerOperations = (
@@ -12,6 +13,13 @@ export const useCustomerOperations = (
           : customer
       )
     );
+    
+    toast.success(isPinned ? "Kunde fjernet fra favoritter" : "Kunde tilføjet til favoritter", {
+      description: isPinned 
+        ? "Kunden vil ikke længere være fastgjort til toppen" 
+        : "Kunden vil nu være fastgjort til toppen af listen",
+      duration: 3000,
+    });
   };
 
   const handleCreateCustomer = (customerData: Omit<Customer, 'id' | 'created_at' | 'updated_at'>) => {
