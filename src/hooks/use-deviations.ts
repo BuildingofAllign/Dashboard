@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useData } from '@/context/DataContext';
 import { toast } from 'sonner';
 
@@ -7,7 +7,7 @@ export const useDeviations = () => {
   const { 
     deviations, 
     loadingDeviations, 
-    fetchDeviations,
+    fetchDeviations: contextFetchDeviations,
     createDeviation,
     updateDeviation,
     addDeviationComment
@@ -16,6 +16,22 @@ export const useDeviations = () => {
   const [projectFilter, setProjectFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [approverFilter, setApproverFilter] = useState("all");
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
+  // Enhanced fetchDeviations with better error handling
+  const fetchDeviations = useCallback(async () => {
+    try {
+      setFetchError(null);
+      await contextFetchDeviations();
+    } catch (error) {
+      console.error("Error fetching deviations:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      setFetchError(errorMessage);
+      toast.error("Failed to load deviations", {
+        description: "Please try again later"
+      });
+    }
+  }, [contextFetchDeviations]);
 
   // Get filtered deviations based on current filters
   const filteredDeviations = deviations.filter((deviation) => {
@@ -50,6 +66,10 @@ export const useDeviations = () => {
       });
       return true;
     } catch (error) {
+      console.error("Error creating deviation:", error);
+      toast.error("Kunne ikke oprette afvigelse", {
+        description: "Prøv igen senere"
+      });
       return false;
     }
   };
@@ -62,6 +82,10 @@ export const useDeviations = () => {
       });
       return true;
     } catch (error) {
+      console.error("Error approving deviation:", error);
+      toast.error("Kunne ikke godkende afvigelse", {
+        description: "Prøv igen senere"
+      });
       return false;
     }
   };
@@ -74,6 +98,10 @@ export const useDeviations = () => {
       });
       return true;
     } catch (error) {
+      console.error("Error rejecting deviation:", error);
+      toast.error("Kunne ikke afvise afvigelse", {
+        description: "Prøv igen senere"
+      });
       return false;
     }
   };
@@ -83,6 +111,10 @@ export const useDeviations = () => {
       // This will be handled by the additional tasks hook
       return true;
     } catch (error) {
+      console.error("Error converting to additional task:", error);
+      toast.error("Kunne ikke konvertere til tillægsopgave", {
+        description: "Prøv igen senere"
+      });
       return false;
     }
   };
@@ -95,6 +127,10 @@ export const useDeviations = () => {
       });
       return true;
     } catch (error) {
+      console.error("Error adding comment:", error);
+      toast.error("Kunne ikke tilføje kommentar", {
+        description: "Prøv igen senere"
+      });
       return false;
     }
   };
@@ -103,6 +139,7 @@ export const useDeviations = () => {
     deviations,
     filteredDeviations,
     loadingDeviations,
+    fetchError,
     searchQuery,
     setSearchQuery,
     projectFilter,

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { FileText, X, Download, ZoomIn, ZoomOut, Maximize, Annotation, MessageSquare } from 'lucide-react';
+import { FileText, X, Download, ZoomIn, ZoomOut, Maximize, MessageSquare, AlertCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -80,7 +80,7 @@ export const DrawingViewerWrapper: React.FC<DrawingViewerWrapperProps> = ({
         </div>
         
         <div className="flex items-center space-x-2">
-          <Badge variant={drawing.hasAnnotations ? "destructive" : "success"}>
+          <Badge variant={drawing.hasAnnotations ? "destructive" : "default"}>
             {drawing.hasAnnotations ? `${annotations.length} afvigelser` : "Ingen afvigelser"}
           </Badge>
           
@@ -145,7 +145,7 @@ export const DrawingViewerWrapper: React.FC<DrawingViewerWrapperProps> = ({
                     size="sm"
                     onClick={handleToggleAnnotations}
                   >
-                    <Annotation className="h-4 w-4 mr-1" />
+                    <AlertCircle className="h-4 w-4 mr-1" />
                     <span>Vis afvigelser</span>
                   </Button>
                 </TooltipTrigger>

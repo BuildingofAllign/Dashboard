@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { useDeviations } from "@/hooks/use-deviations";
 import { Button } from "@/components/ui/button";
@@ -73,11 +73,20 @@ const Afvigelser = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDeviations, setSelectedDeviations] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("all");
-  const { loadingDeviations } = useDeviations();
+  const { 
+    loadingDeviations, 
+    deviations: apiDeviations, 
+    refreshDeviations 
+  } = useDeviations();
   
   // In a real app, we would use the data from useDeviations()
   // For demonstration, we're using the DEMO_DEVIATIONS constant
   const deviations = DEMO_DEVIATIONS;
+  
+  // Fetch deviations on component mount
+  useEffect(() => {
+    refreshDeviations();
+  }, [refreshDeviations]);
   
   const handleSearch = (value: string) => {
     setSearchQuery(value);
