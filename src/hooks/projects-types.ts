@@ -16,4 +16,10 @@ export type Project = {
   created_at?: string;
   updated_at?: string;
   team?: Array<{ name: string; initials: string; color?: string; }>;
+  // New fields
+  customer?: string;
+  contact_person?: string;
+  budget?: number;
+  address?: string;
+  project_name?: string;
 };

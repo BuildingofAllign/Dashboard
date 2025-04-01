@@ -24,14 +24,29 @@ export const useProjectsData = () => {
         throw error;
       }
       
-      // Map Supabase data to our project type
-      const formattedProjects = data ? data.map(project => ({
-        ...project,
-        isPinned: project.is_pinned || false,
-      })) : [];
+      // Get team members for each project
+      const projectsWithTeams = await Promise.all(
+        data.map(async (project) => {
+          const { data: teamData, error: teamError } = await supabase
+            .from('project_team_members')
+            .select('*')
+            .eq('project_id', project.id);
+            
+          if (teamError) {
+            console.error("Error fetching team:", teamError);
+            return { ...project, team: [] };
+          }
+          
+          return { 
+            ...project, 
+            isPinned: project.is_pinned || false,
+            team: teamData || [] 
+          };
+        })
+      );
       
-      setProjects(formattedProjects);
-      console.log("Projects fetched successfully:", formattedProjects);
+      setProjects(projectsWithTeams);
+      console.log("Projects fetched successfully:", projectsWithTeams);
     } catch (err) {
       console.error("Error fetching projects:", err);
       setError(err instanceof Error ? err : new Error(String(err)));

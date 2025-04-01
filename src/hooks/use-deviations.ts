@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useData } from '@/context/DataContext';
 import { toast } from 'sonner';
 
@@ -32,6 +32,11 @@ export const useDeviations = () => {
       });
     }
   }, [contextFetchDeviations]);
+
+  // Fetch deviations on component mount
+  useEffect(() => {
+    fetchDeviations();
+  }, [fetchDeviations]);
 
   // Get filtered deviations based on current filters
   const filteredDeviations = deviations.filter((deviation) => {

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useProjects } from "@/hooks/use-projects";
 import { ProjectsHeader } from "@/components/projects/ProjectsHeader";
@@ -16,6 +17,8 @@ import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { ProjectHoverCard } from "@/components/ui/ProjectHoverCard";
 import { ProjectSkeleton } from "@/components/ui/ProjectSkeleton";
 import { Header } from "@/components/layout/Header";
+import { DanishProjectList } from "@/components/projects/DanishProjectList";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Projects = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -23,6 +26,7 @@ const Projects = () => {
   const [viewMode, setViewMode] = useState<ViewMode>(
     localStorage.getItem('projectViewMode') as ViewMode || 'grid'
   );
+  const [activeTab, setActiveTab] = useState("standard");
   
   const {
     searchQuery,
@@ -39,7 +43,8 @@ const Projects = () => {
     handleDeleteProject,
     handleTogglePin,
     loadingProjects,
-    error
+    error,
+    getProjectsByCategory
   } = useProjects();
   
   useEffect(() => {
@@ -111,79 +116,108 @@ const Projects = () => {
           setCommandOpen={setIsCommandOpen}
         />
         
-        {viewMode !== "list" && pinnedProjects.length > 0 && (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-medium">Fastgjorte projekter</h2>
-              <Badge variant="secondary" className="rounded-full">
-                {pinnedProjects.length}
-              </Badge>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {pinnedProjects.map(project => (
-                <ProjectSummaryCard
-                  key={`pinned-${project.id}`}
-                  project={project}
-                  className="border-primary/30 shadow-sm"
-                />
-              ))}
-            </div>
-            
-            <Separator />
-          </div>
-        )}
-        
-        {viewMode === "list" ? (
-          <ProjectsContent 
-            viewMode={viewMode}
-            loadingProjects={loadingProjects}
-            filteredAndSortedProjects={filteredAndSortedProjects}
-            handlePinWithToast={handlePinWithToast}
-            handleEditProject={handleEditProject}
-            handleDeleteProject={handleDeleteProject}
-            setIsCreateDialogOpen={setIsCreateDialogOpen}
-          />
-        ) : (
-          loadingProjects ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              <ProjectSkeleton count={8} />
-            </div>
-          ) : filteredAndSortedProjects.length === 0 ? (
-            <EmptyState
-              title="Ingen projekter fundet"
-              description="Prøv at justere dine filtre eller opret et nyt projekt."
-              icon="file"
-              actionLabel="Opret nyt projekt"
-              onAction={() => setIsCreateDialogOpen(true)}
-            />
-          ) : (
-            <div className="space-y-8">
-              {sortedTypes.map(type => (
-                <div key={type} className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-medium capitalize">{type}</h2>
-                    <Badge variant="outline" className="rounded-full">
-                      {projectsByType[type].length}
-                    </Badge>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {projectsByType[type].map(project => (
-                      <ProjectHoverCard key={project.id} project={project}>
-                        <div className="h-full">
-                          <ProjectSummaryCard
-                            project={project}
-                          />
-                        </div>
-                      </ProjectHoverCard>
-                    ))}
-                  </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="standard">Standard visning</TabsTrigger>
+            <TabsTrigger value="danish">Dansk visning</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="standard" className="space-y-6">
+            {viewMode !== "list" && pinnedProjects.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-medium">Fastgjorte projekter</h2>
+                  <Badge variant="secondary" className="rounded-full">
+                    {pinnedProjects.length}
+                  </Badge>
                 </div>
-              ))}
-            </div>
-          )
-        )}
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {pinnedProjects.map(project => (
+                    <ProjectSummaryCard
+                      key={`pinned-${project.id}`}
+                      project={project}
+                      className="border-primary/30 shadow-sm"
+                    />
+                  ))}
+                </div>
+                
+                <Separator />
+              </div>
+            )}
+            
+            {viewMode === "list" ? (
+              <ProjectsContent 
+                viewMode={viewMode}
+                loadingProjects={loadingProjects}
+                filteredAndSortedProjects={filteredAndSortedProjects}
+                handlePinWithToast={handlePinWithToast}
+                handleEditProject={handleEditProject}
+                handleDeleteProject={handleDeleteProject}
+                setIsCreateDialogOpen={setIsCreateDialogOpen}
+              />
+            ) : (
+              loadingProjects ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  <ProjectSkeleton count={8} />
+                </div>
+              ) : filteredAndSortedProjects.length === 0 ? (
+                <EmptyState
+                  title="Ingen projekter fundet"
+                  description="Prøv at justere dine filtre eller opret et nyt projekt."
+                  icon="file"
+                  actionLabel="Opret nyt projekt"
+                  onAction={() => setIsCreateDialogOpen(true)}
+                />
+              ) : (
+                <div className="space-y-8">
+                  {sortedTypes.map(type => (
+                    <div key={type} className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-lg font-medium capitalize">{type}</h2>
+                        <Badge variant="outline" className="rounded-full">
+                          {projectsByType[type].length}
+                        </Badge>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {projectsByType[type].map(project => (
+                          <ProjectHoverCard key={project.id} project={project}>
+                            <div className="h-full">
+                              <ProjectSummaryCard
+                                project={project}
+                              />
+                            </div>
+                          </ProjectHoverCard>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            )}
+          </TabsContent>
+          
+          <TabsContent value="danish">
+            {loadingProjects ? (
+              <div className="space-y-4">
+                <div className="h-32 bg-gray-100 animate-pulse rounded-md"></div>
+                <div className="h-32 bg-gray-100 animate-pulse rounded-md"></div>
+                <div className="h-32 bg-gray-100 animate-pulse rounded-md"></div>
+              </div>
+            ) : filteredAndSortedProjects.length === 0 ? (
+              <EmptyState
+                title="Ingen projekter fundet"
+                description="Prøv at justere dine filtre eller opret et nyt projekt."
+                icon="file"
+                actionLabel="Opret nyt projekt"
+                onAction={() => setIsCreateDialogOpen(true)}
+              />
+            ) : (
+              <DanishProjectList projects={filteredAndSortedProjects} />
+            )}
+          </TabsContent>
+        </Tabs>
         
         <ProjectFormDialog
           open={isCreateDialogOpen}

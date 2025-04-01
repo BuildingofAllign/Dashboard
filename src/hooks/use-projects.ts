@@ -40,6 +40,21 @@ export const useProjects = () => {
     fetchProjects();
   }, [fetchProjects]);
 
+  // Calculate projects by category (for Danish view)
+  const getProjectsByCategory = () => {
+    const categories: { [key: string]: Project[] } = {};
+    
+    projects.forEach(project => {
+      if (!project.category) return;
+      if (!categories[project.category]) {
+        categories[project.category] = [];
+      }
+      categories[project.category].push(project);
+    });
+    
+    return categories;
+  };
+
   return {
     projects,
     filteredAndSortedProjects,
@@ -57,6 +72,7 @@ export const useProjects = () => {
     handleCreateProject,
     handleUpdateProject,
     handleDeleteProject,
+    getProjectsByCategory,
     error
   };
 };
