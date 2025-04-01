@@ -34,14 +34,18 @@ export const useProjectsData = () => {
             
           if (teamError) {
             console.error("Error fetching team:", teamError);
-            return { ...project, team: [] };
+            return { 
+              ...project, 
+              isPinned: project.is_pinned || false,
+              team: [] 
+            } as Project;
           }
           
           return { 
             ...project, 
             isPinned: project.is_pinned || false,
             team: teamData || [] 
-          };
+          } as Project;
         })
       );
       

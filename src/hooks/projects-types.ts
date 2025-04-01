@@ -16,7 +16,7 @@ export type Project = {
   created_at?: string;
   updated_at?: string;
   team?: Array<{ name: string; initials: string; color?: string; }>;
-  // New fields
+  // New fields for Danish view
   customer?: string;
   contact_person?: string;
   budget?: number;

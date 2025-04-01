@@ -487,8 +487,12 @@ export type Database = {
       }
       projects: {
         Row: {
+          address: string | null
+          budget: number | null
           category: string
+          contact_person: string | null
           created_at: string | null
+          customer: string | null
           description: string | null
           end_date: string | null
           id: string
@@ -497,14 +501,19 @@ export type Database = {
           priority: string | null
           progress: number
           project_id: string
+          project_name: string | null
           start_date: string | null
           status: string
           type: string
           updated_at: string | null
         }
         Insert: {
+          address?: string | null
+          budget?: number | null
           category: string
+          contact_person?: string | null
           created_at?: string | null
+          customer?: string | null
           description?: string | null
           end_date?: string | null
           id?: string
@@ -513,14 +522,19 @@ export type Database = {
           priority?: string | null
           progress?: number
           project_id: string
+          project_name?: string | null
           start_date?: string | null
           status: string
           type: string
           updated_at?: string | null
         }
         Update: {
+          address?: string | null
+          budget?: number | null
           category?: string
+          contact_person?: string | null
           created_at?: string | null
+          customer?: string | null
           description?: string | null
           end_date?: string | null
           id?: string
@@ -529,6 +543,7 @@ export type Database = {
           priority?: string | null
           progress?: number
           project_id?: string
+          project_name?: string | null
           start_date?: string | null
           status?: string
           type?: string
