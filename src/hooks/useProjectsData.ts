@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { Project } from '../projects-types';
+import { Project } from './projects-types';
 
 export const useProjectsData = () => {
   const [projects, setProjects] = useState<Project[]>([]);
