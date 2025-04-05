@@ -44,3 +44,16 @@ export function getRelativeTime(date: Date | string): string {
   
   return `${Math.floor(diffInSeconds / 31536000)} år siden`;
 }
+
+/**
+ * Format currency in Danish format
+ */
+export function formatCurrency(amount: number | undefined): string {
+  if (!amount && amount !== 0) return 'Ikke angivet';
+  
+  return new Intl.NumberFormat('da-DK', {
+    style: 'currency',
+    currency: 'DKK',
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
