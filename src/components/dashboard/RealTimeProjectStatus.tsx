@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { ProjectProgressIndicator } from "@/components/ui/ProjectProgressIndicator";
 import { Users, Calendar, AlertTriangle, Building, ChevronRight, CheckCircle } from "lucide-react";
+import { toast } from "sonner";
 
 interface ProjectUpdate {
   id: string;
@@ -27,6 +28,34 @@ interface RealTimeProjectStatusProps {
   className?: string;
 }
 
+// Sample demo data to use when no data is available from the database
+const DEMO_PROJECTS = [
+  {
+    id: "demo-1",
+    project_id: "demo-proj-1",
+    status: "aktiv",
+    progress: 75,
+    updated_by: "Anders Jensen",
+    activity: "Opdaterede tegninger",
+    alert: false,
+    team_size: 4,
+    days_left: 14,
+    project_name: "Boligbyggeri Nord"
+  },
+  {
+    id: "demo-2",
+    project_id: "demo-proj-2",
+    status: "problem",
+    progress: 45,
+    updated_by: "Mette Nielsen",
+    activity: "Rapporterede materialeproblemer",
+    alert: true,
+    team_size: 3,
+    days_left: 5,
+    project_name: "Erhvervsrenovering Centrum"
+  }
+];
+
 export const RealTimeProjectStatus: React.FC<RealTimeProjectStatusProps> = ({ 
   className 
 }) => {
@@ -34,10 +63,22 @@ export const RealTimeProjectStatus: React.FC<RealTimeProjectStatusProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
+  const [useDemo, setUseDemo] = useState(false);
 
   useEffect(() => {
     const fetchProjectUpdates = async () => {
       try {
+        setIsLoading(true);
+        setError(null);
+        
+        // Add timeout to prevent indefinite loading
+        const timeoutId = setTimeout(() => {
+          console.log("Project updates fetch timeout - using demo data");
+          setUseDemo(true);
+          setProjects(DEMO_PROJECTS);
+          setIsLoading(false);
+        }, 5000);
+        
         const { data, error } = await supabase
           .from('project_updates')
           .select(`
@@ -54,26 +95,42 @@ export const RealTimeProjectStatus: React.FC<RealTimeProjectStatusProps> = ({
           `)
           .order('last_update', { ascending: false })
           .limit(expanded ? 8 : 4);
+          
+        // Clear timeout since we got a response
+        clearTimeout(timeoutId);
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching project updates:", error);
+          throw error;
+        }
 
-        const formattedData = data.map(update => ({
-          id: update.id,
-          project_id: update.project_id,
-          status: update.status,
-          progress: update.progress,
-          updated_by: update.updated_by,
-          activity: update.activity,
-          alert: update.alert,
-          team_size: update.team_size,
-          days_left: update.days_left,
-          project_name: update.projects?.name
-        }));
-
-        setProjects(formattedData);
+        if (!data || data.length === 0) {
+          console.log("No project updates found, using demo data");
+          setUseDemo(true);
+          setProjects(DEMO_PROJECTS);
+        } else {
+          const formattedData = data.map(update => ({
+            id: update.id,
+            project_id: update.project_id,
+            status: update.status,
+            progress: update.progress,
+            updated_by: update.updated_by,
+            activity: update.activity,
+            alert: update.alert,
+            team_size: update.team_size,
+            days_left: update.days_left,
+            project_name: update.projects?.name
+          }));
+          
+          setProjects(formattedData);
+          setUseDemo(false);
+        }
       } catch (err) {
-        console.error('Error fetching project updates:', err);
-        setError('Kunne ikke hente projekt opdateringer');
+        console.error("Error fetching project updates:", err);
+        setError("Kunne ikke hente projekt opdateringer. Viser demo data.");
+        setUseDemo(true);
+        setProjects(DEMO_PROJECTS);
+        toast.error("Kunne ikke hente projekt opdateringer");
       } finally {
         setIsLoading(false);
       }
@@ -81,24 +138,33 @@ export const RealTimeProjectStatus: React.FC<RealTimeProjectStatusProps> = ({
 
     fetchProjectUpdates();
 
-    // Subscribe to changes
-    const channel = supabase
-      .channel('schema-db-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'project_updates'
-        },
-        () => {
-          fetchProjectUpdates();
-        }
-      )
-      .subscribe();
+    // Limited subscription to changes - with error handling
+    let channel;
+    try {
+      channel = supabase
+        .channel('schema-db-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'project_updates'
+          },
+          () => {
+            fetchProjectUpdates();
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'CHANNEL_ERROR') {
+            console.error("Error subscribing to project updates");
+          }
+        });
+    } catch (err) {
+      console.error("Error setting up realtime subscription:", err);
+    }
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channel) supabase.removeChannel(channel);
     };
   }, [expanded]);
 
@@ -129,17 +195,20 @@ export const RealTimeProjectStatus: React.FC<RealTimeProjectStatusProps> = ({
         <div className="flex items-center gap-2">
           <Building className="h-5 w-5 text-muted-foreground" />
           <CardTitle>Realtime projekt status</CardTitle>
+          {useDemo && <Badge variant="outline" className="ml-2 text-xs">Demo data</Badge>}
         </div>
-        <Button variant="outline" size="sm" className="h-8">
+        <Button variant="outline" size="sm" className="h-8" onClick={() => {
+          toast.info("Viser alle projekter");
+        }}>
           Alle projekter
         </Button>
       </CardHeader>
       <CardContent className="flex-1 overflow-auto pb-0">
         {isLoading ? (
           <div className="flex justify-center py-8">
-            <LoadingSpinner />
+            <LoadingSpinner text="Indlæser projekter..." />
           </div>
-        ) : error ? (
+        ) : error && !useDemo ? (
           <div className="text-center py-8 text-muted-foreground">
             {error}
           </div>

@@ -22,6 +22,34 @@ interface PrioritizedTasksListProps {
   className?: string;
 }
 
+// Sample demo data to use when no data is available from the database
+const DEMO_TASKS = [
+  {
+    id: "demo-1",
+    title: "Opdater tegning for nordvæg",
+    priority: "critical" as 'critical',
+    due_date: "I dag, 16:00",
+    status: "delayed",
+    project_name: "Boligbyggeri Nord"
+  },
+  {
+    id: "demo-2",
+    title: "Materiale godkendelse",
+    priority: "high" as 'high',
+    due_date: "I morgen, 12:00",
+    status: "in-progress",
+    project_name: "Erhvervsrenovering Centrum"
+  },
+  {
+    id: "demo-3",
+    title: "KS inspektion",
+    priority: "medium" as 'medium',
+    due_date: "3. maj",
+    status: "pending",
+    project_name: "Institutionsbyggeri Syd"
+  }
+];
+
 export const PrioritizedTasksList: React.FC<PrioritizedTasksListProps> = ({ 
   className 
 }) => {
@@ -30,10 +58,22 @@ export const PrioritizedTasksList: React.FC<PrioritizedTasksListProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [filter, setFilter] = useState<'all' | 'critical' | 'high'>('all');
+  const [useDemo, setUseDemo] = useState(false);
 
   useEffect(() => {
     const fetchTasks = async () => {
       try {
+        setIsLoading(true);
+        setError(null);
+        
+        // Add timeout to prevent indefinite loading
+        const timeoutId = setTimeout(() => {
+          console.log("Tasks fetch timeout - using demo data");
+          setUseDemo(true);
+          setTasks(DEMO_TASKS);
+          setIsLoading(false);
+        }, 5000);
+        
         let query = supabase
           .from('tasks')
           .select(`
@@ -51,22 +91,38 @@ export const PrioritizedTasksList: React.FC<PrioritizedTasksListProps> = ({
         }
 
         const { data, error } = await query.limit(expanded ? 8 : 4);
+        
+        // Clear timeout since we got a response
+        clearTimeout(timeoutId);
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching tasks:", error);
+          throw error;
+        }
 
-        const formattedData = data.map(task => ({
-          id: task.id,
-          title: task.title,
-          priority: task.priority as 'critical' | 'high' | 'medium',
-          due_date: task.due_date,
-          status: task.status,
-          project_name: task.projects?.name
-        }));
+        if (!data || data.length === 0) {
+          console.log("No tasks found, using demo data");
+          setUseDemo(true);
+          setTasks(DEMO_TASKS);
+        } else {
+          const formattedData = data.map(task => ({
+            id: task.id,
+            title: task.title,
+            priority: task.priority as 'critical' | 'high' | 'medium',
+            due_date: task.due_date,
+            status: task.status,
+            project_name: task.projects?.name
+          }));
 
-        setTasks(formattedData);
+          setTasks(formattedData);
+          setUseDemo(false);
+        }
       } catch (err) {
         console.error('Error fetching tasks:', err);
-        setError('Kunne ikke hente opgaver');
+        setError('Kunne ikke hente opgaver. Viser demo data.');
+        setUseDemo(true);
+        setTasks(DEMO_TASKS);
+        toast.error("Kunne ikke hente opgaver");
       } finally {
         setIsLoading(false);
       }
@@ -74,24 +130,33 @@ export const PrioritizedTasksList: React.FC<PrioritizedTasksListProps> = ({
 
     fetchTasks();
 
-    // Subscribe to changes
-    const channel = supabase
-      .channel('schema-db-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'tasks'
-        },
-        () => {
-          fetchTasks();
-        }
-      )
-      .subscribe();
+    // Limited subscription to changes - with error handling
+    let channel;
+    try {
+      channel = supabase
+        .channel('schema-db-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'tasks'
+          },
+          () => {
+            fetchTasks();
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'CHANNEL_ERROR') {
+            console.error("Error subscribing to tasks");
+          }
+        });
+    } catch (err) {
+      console.error("Error setting up realtime subscription:", err);
+    }
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channel) supabase.removeChannel(channel);
     };
   }, [expanded, filter]);
 
@@ -128,7 +193,8 @@ export const PrioritizedTasksList: React.FC<PrioritizedTasksListProps> = ({
     <Card className={cn("h-full overflow-hidden flex flex-col", className)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle>Prioriterede opgaver</CardTitle>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          {useDemo && <Badge variant="outline" className="text-xs">Demo data</Badge>}
           <div className="flex items-center bg-secondary text-xs rounded-md overflow-hidden">
             <button 
               className={cn(
@@ -166,9 +232,9 @@ export const PrioritizedTasksList: React.FC<PrioritizedTasksListProps> = ({
       <CardContent className="flex-1 overflow-auto pb-0">
         {isLoading ? (
           <div className="flex justify-center py-8">
-            <LoadingSpinner />
+            <LoadingSpinner text="Indlæser opgaver..." />
           </div>
-        ) : error ? (
+        ) : error && !useDemo ? (
           <div className="text-center py-8 text-muted-foreground">
             {error}
           </div>
