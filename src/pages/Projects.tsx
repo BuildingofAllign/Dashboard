@@ -116,33 +116,33 @@ const Projects = () => {
           setCommandOpen={setIsCommandOpen}
         />
         
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="standard">Standard visning</TabsTrigger>
-            <TabsTrigger value="danish">Dansk visning</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="w-full md:w-auto">
+            <TabsTrigger value="standard" className="flex-1">Standard visning</TabsTrigger>
+            <TabsTrigger value="danish" className="flex-1">Dansk visning</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="standard" className="space-y-6">
+          <TabsContent value="standard" className="space-y-8 mt-4">
             {viewMode !== "list" && pinnedProjects.length > 0 && (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-medium">Fastgjorte projekter</h2>
+                  <h2 className="text-lg font-semibold">Fastgjorte projekter</h2>
                   <Badge variant="secondary" className="rounded-full">
                     {pinnedProjects.length}
                   </Badge>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
                   {pinnedProjects.map(project => (
                     <ProjectSummaryCard
                       key={`pinned-${project.id}`}
                       project={project}
-                      className="border-primary/30 shadow-sm"
+                      className="border-primary/30 shadow-md"
                     />
                   ))}
                 </div>
                 
-                <Separator />
+                <Separator className="my-6" />
               </div>
             )}
             
@@ -158,7 +158,7 @@ const Projects = () => {
               />
             ) : (
               loadingProjects ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
                   <ProjectSkeleton count={8} />
                 </div>
               ) : filteredAndSortedProjects.length === 0 ? (
@@ -170,23 +170,21 @@ const Projects = () => {
                   onAction={() => setIsCreateDialogOpen(true)}
                 />
               ) : (
-                <div className="space-y-8">
+                <div className="space-y-10">
                   {sortedTypes.map(type => (
-                    <div key={type} className="space-y-3">
+                    <div key={type} className="space-y-4">
                       <div className="flex items-center gap-2">
-                        <h2 className="text-lg font-medium capitalize">{type}</h2>
+                        <h2 className="text-lg font-semibold capitalize">{type}</h2>
                         <Badge variant="outline" className="rounded-full">
                           {projectsByType[type].length}
                         </Badge>
                       </div>
                       
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
                         {projectsByType[type].map(project => (
                           <ProjectHoverCard key={project.id} project={project}>
                             <div className="h-full">
-                              <ProjectSummaryCard
-                                project={project}
-                              />
+                              <ProjectSummaryCard project={project} />
                             </div>
                           </ProjectHoverCard>
                         ))}
@@ -201,9 +199,9 @@ const Projects = () => {
           <TabsContent value="danish">
             {loadingProjects ? (
               <div className="space-y-4">
-                <div className="h-32 bg-gray-100 animate-pulse rounded-md"></div>
-                <div className="h-32 bg-gray-100 animate-pulse rounded-md"></div>
-                <div className="h-32 bg-gray-100 animate-pulse rounded-md"></div>
+                <div className="h-32 bg-muted animate-pulse rounded-md"></div>
+                <div className="h-32 bg-muted animate-pulse rounded-md"></div>
+                <div className="h-32 bg-muted animate-pulse rounded-md"></div>
               </div>
             ) : filteredAndSortedProjects.length === 0 ? (
               <EmptyState

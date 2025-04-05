@@ -10,7 +10,8 @@ import {
   Briefcase, 
   FileText, 
   CreditCard, 
-  Building 
+  Building,
+  Download
 } from 'lucide-react';
 import { Project } from '@/hooks/projects-types';
 import { cn } from '@/lib/utils';
@@ -19,7 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { ProjectTag } from '@/components/ui/ProjectTag';
 import { Separator } from '@/components/ui/separator';
 import { PriorityIndicator } from '@/components/ui/PriorityIndicator';
-import { formatCurrency } from '@/lib/date-utils';
+import { Button } from '@/components/ui/button';
 
 interface DanishProjectListProps {
   projects: Project[];
@@ -56,13 +57,13 @@ export const DanishProjectList: React.FC<DanishProjectListProps> = ({ projects }
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
       case 'aktiv':
-        return <Badge className="bg-green-500 text-white hover:bg-green-600">Aktiv</Badge>;
+        return <Badge className="bg-blue-500 hover:bg-blue-600 text-white">Aktiv</Badge>;
       case 'problem':
-        return <Badge className="bg-red-500 text-white hover:bg-red-600">Problem</Badge>;
+        return <Badge className="bg-amber-500 hover:bg-amber-600 text-white">Problem</Badge>;
       case 'udfordring':
-        return <Badge className="bg-yellow-500 text-white hover:bg-yellow-600">Udfordring</Badge>;
+        return <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white">Udfordring</Badge>;
       case 'afsluttet':
-        return <Badge className="bg-gray-500 text-white hover:bg-gray-600">Afsluttet</Badge>;
+        return <Badge className="bg-green-500 hover:bg-green-600 text-white">Afsluttet</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
@@ -86,18 +87,18 @@ export const DanishProjectList: React.FC<DanishProjectListProps> = ({ projects }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {projects.map((project) => (
         <div 
           key={project.id} 
-          className="bg-white rounded-lg shadow-md border overflow-hidden hover:shadow-lg transition-shadow duration-200"
+          className="bg-card rounded-lg shadow-md border overflow-hidden hover:shadow-lg transition-shadow duration-200"
         >
           {/* Project header with name and badges */}
-          <div className="bg-gradient-to-r from-gray-700 to-gray-800 text-white p-5">
+          <div className="bg-gradient-to-r from-slate-700 to-slate-800 text-white p-6">
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="text-xl font-bold">{project.name}</h3>
-                <p className="text-gray-300 mt-1">#{project.project_id}</p>
+                <p className="text-slate-300 mt-1">#{project.project_id}</p>
               </div>
               <div className="flex space-x-2">
                 {getStatusBadge(project.status)}
@@ -107,34 +108,36 @@ export const DanishProjectList: React.FC<DanishProjectListProps> = ({ projects }
           </div>
           
           {/* Project content grid */}
-          <div className="p-5 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left column - Customer info */}
             <div className="space-y-5">
               <div>
-                <h4 className="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wider">Kundeoplysninger</h4>
+                <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
+                  Kundeoplysninger
+                </h4>
                 
                 <div className="space-y-4">
                   <div className="flex items-start">
-                    <Building className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
+                    <Building className="h-5 w-5 text-muted-foreground mr-3 mt-0.5" />
                     <div>
                       <p className="font-medium">{project.customer || 'Ikke angivet'}</p>
-                      <p className="text-sm text-gray-500">Kunde</p>
+                      <p className="text-sm text-muted-foreground">Kunde</p>
                     </div>
                   </div>
                   
                   <div className="flex items-start">
-                    <User className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
+                    <User className="h-5 w-5 text-muted-foreground mr-3 mt-0.5" />
                     <div>
                       <p className="font-medium">{project.contact_person || 'Ikke angivet'}</p>
-                      <p className="text-sm text-gray-500">Kontaktperson</p>
+                      <p className="text-sm text-muted-foreground">Kontaktperson</p>
                     </div>
                   </div>
                   
                   <div className="flex items-start">
-                    <MapPin className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
+                    <MapPin className="h-5 w-5 text-muted-foreground mr-3 mt-0.5" />
                     <div>
                       <p className="font-medium">{project.address || 'Ikke angivet'}</p>
-                      <p className="text-sm text-gray-500">Adresse</p>
+                      <p className="text-sm text-muted-foreground">Adresse</p>
                     </div>
                   </div>
                 </div>
@@ -143,30 +146,32 @@ export const DanishProjectList: React.FC<DanishProjectListProps> = ({ projects }
               <Separator />
               
               <div>
-                <h4 className="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wider">Projektdetaljer</h4>
+                <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
+                  Projektdetaljer
+                </h4>
                 
                 <div className="space-y-4">
                   <div className="flex items-start">
-                    <Briefcase className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
+                    <Briefcase className="h-5 w-5 text-muted-foreground mr-3 mt-0.5" />
                     <div>
                       <p className="font-medium">{project.project_name || project.name}</p>
-                      <p className="text-sm text-gray-500">Projektnavn</p>
+                      <p className="text-sm text-muted-foreground">Projektnavn</p>
                     </div>
                   </div>
                   
                   <div className="flex items-start">
-                    <Calendar className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
+                    <Calendar className="h-5 w-5 text-muted-foreground mr-3 mt-0.5" />
                     <div>
                       <p className="font-medium">{formatDateRange(project.start_date, project.end_date)}</p>
-                      <p className="text-sm text-gray-500">Tidsplan</p>
+                      <p className="text-sm text-muted-foreground">Tidsplan</p>
                     </div>
                   </div>
                   
                   <div className="flex items-start">
-                    <CreditCard className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
+                    <CreditCard className="h-5 w-5 text-muted-foreground mr-3 mt-0.5" />
                     <div>
                       <p className="font-medium">{formatCurrency(project.budget)}</p>
-                      <p className="text-sm text-gray-500">Budget</p>
+                      <p className="text-sm text-muted-foreground">Budget</p>
                     </div>
                   </div>
                 </div>
@@ -176,7 +181,7 @@ export const DanishProjectList: React.FC<DanishProjectListProps> = ({ projects }
             {/* Middle column - Project status and progress */}
             <div className="space-y-5">
               <div>
-                <h4 className="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wider">Status</h4>
+                <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">Status</h4>
                 
                 <div className="space-y-4">
                   <div className="flex items-start">
@@ -189,10 +194,10 @@ export const DanishProjectList: React.FC<DanishProjectListProps> = ({ projects }
                         value={project.progress} 
                         className="h-2.5 w-full" 
                         indicatorClassName={cn(
-                          project.status.toLowerCase() === 'problem' && "bg-red-500",
+                          project.status.toLowerCase() === 'problem' && "bg-amber-500",
                           project.status.toLowerCase() === 'udfordring' && "bg-yellow-500",
-                          project.status.toLowerCase() === 'aktiv' && "bg-green-500",
-                          project.status.toLowerCase() === 'afsluttet' && "bg-blue-500",
+                          project.status.toLowerCase() === 'aktiv' && "bg-blue-500",
+                          project.status.toLowerCase() === 'afsluttet' && "bg-green-500",
                         )}
                       />
                     </div>
@@ -225,12 +230,12 @@ export const DanishProjectList: React.FC<DanishProjectListProps> = ({ projects }
               <Separator />
               
               <div>
-                <h4 className="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wider">Team</h4>
+                <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">Team</h4>
                 
                 <div className="space-y-3">
                   {project.team && project.team.length > 0 ? (
                     project.team.map((member, index) => (
-                      <div key={index} className="flex items-center p-3 rounded-md bg-gray-50 border">
+                      <div key={index} className="flex items-center p-3 rounded-md bg-muted/20 border">
                         <div 
                           className="w-8 h-8 rounded-full flex items-center justify-center text-white mr-3"
                           style={{ backgroundColor: member.color || '#6366F1' }}
@@ -239,12 +244,12 @@ export const DanishProjectList: React.FC<DanishProjectListProps> = ({ projects }
                         </div>
                         <div>
                           <p className="font-medium">{member.name}</p>
-                          <p className="text-xs text-gray-500">{member.role || 'Teammedlem'}</p>
+                          <p className="text-xs text-muted-foreground">{member.role || 'Teammedlem'}</p>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <p className="text-gray-500 italic">Ingen teammedlemmer tildelt</p>
+                    <p className="text-muted-foreground italic">Ingen teammedlemmer tildelt</p>
                   )}
                 </div>
               </div>
@@ -253,10 +258,10 @@ export const DanishProjectList: React.FC<DanishProjectListProps> = ({ projects }
             {/* Right column - Description and details */}
             <div className="space-y-5">
               <div>
-                <h4 className="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wider">Beskrivelse</h4>
+                <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">Beskrivelse</h4>
                 
-                <div className="bg-gray-50 p-4 rounded-md border">
-                  <p className="text-gray-700 whitespace-pre-line">
+                <div className="bg-muted/30 p-4 rounded-md border">
+                  <p className="text-foreground whitespace-pre-line">
                     {project.description || 'Ingen beskrivelse tilgængelig'}
                   </p>
                 </div>
@@ -265,32 +270,41 @@ export const DanishProjectList: React.FC<DanishProjectListProps> = ({ projects }
               <Separator />
               
               <div>
-                <h4 className="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wider">Dokumenter og bilag</h4>
+                <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">Dokumenter og bilag</h4>
                 
                 <div className="space-y-3">
-                  {/* Example document items - static for now */}
-                  <div className="flex items-center p-3 rounded-md bg-gray-50 border hover:bg-gray-100 cursor-pointer transition-colors">
+                  {/* Example document items */}
+                  <div className="flex items-center p-3 rounded-md bg-muted/20 border hover:bg-muted/30 cursor-pointer transition-colors">
                     <FileText className="h-5 w-5 text-blue-500 mr-3" />
-                    <div>
+                    <div className="flex-1">
                       <p className="font-medium">Projektbeskrivelse</p>
-                      <p className="text-xs text-gray-500">PDF - 2.5 MB</p>
+                      <p className="text-xs text-muted-foreground">PDF - 2.5 MB</p>
                     </div>
+                    <Button variant="ghost" size="icon">
+                      <Download className="h-4 w-4" />
+                    </Button>
                   </div>
                   
-                  <div className="flex items-center p-3 rounded-md bg-gray-50 border hover:bg-gray-100 cursor-pointer transition-colors">
+                  <div className="flex items-center p-3 rounded-md bg-muted/20 border hover:bg-muted/30 cursor-pointer transition-colors">
                     <FileText className="h-5 w-5 text-green-500 mr-3" />
-                    <div>
+                    <div className="flex-1">
                       <p className="font-medium">Tidsplan</p>
-                      <p className="text-xs text-gray-500">XLSX - 1.2 MB</p>
+                      <p className="text-xs text-muted-foreground">XLSX - 1.2 MB</p>
                     </div>
+                    <Button variant="ghost" size="icon">
+                      <Download className="h-4 w-4" />
+                    </Button>
                   </div>
                   
-                  <div className="flex items-center p-3 rounded-md bg-gray-50 border hover:bg-gray-100 cursor-pointer transition-colors">
+                  <div className="flex items-center p-3 rounded-md bg-muted/20 border hover:bg-muted/30 cursor-pointer transition-colors">
                     <FileText className="h-5 w-5 text-orange-500 mr-3" />
-                    <div>
+                    <div className="flex-1">
                       <p className="font-medium">Kontrakt</p>
-                      <p className="text-xs text-gray-500">PDF - 3.8 MB</p>
+                      <p className="text-xs text-muted-foreground">PDF - 3.8 MB</p>
                     </div>
+                    <Button variant="ghost" size="icon">
+                      <Download className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -298,8 +312,8 @@ export const DanishProjectList: React.FC<DanishProjectListProps> = ({ projects }
           </div>
           
           {/* Project footer */}
-          <div className="bg-gray-50 p-4 border-t flex justify-between items-center">
-            <div className="text-sm text-gray-500">
+          <div className="bg-muted/20 p-4 border-t flex justify-between items-center">
+            <div className="text-sm text-muted-foreground">
               <span>Oprettet: {formatDate(project.created_at)}</span>
               {project.updated_at && project.updated_at !== project.created_at && (
                 <span> · Opdateret: {formatDate(project.updated_at)}</span>
@@ -307,7 +321,7 @@ export const DanishProjectList: React.FC<DanishProjectListProps> = ({ projects }
             </div>
             
             <div className="flex space-x-2">
-              <Badge variant="outline" className="bg-white">
+              <Badge variant="outline" className="bg-card">
                 ID: {project.id.substring(0, 8)}
               </Badge>
             </div>

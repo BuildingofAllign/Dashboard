@@ -33,7 +33,7 @@ export const ProjectProgressIndicator: React.FC<ProjectProgressIndicatorProps> =
   const sizeConfig = {
     sm: { height: "h-1.5", textSize: "text-xs", iconSize: "h-3.5 w-3.5" },
     md: { height: "h-2", textSize: "text-sm", iconSize: "h-4 w-4" },
-    lg: { height: "h-3", textSize: "text-base", iconSize: "h-5 w-5" },
+    lg: { height: "h-2.5", textSize: "text-base", iconSize: "h-5 w-5" },
   };
   
   const statusConfig: Record<string, { 
@@ -68,7 +68,7 @@ export const ProjectProgressIndicator: React.FC<ProjectProgressIndicatorProps> =
       indicatorClass: "bg-red-500",
       label: "Standset" 
     },
-    "problem": {  // Added mapping for the 'problem' status
+    "problem": {
       color: "text-amber-600", 
       icon: AlertCircle,
       indicatorClass: "bg-amber-500",
@@ -83,10 +83,14 @@ export const ProjectProgressIndicator: React.FC<ProjectProgressIndicatorProps> =
   
   const progressComponent = (
     <div className={cn("w-full", className)}>
-      <div className="flex justify-between items-center mb-1">
+      <div className="flex justify-between items-center mb-1.5">
         {showLabel && (
           <div className="flex items-center gap-1.5">
-            {showIcon && <Icon className={cn(sizeConfig[size].iconSize, color)} />}
+            {showIcon && (
+              <span className={cn("p-0.5 rounded-full", color.replace('text', 'bg').replace('600', '100'))}>
+                <Icon className={cn(sizeConfig[size].iconSize, color)} />
+              </span>
+            )}
             <span className={cn(sizeConfig[size].textSize, "font-medium", color)}>
               {label}
             </span>
@@ -99,7 +103,7 @@ export const ProjectProgressIndicator: React.FC<ProjectProgressIndicatorProps> =
       <div className="relative">
         <Progress 
           value={normalizedProgress} 
-          className={cn(sizeConfig[size].height, "bg-secondary")}
+          className={cn(sizeConfig[size].height, "bg-secondary/50")}
           indicatorClassName={cn(
             indicatorClass,
             animate && (status === "aktiv" || status === "problem") && "transition-all duration-1000"
@@ -109,7 +113,7 @@ export const ProjectProgressIndicator: React.FC<ProjectProgressIndicatorProps> =
         {animate && (status === "aktiv" || status === "problem") && normalizedProgress > 0 && (
           <span 
             className={cn(
-              "absolute top-0 right-0 h-full w-4 opacity-70 blur-sm", 
+              "absolute top-0 right-0 h-full opacity-70 blur-sm", 
               pulseColor,
               "animate-pulse"
             )}
