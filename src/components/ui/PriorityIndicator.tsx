@@ -30,7 +30,8 @@ export const PriorityIndicator: React.FC<PriorityIndicatorProps> = ({
     lg: 'h-6 w-6',
   };
   
-  const priorityConfig = {
+  // Map priority values to configuration
+  const priorityConfig: Record<Priority, { icon: any, color: string, label: string }> = {
     red: {
       icon: AlertCircle,
       color: 'text-red-500',
@@ -53,7 +54,9 @@ export const PriorityIndicator: React.FC<PriorityIndicatorProps> = ({
     }
   };
 
-  const { icon: Icon, color, label } = priorityConfig[priority];
+  // Safely access the configuration or fallback to grey
+  const config = priorityConfig[priority] || priorityConfig.grey;
+  const { icon: Icon, color, label } = config;
 
   return (
     <div className={cn('flex items-center gap-1.5', className)}>
