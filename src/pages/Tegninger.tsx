@@ -15,6 +15,7 @@ import {
 import { ViewToggle, ViewMode } from "@/components/ui/ViewToggle";
 import { NoData } from "@/components/ui/NoData";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { DashboardLayout } from "../App";
 
 // Placeholder data for drawings
 const DRAWINGS_DATA: Drawing[] = [
@@ -137,101 +138,104 @@ const Tegninger = () => {
   ];
 
   return (
-    <div className="flex flex-col h-full">
-      <Header title="Tegninger" userInitials="BL" />
-      
-      <div className="flex-1 overflow-auto p-6">
-        <BreadcrumbNav items={breadcrumbItems} />
+    <DashboardLayout>
+      <div className="flex flex-col h-full">
+        <Header title="Tegninger" userInitials="BL" />
         
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4 mb-6">
-          <h1 className="text-2xl font-semibold">Tegninger</h1>
+        <div className="flex-1 overflow-auto p-6">
+          <BreadcrumbNav items={breadcrumbItems} />
           
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Søg tegninger..."
-                className="pl-9 w-full"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4 mb-6">
+            <h1 className="text-2xl font-semibold">Tegninger</h1>
+            
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Søg tegninger..."
+                  className="pl-9 w-full"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                {searchQuery && (
+                  <button 
+                    title="Clear search"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              
+              <Button variant="outline" className="flex gap-2 items-center">
+                <Filter className="h-4 w-4" />
+                <span>Filter</span>
+              </Button>
+              
+              <ViewToggle
+                currentView={viewMode}
+                onChange={setViewMode}
+                gridIcon={<LayoutGrid className="h-4 w-4" />}
+                listIcon={<LayoutList className="h-4 w-4" />}
               />
-              {searchQuery && (
-                <button 
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  onClick={() => setSearchQuery("")}
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
+              
+              <Button className="flex gap-2 items-center">
+                <Upload className="h-4 w-4" />
+                <span>Upload</span>
+              </Button>
             </div>
-            
-            <Button variant="outline" className="flex gap-2 items-center">
-              <Filter className="h-4 w-4" />
-              <span>Filter</span>
-            </Button>
-            
-            <ViewToggle
-              currentView={viewMode}
-              onChange={setViewMode}
-              gridIcon={<LayoutGrid className="h-4 w-4" />}
-              listIcon={<LayoutList className="h-4 w-4" />}
-            />
-            
-            <Button className="flex gap-2 items-center">
-              <Upload className="h-4 w-4" />
-              <span>Upload</span>
-            </Button>
           </div>
+          
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <LoadingSpinner size="lg" />
+            </div>
+          ) : filteredDrawings.length === 0 ? (
+            <NoData
+              title="Ingen tegninger fundet"
+              description="Prøv at søge med andre søgeord eller tilføj en ny tegning"
+              icon={<FileText className="h-12 w-12 text-muted-foreground/60" />}
+              action={
+                <Button className="flex gap-2 items-center">
+                  <Plus className="h-4 w-4" />
+                  <span>Upload tegning</span>
+                </Button>
+              }
+            />
+          ) : (
+            <div className={`grid gap-6 ${
+              viewMode === "grid" 
+                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                : "grid-cols-1"
+            }`}>
+              {viewMode === "grid" && (
+                <AddDrawingCard />
+              )}
+              
+              {filteredDrawings.map((drawing) => (
+                <DrawingCard
+                  key={drawing.id}
+                  drawing={drawing}
+                  onView={() => handleViewDrawing(drawing)}
+                />
+              ))}
+            </div>
+          )}
         </div>
         
-        {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <LoadingSpinner size="lg" />
-          </div>
-        ) : filteredDrawings.length === 0 ? (
-          <NoData
-            title="Ingen tegninger fundet"
-            description="Prøv at søge med andre søgeord eller tilføj en ny tegning"
-            icon={<FileText className="h-12 w-12 text-muted-foreground/60" />}
-            action={
-              <Button className="flex gap-2 items-center">
-                <Plus className="h-4 w-4" />
-                <span>Upload tegning</span>
-              </Button>
-            }
-          />
-        ) : (
-          <div className={`grid gap-6 ${
-            viewMode === "grid" 
-              ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-              : "grid-cols-1"
-          }`}>
-            {viewMode === "grid" && (
-              <AddDrawingCard />
-            )}
-            
-            {filteredDrawings.map((drawing) => (
-              <DrawingCard
-                key={drawing.id}
-                drawing={drawing}
-                onView={() => handleViewDrawing(drawing)}
+        <Dialog open={isDrawingViewerOpen} onOpenChange={setIsDrawingViewerOpen}>
+          <DialogContent className="max-w-6xl w-[90vw] h-[80vh] p-0">
+            {selectedDrawing && (
+              <AnnotatableDrawingViewer 
+                drawing={selectedDrawing}
+                onClose={() => setIsDrawingViewerOpen(false)}
               />
-            ))}
-          </div>
-        )}
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
-      
-      <Dialog open={isDrawingViewerOpen} onOpenChange={setIsDrawingViewerOpen}>
-        <DialogContent className="max-w-6xl w-[90vw] h-[80vh] p-0">
-          {selectedDrawing && (
-            <AnnotatableDrawingViewer 
-              drawing={selectedDrawing}
-              onClose={() => setIsDrawingViewerOpen(false)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-    </div>
+    </DashboardLayout>
   );
 };
 

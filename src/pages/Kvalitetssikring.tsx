@@ -1,10 +1,10 @@
-
 import React from "react";
 import { Header } from "@/components/layout/Header";
+import { DashboardLayout } from "../App";
 
 const Kvalitetssikring: React.FC = () => {
   return (
-    <>
+    <DashboardLayout>
       <Header title="Kvalitetssikring" userInitials="BL" />
       
       <div className="p-6">
@@ -16,7 +16,7 @@ const Kvalitetssikring: React.FC = () => {
           </p>
         </div>
       </div>
-    </>
+    </DashboardLayout>
   );
 };
 

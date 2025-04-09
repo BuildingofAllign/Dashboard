@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useCustomers } from "@/hooks/use-customers";
 import { CustomersHeader } from "@/components/customers/CustomersHeader";
@@ -32,6 +31,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
+import { DashboardLayout } from "../App";
 
 const Customers = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -115,7 +115,7 @@ const Customers = () => {
   }
 
   return (
-    <>
+    <DashboardLayout>
       <Header title="Kunder" userInitials="BL" />
       <div className="container py-6 space-y-6 max-w-7xl mx-auto">
         {/* Breadcrumb and action buttons */}
@@ -220,7 +220,7 @@ const Customers = () => {
         
         <ScrollToTopButton />
       </div>
-    </>
+    </DashboardLayout>
   );
 };
 

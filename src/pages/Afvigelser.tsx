@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { useDeviations } from "@/hooks/use-deviations";
@@ -11,6 +10,7 @@ import { SearchBar } from "@/components/ui/SearchBar";
 import { BulkActionsBar, BulkAction } from "@/components/ui/BulkActionsBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { DashboardLayout } from "../App";
 
 // Add a more diverse set of deviations for demonstration purposes
 const DEMO_DEVIATIONS = [
@@ -162,93 +162,95 @@ const Afvigelser = () => {
   ];
 
   return (
-    <div className="flex flex-col h-full">
-      <Header title="Afvigelser" userInitials="BL" />
-      
-      <div className="flex-1 overflow-auto p-6">
-        <div className="mb-6 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-          <div>
-            <h2 className="text-2xl font-bold">Registrerede afvigelser</h2>
-            <p className="text-muted-foreground">
-              Spor og håndter afvigelser på tværs af dine projekter
-            </p>
-          </div>
-          
-          <Button onClick={() => setIsFormOpen(true)}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Ny afvigelse
-          </Button>
-        </div>
+    <DashboardLayout>
+      <div className="flex flex-col h-full">
+        <Header title="Afvigelser" userInitials="BL" />
         
-        <div className="mb-6 space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <SearchBar
-              placeholder="Søg i afvigelser..."
-              onChange={handleSearch}
-              value={searchQuery}
-              onClear={() => setSearchQuery("")}
-              className="w-full sm:w-80"
-            />
-          </div>
-          
-          <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
-              <TabsTrigger value="all">Alle afvigelser</TabsTrigger>
-              <TabsTrigger value="open">Åbne</TabsTrigger>
-              <TabsTrigger value="approved">Godkendte</TabsTrigger>
-              <TabsTrigger value="rejected">Afviste</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-
-        {loadingDeviations ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          </div>
-        ) : filteredDeviations.length > 0 ? (
-          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {filteredDeviations.map((deviation) => (
-              <div 
-                key={deviation.id} 
-                className={`${selectedDeviations.includes(deviation.id) ? 'ring-2 ring-primary' : ''}`}
-                onClick={() => handleSelectDeviation(deviation.id)}
-              >
-                <DeviationCard 
-                  deviation={deviation}
-                  onView={handleViewDeviation}
-                  onApprove={handleApproveDeviation}
-                  onReject={handleRejectDeviation}
-                />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Ingen afvigelser matcher dine søgekriterier.</p>
-            <Button 
-              variant="outline" 
-              className="mt-4"
-              onClick={() => {
-                setSearchQuery("");
-                setActiveTab("all");
-              }}
-            >
-              Nulstil filtre
+        <div className="flex-1 overflow-auto p-6">
+          <div className="mb-6 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+            <div>
+              <h2 className="text-2xl font-bold">Registrerede afvigelser</h2>
+              <p className="text-muted-foreground">
+                Spor og håndter afvigelser på tværs af dine projekter
+              </p>
+            </div>
+            
+            <Button onClick={() => setIsFormOpen(true)}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Ny afvigelse
             </Button>
           </div>
-        )}
+          
+          <div className="mb-6 space-y-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <SearchBar
+                placeholder="Søg i afvigelser..."
+                onChange={handleSearch}
+                value={searchQuery}
+                onClear={() => setSearchQuery("")}
+                className="w-full sm:w-80"
+              />
+            </div>
+            
+            <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+              <TabsList>
+                <TabsTrigger value="all">Alle afvigelser</TabsTrigger>
+                <TabsTrigger value="open">Åbne</TabsTrigger>
+                <TabsTrigger value="approved">Godkendte</TabsTrigger>
+                <TabsTrigger value="rejected">Afviste</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+
+          {loadingDeviations ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            </div>
+          ) : filteredDeviations.length > 0 ? (
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              {filteredDeviations.map((deviation) => (
+                <div 
+                  key={deviation.id} 
+                  className={`${selectedDeviations.includes(deviation.id) ? 'ring-2 ring-primary' : ''}`}
+                  onClick={() => handleSelectDeviation(deviation.id)}
+                >
+                  <DeviationCard 
+                    deviation={deviation}
+                    onView={handleViewDeviation}
+                    onApprove={handleApproveDeviation}
+                    onReject={handleRejectDeviation}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Ingen afvigelser matcher dine søgekriterier.</p>
+              <Button 
+                variant="outline" 
+                className="mt-4"
+                onClick={() => {
+                  setSearchQuery("");
+                  setActiveTab("all");
+                }}
+              >
+                Nulstil filtre
+              </Button>
+            </div>
+          )}
+        </div>
+
+        <BulkActionsBar
+          selectedCount={selectedDeviations.length}
+          primaryActions={primaryBulkActions}
+          secondaryActions={secondaryBulkActions}
+          onClearSelection={handleClearSelection}
+          className="z-50"
+        />
+
+        <DeviationForm open={isFormOpen} onOpenChange={setIsFormOpen} />
       </div>
-
-      <BulkActionsBar
-        selectedCount={selectedDeviations.length}
-        primaryActions={primaryBulkActions}
-        secondaryActions={secondaryBulkActions}
-        onClearSelection={handleClearSelection}
-        className="z-50"
-      />
-
-      <DeviationForm open={isFormOpen} onOpenChange={setIsFormOpen} />
-    </div>
+    </DashboardLayout>
   );
 };
 

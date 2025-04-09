@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useProjects } from "@/hooks/use-projects";
 import { ProjectsHeader } from "@/components/projects/ProjectsHeader";
@@ -19,6 +18,7 @@ import { ProjectSkeleton } from "@/components/ui/ProjectSkeleton";
 import { Header } from "@/components/layout/Header";
 import { DanishProjectList } from "@/components/projects/DanishProjectList";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DashboardLayout } from "../App";
 
 const Projects = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -97,7 +97,7 @@ const Projects = () => {
   }
 
   return (
-    <>
+    <DashboardLayout>
       <Header title="Projekter" userInitials="BL" />
       <div className="container py-6 space-y-6 max-w-7xl mx-auto">
         <ProjectsHeader
@@ -231,7 +231,7 @@ const Projects = () => {
         
         <ScrollToTopButton />
       </div>
-    </>
+    </DashboardLayout>
   );
 };
 

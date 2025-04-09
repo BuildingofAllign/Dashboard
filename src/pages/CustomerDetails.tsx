@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
@@ -7,6 +6,7 @@ import { ArrowLeft, Building2, Mail, MapPin, Phone } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCustomers } from "@/hooks/use-customers";
+import { DashboardLayout } from "../App";
 
 const CustomerDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -35,7 +35,7 @@ const CustomerDetails = () => {
   }
   
   return (
-    <>
+    <DashboardLayout>
       <Header title={customer.name} userInitials="BL" />
       <div className="container py-6 max-w-7xl mx-auto space-y-6">
         <div className="flex items-center gap-2">
@@ -132,7 +132,7 @@ const CustomerDetails = () => {
           </div>
         </div>
       </div>
-    </>
+    </DashboardLayout>
   );
 };
 

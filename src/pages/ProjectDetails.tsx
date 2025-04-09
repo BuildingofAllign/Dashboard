@@ -1,13 +1,13 @@
-
 import React from "react";
 import { useParams } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
+import { DashboardLayout } from "../App";
 
 const ProjectDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   
   return (
-    <>
+    <DashboardLayout>
       <Header title="Projektdetaljer" userInitials="BL" />
       
       <div className="p-6">
@@ -19,7 +19,7 @@ const ProjectDetails: React.FC = () => {
           </p>
         </div>
       </div>
-    </>
+    </DashboardLayout>
   );
 };
 

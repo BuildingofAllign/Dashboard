@@ -32,7 +32,7 @@ const queryClient = new QueryClient({
   },
 });
 
-function DashboardLayout({ children }: { children: React.ReactNode }) {
+export function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen w-full bg-background">
       <Sidebar />
