@@ -64,7 +64,7 @@ export const Sidebar: React.FC = () => {
   });
   
   const navItems: SidebarNavItem[] = [
-    { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
+    { icon: LayoutDashboard, label: "Dashboard", path: "/" },
     { icon: FolderKanban, label: "Projekter", path: "/projekter" },
     { icon: Building2, label: "Kunder", path: "/kunder" },
     { icon: Users, label: "Medarbejdere", path: "/" },
